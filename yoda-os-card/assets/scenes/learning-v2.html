@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习辅助 V2 · YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --primary-dim: rgba(64,255,94,0.55);
+    --primary-low: rgba(64,255,94,0.15);
+    --primary-faint: rgba(64,255,94,0.06);
+    --negative: #FF4040;
+    --negative-low: rgba(255,64,64,0.12);
+    --moderate: #FFB340;
+    --moderate-low: rgba(255,179,64,0.12);
+    --bg-page: #0a0a0a;
+    --bg-card: #1C1C1C;
+    --bg-surface: #252525;
+    --border: rgba(64,255,94,0.3);
+    --text-primary: #40FF5E;
+    --text-dim: rgba(64,255,94,0.55);
+    --text-low: rgba(64,255,94,0.35);
+    --font: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    --fs-title: 24px;
+    --fs-subtitle: 20px;
+    --fs-body: 16px;
+    --fs-caption: 13px;
+    --fs-button: 15px;
+  }
+
+  body {
+    background: var(--bg-page);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    font-family: var(--font);
+    color: var(--text-primary);
+  }
+
+  .page-title {
+    font-size: 13px;
+    color: var(--text-low);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  /* 模式选择器 */
+  .mode-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    width: 480px;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .mode-btn.active {
+    background: var(--primary-low);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .state-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    width: 480px;
+    flex-wrap: wrap;
+  }
+  .s-btn {
+    padding: 6px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .s-btn.active {
+    background: var(--primary-low);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .card {
+    width: 480px;
+    height: 400px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .state-panel {
+    display: none;
+    width: 480px;
+    height: 400px;
+    position: absolute;
+    top: 0; left: 0;
+    padding: 20px;
+    flex-direction: column;
+  }
+  .state-panel.active { display: flex; }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: var(--fs-subtitle);
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .card-badge {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    background: var(--primary-faint);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* 单词主显示 */
+  .word-display {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .word-text {
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 1px;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .phonetic {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .pos-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--primary-faint);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* 释义区域 */
+  .def-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .def-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .def-pos {
+    font-size: 12px;
+    color: var(--primary);
+    background: var(--primary-faint);
+    padding: 1px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .def-text {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* 例句 */
+  .example-box {
+    background: var(--bg-surface);
+    border-radius: 10px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--primary);
+    margin-bottom: 10px;
+  }
+  .example-en {
+    font-size: var(--fs-caption);
+    color: var(--primary);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .example-zh {
+    font-size: var(--fs-caption);
+    color: var(--text-low);
+    line-height: 1.4;
+  }
+
+  /* 助记 */
+  .mnemonic-box {
+    background: var(--moderate-low);
+    border: 1px solid rgba(255,179,64,0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+  }
+  .mnemonic-label {
+    font-size: 11px;
+    color: var(--moderate);
+    margin-bottom: 3px;
+    letter-spacing: 1px;
+  }
+  .mnemonic-text {
+    font-size: var(--fs-caption);
+    color: rgba(255,179,64,0.8);
+    line-height: 1.4;
+  }
+
+  /* 进度条 */
+  .word-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .wp-label {
+    font-size: 11px;
+    color: var(--text-low);
+    flex-shrink: 0;
+  }
+  .wp-track {
+    flex: 1;
+    height: 4px;
+    background: var(--primary-faint);
+    border-radius: 2px;
+  }
+  .wp-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+  .wp-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* 复习模式 */
+  .flip-card-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .flip-card {
+    width: 100%;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .flip-card:hover {
+    border-color: var(--primary);
+    background: var(--primary-faint);
+  }
+  .flip-question {
+    font-size: 14px;
+    color: var(--text-low);
+    margin-bottom: 12px;
+  }
+  .flip-word {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .flip-hint {
+    font-size: 11px;
+    color: var(--text-low);
+    margin-top: 8px;
+  }
+  .review-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  .review-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: var(--fs-caption);
+    font-family: var(--font);
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .review-btn.wrong {
+    background: var(--negative-low);
+    border: 1px solid var(--negative);
+    color: var(--negative);
+  }
+  .review-btn.unsure {
+    background: var(--moderate-low);
+    border: 1px solid var(--moderate);
+    color: var(--moderate);
+  }
+  .review-btn.correct {
+    background: var(--primary-low);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+  }
+
+  /* 测验模式 */
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+  .quiz-option {
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border-radius: 10px;
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .quiz-option:hover { border-color: var(--border); }
+  .quiz-option.correct {
+    background: var(--primary-faint);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .quiz-option.wrong {
+    background: var(--negative-low);
+    border-color: var(--negative);
+    color: var(--negative);
+  }
+  .opt-letter {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* 统计 */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stat-cell {
+    background: var(--bg-surface);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .stat-lbl { font-size: 11px; color: var(--text-low); }
+
+  /* 分隔线 */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 10px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">YODAOS SPRITE · 学习辅助 V2</div>
+
+<!-- 模式切换 -->
+<div class="mode-selector">
+  <button class="mode-btn active" onclick="setMode('learn')">学习模式</button>
+  <button class="mode-btn" onclick="setMode('review')">复习模式</button>
+  <button class="mode-btn" onclick="setMode('quiz')">测验模式</button>
+</div>
+
+<!-- 学习状态导航 -->
+<div class="state-nav" id="learn-nav">
+  <button class="s-btn active" onclick="showState(1)">单词</button>
+  <button class="s-btn" onclick="showState(2)">释义</button>
+  <button class="s-btn" onclick="showState(3)">例句</button>
+  <button class="s-btn" onclick="showState(4)">助记</button>
+  <button class="s-btn" onclick="showState(5)">进度</button>
+</div>
+
+<!-- 复习状态导航（隐藏） -->
+<div class="state-nav" id="review-nav" style="display:none;">
+  <button class="s-btn active" onclick="showState(1)">翻转卡片</button>
+  <button class="s-btn" onclick="showState(2)">今日统计</button>
+</div>
+
+<!-- 测验状态导航（隐藏） -->
+<div class="state-nav" id="quiz-nav" style="display:none;">
+  <button class="s-btn active" onclick="showState(1)">选择题</button>
+  <button class="s-btn" onclick="showState(2)">测验结果</button>
+</div>
+
+<div class="card" id="main-card">
+
+  <!-- ===== 学习模式面板 ===== -->
+
+  <!-- 学习-1：单词 -->
+  <div class="state-panel active" id="state-1">
+    <div class="card-header">
+      <div class="card-title">单词学习</div>
+      <div class="card-badge">今日第 23 个</div>
+    </div>
+    <div class="word-display">
+      <div class="word-text">magnificent</div>
+      <div class="phonetic">/mæɡˈnɪfɪsnt/</div>
+      <span class="pos-tag">adj.</span>
+    </div>
+    <div class="def-list">
+      <div class="def-item">
+        <div class="def-pos">adj</div>
+        <div class="def-text">壮观的；宏伟的；华丽的；出色的</div>
+      </div>
+      <div class="def-item">
+        <div class="def-pos">近义</div>
+        <div class="def-text">splendid, grand, glorious, superb</div>
+      </div>
+    </div>
+    <div class="word-progress">
+      <div class="wp-label">今日进度</div>
+      <div class="wp-track"><div class="wp-fill" style="width:46%;"></div></div>
+      <div class="wp-count">23 / 50</div>
+    </div>
+  </div>
+
+  <!-- 学习-2：释义详情 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="card-title">magnificent</div>
+      <div class="card-badge">详细释义</div>
+    </div>
+    <div class="def-list" style="margin-bottom:12px;">
+      <div class="def-item">
+        <div class="def-pos">adj</div>
+        <div class="def-text">1. 壮观的，宏伟的（规模或外观）</div>
+      </div>
+      <div class="def-item">
+        <div class="def-pos">adj</div>
+        <div class="def-text">2. 极好的，了不起的（用于表示钦佩）</div>
+      </div>
+      <div class="def-item">
+        <div class="def-pos">词根</div>
+        <div class="def-text">magni-(大) + fic(做) + -ent → "做出伟大之事的"</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:8px;">常见搭配</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <span style="padding:4px 10px;background:var(--bg-surface);border-radius:6px;font-size:12px;color:var(--text-dim);">a magnificent view</span>
+      <span style="padding:4px 10px;background:var(--bg-surface);border-radius:6px;font-size:12px;color:var(--text-dim);">magnificent architecture</span>
+      <span style="padding:4px 10px;background:var(--bg-surface);border-radius:6px;font-size:12px;color:var(--text-dim);">simply magnificent</span>
+    </div>
+    <div class="word-progress" style="margin-top:auto;">
+      <div class="wp-label">今日进度</div>
+      <div class="wp-track"><div class="wp-fill" style="width:46%;"></div></div>
+      <div class="wp-count">23 / 50</div>
+    </div>
+  </div>
+
+  <!-- 学习-3：例句 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="card-title">例句</div>
+      <div class="card-badge">magnificent</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+      <div class="example-box">
+        <div class="example-en">The <strong style="color:var(--primary);">magnificent</strong> cathedral stood at the center of the old city.</div>
+        <div class="example-zh">那座宏伟的大教堂矗立在古城中心。</div>
+      </div>
+      <div class="example-box" style="border-left-color:var(--primary-dim);">
+        <div class="example-en">She gave a <strong style="color:var(--primary);">magnificent</strong> performance that moved the audience to tears.</div>
+        <div class="example-zh">她的表演精彩绝伦，感动了观众落泪。</div>
+      </div>
+      <div class="example-box" style="border-left-color:rgba(64,255,94,0.2);">
+        <div class="example-en">The view from the mountaintop was simply <strong style="color:var(--primary);">magnificent</strong>.</div>
+        <div class="example-zh">山顶的景色实在是壮观无比。</div>
+      </div>
+    </div>
+    <div class="word-progress">
+      <div class="wp-label">今日进度</div>
+      <div class="wp-track"><div class="wp-fill" style="width:46%;"></div></div>
+      <div class="wp-count">23 / 50</div>
+    </div>
+  </div>
+
+  <!-- 学习-4：助记 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="card-title">记忆技巧</div>
+      <div class="card-badge">magnificent</div>
+    </div>
+    <div class="mnemonic-box">
+      <div class="mnemonic-label">词根分析</div>
+      <div class="mnemonic-text">magni(大) + fic(做) + ent(形容词词尾)<br>→ "做出伟大之事的" → 壮观的、出色的</div>
+    </div>
+    <div style="background:var(--bg-surface);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--text-low);margin-bottom:6px;letter-spacing:1px;">谐音联想</div>
+      <div style="font-size:var(--fs-caption);color:var(--text-dim);line-height:1.5;">
+        "马格尼-费（magnificent）" → 想象一匹<span style="color:var(--primary);">马</span>格外<span style="color:var(--primary);">壮观</span>地奔跑在草原
+      </div>
+    </div>
+    <div style="background:var(--bg-surface);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--text-low);margin-bottom:6px;letter-spacing:1px;">同族词汇</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span style="font-size:12px;padding:3px 8px;background:var(--bg-card);border-radius:4px;color:var(--primary);">magnify</span>
+        <span style="font-size:12px;padding:3px 8px;background:var(--bg-card);border-radius:4px;color:var(--text-dim);">放大</span>
+        <span style="font-size:12px;padding:3px 8px;background:var(--bg-card);border-radius:4px;color:var(--primary);">magnitude</span>
+        <span style="font-size:12px;padding:3px 8px;background:var(--bg-card);border-radius:4px;color:var(--text-dim);">规模</span>
+      </div>
+    </div>
+    <div class="word-progress" style="margin-top:auto;">
+      <div class="wp-label">今日进度</div>
+      <div class="wp-track"><div class="wp-fill" style="width:46%;"></div></div>
+      <div class="wp-count">23 / 50</div>
+    </div>
+  </div>
+
+  <!-- 学习-5：进度 -->
+  <div class="state-panel" id="state-5">
+    <div class="card-header">
+      <div class="card-title">学习进度</div>
+      <div class="card-badge">今日</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <div class="stat-val">23</div>
+        <div class="stat-lbl">已学单词</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val">87%</div>
+        <div class="stat-lbl">正确率</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val">12</div>
+        <div class="stat-lbl">连续天数</div>
+      </div>
+    </div>
+    <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:8px;">本周学习热力</div>
+    <div style="display:flex;gap:6px;align-items:flex-end;height:60px;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary-dim);border-radius:4px 4px 0 0;height:80%;"></div>
+        <div style="font-size:10px;color:var(--text-low);">一</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary);border-radius:4px 4px 0 0;height:100%;"></div>
+        <div style="font-size:10px;color:var(--text-low);">二</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary-dim);border-radius:4px 4px 0 0;height:60%;"></div>
+        <div style="font-size:10px;color:var(--text-low);">三</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary);border-radius:4px 4px 0 0;height:90%;"></div>
+        <div style="font-size:10px;color:var(--text-low);">四</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary-dim);border-radius:4px 4px 0 0;height:40%;"></div>
+        <div style="font-size:10px;color:var(--text-low);">五</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary-low);border-radius:4px 4px 0 0;height:20%;"></div>
+        <div style="font-size:10px;color:var(--text-low);">六</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+        <div style="width:100%;background:var(--primary);border-radius:4px 4px 0 0;height:46%;"></div>
+        <div style="font-size:10px;color:var(--text-dim);">今</div>
+      </div>
+    </div>
+    <div class="word-progress">
+      <div class="wp-label">今日目标</div>
+      <div class="wp-track"><div class="wp-fill" style="width:46%;"></div></div>
+      <div class="wp-count">23 / 50</div>
+    </div>
+  </div>
+
+  <!-- ===== 复习模式面板 ===== -->
+
+  <!-- 复习-6：翻转卡片 -->
+  <div class="state-panel" id="state-6">
+    <div class="card-header">
+      <div class="card-title">单词复习</div>
+      <div class="card-badge">待复习 18 个</div>
+    </div>
+    <div class="flip-card-area">
+      <div class="flip-card">
+        <div class="flip-question">这个单词的意思是？</div>
+        <div class="flip-word">resilient</div>
+        <div class="flip-hint">点击翻转查看答案</div>
+      </div>
+      <div class="review-actions">
+        <button class="review-btn wrong">✗ 不会</button>
+        <button class="review-btn unsure">? 模糊</button>
+        <button class="review-btn correct">✓ 熟悉</button>
+      </div>
+    </div>
+    <div class="word-progress">
+      <div class="wp-label">复习进度</div>
+      <div class="wp-track"><div class="wp-fill" style="width:33%;"></div></div>
+      <div class="wp-count">6 / 18</div>
+    </div>
+  </div>
+
+  <!-- 复习-7：今日统计 -->
+  <div class="state-panel" id="state-7">
+    <div class="card-header">
+      <div class="card-title">复习统计</div>
+      <div class="card-badge">今日完成</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <div class="stat-val">18</div>
+        <div class="stat-lbl">已复习</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val">13</div>
+        <div class="stat-lbl">✓ 熟悉</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val">5</div>
+        <div class="stat-lbl">需加强</div>
+      </div>
+    </div>
+    <div style="background:var(--primary-faint);border:1px solid var(--primary);border-radius:8px;padding:10px 14px;margin-bottom:10px;">
+      <div style="font-size:var(--fs-caption);color:var(--primary);">
+        🎉 今日复习完成！记忆留存率 72%，比昨日提升 8%
+      </div>
+    </div>
+    <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:8px;">需要加强的单词</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--bg-surface);border-radius:8px;">
+        <div style="font-size:var(--fs-caption);color:var(--negative);">resilient</div>
+        <div style="font-size:11px;color:var(--text-low);">明日重点复习</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--bg-surface);border-radius:8px;">
+        <div style="font-size:var(--fs-caption);color:var(--moderate);">ephemeral</div>
+        <div style="font-size:11px;color:var(--text-low);">2天后复习</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 测验模式面板 ===== -->
+
+  <!-- 测验-8：选择题 -->
+  <div class="state-panel" id="state-8">
+    <div class="card-header">
+      <div class="card-title">单词测验</div>
+      <div class="card-badge">第 5 / 10 题</div>
+    </div>
+    <div style="background:var(--bg-surface);border-radius:10px;padding:12px 14px;margin-bottom:12px;text-align:center;">
+      <div style="font-size:12px;color:var(--text-low);margin-bottom:6px;">选择 "magnificent" 的正确释义</div>
+      <div style="font-size:28px;font-weight:700;color:var(--primary);">magnificent</div>
+    </div>
+    <div class="quiz-options">
+      <div class="quiz-option">
+        <div class="opt-letter">A</div>
+        脆弱的，易碎的
+      </div>
+      <div class="quiz-option correct">
+        <div class="opt-letter" style="background:var(--primary-low);color:var(--primary);">B</div>
+        壮观的，宏伟的 ✓
+      </div>
+      <div class="quiz-option wrong">
+        <div class="opt-letter" style="background:var(--negative-low);color:var(--negative);">C</div>
+        神秘的，难以理解的 ✗
+      </div>
+      <div class="quiz-option">
+        <div class="opt-letter">D</div>
+        微小的，不重要的
+      </div>
+    </div>
+  </div>
+
+  <!-- 测验-9：测验结果 -->
+  <div class="state-panel" id="state-9">
+    <div class="card-header">
+      <div class="card-title">测验结果</div>
+      <div class="card-badge">10 题完成</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+      <div style="width:90px;height:90px;border-radius:50%;border:3px solid var(--primary);background:var(--primary-faint);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+        <div style="font-size:32px;font-weight:700;color:var(--primary);line-height:1;">90</div>
+        <div style="font-size:11px;color:var(--text-low);">分</div>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-title);font-weight:700;color:var(--primary);margin-bottom:4px;">优秀！</div>
+        <div style="font-size:var(--fs-caption);color:var(--text-dim);">答对 9 / 10 题</div>
+        <div style="font-size:var(--fs-caption);color:var(--text-low);margin-top:4px;">用时 2 分 38 秒</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <div style="flex:1;padding:8px;background:var(--primary-faint);border-radius:8px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--primary);">9</div>
+        <div style="font-size:11px;color:var(--text-low);">答对</div>
+      </div>
+      <div style="flex:1;padding:8px;background:var(--negative-low);border-radius:8px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--negative);">1</div>
+        <div style="font-size:11px;color:var(--text-low);">答错</div>
+      </div>
+    </div>
+    <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:6px;">错误单词</div>
+    <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--bg-surface);border-radius:8px;">
+      <div style="font-size:var(--fs-caption);color:var(--negative);">ephemeral</div>
+      <div style="font-size:11px;color:var(--text-low);">已加入复习列表</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentMode = 'learn';
+
+// 模式→状态映射
+const modeFirstState = { learn: 1, review: 6, quiz: 8 };
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['learn','review','quiz'][i] === mode);
+  });
+  document.getElementById('learn-nav').style.display = mode === 'learn' ? 'flex' : 'none';
+  document.getElementById('review-nav').style.display = mode === 'review' ? 'flex' : 'none';
+  document.getElementById('quiz-nav').style.display = mode === 'quiz' ? 'flex' : 'none';
+  showState(modeFirstState[mode]);
+}
+
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p, i) => p.classList.toggle('active', i + 1 === n));
+
+  if (currentMode === 'learn') {
+    document.querySelectorAll('#learn-nav .s-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === n));
+  } else if (currentMode === 'review') {
+    document.querySelectorAll('#review-nav .s-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === n - 5));
+  } else if (currentMode === 'quiz') {
+    document.querySelectorAll('#quiz-nav .s-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === n - 7));
+  }
+}
+</script>
+</body>
+</html>

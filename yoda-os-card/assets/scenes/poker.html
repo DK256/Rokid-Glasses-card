@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poker Assistant · JSUI Card Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 32px 16px;
+    font-family: 'PingFang SC', 'HarmonyOS Sans SC', sans-serif;
+  }
+
+  .page-title {
+    color: rgba(255,255,255,0.3);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .page-sub {
+    color: rgba(255,255,255,0.15);
+    font-size: 11px;
+    margin-bottom: 32px;
+  }
+
+  /* ========= CARD ========= */
+  .card {
+    width: 480px;
+    background: #1C1C1C;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  /* NAV */
+  .nav-bar {
+    display: flex;
+    background: #111;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0 8px;
+  }
+  .nav-item {
+    flex: 1;
+    text-align: center;
+    padding: 9px 0;
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .nav-item:hover { color: rgba(255,255,255,0.6); }
+  .nav-item.active { color: #40FF5E; border-bottom-color: #40FF5E; }
+
+  /* BODY */
+  .body {
+    padding: 14px 16px;
+    display: none;
+    flex-direction: column;
+    gap: 11px;
+    min-height: 290px;
+  }
+  .body.active { display: flex; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.5px;
+  }
+
+  /* === STATE 1: SCAN === */
+  .scan-title { font-size: 15px; font-weight: 700; color: #40FF5E; }
+  .scan-hint  { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  .scan-frame {
+    position: relative;
+    height: 130px;
+    border: 1px solid rgba(64,255,94,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(64,255,94,0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: #40FF5E;
+    border-style: solid;
+  }
+  .tl { top:5px;left:5px;   border-width: 2px 0 0 2px; }
+  .tr { top:5px;right:5px;  border-width: 2px 2px 0 0; }
+  .bl { bottom:5px;left:5px;border-width: 0 0 2px 2px; }
+  .br { bottom:5px;right:5px;border-width: 0 2px 2px 0; }
+
+  .scan-line {
+    position: absolute;
+    left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, #40FF5E, transparent);
+    animation: scanMove 1.8s linear infinite;
+  }
+  @keyframes scanMove { 0%{top:5%} 50%{top:90%} 100%{top:5%} }
+
+  .scan-cards-preview { display: flex; gap: 6px; }
+  .mini-card {
+    width: 32px; height: 44px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.25);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1px;
+  }
+  .mini-suit { font-size: 11px; color: #fff; line-height: 1; }
+  .mini-suit.red { color: #FF5555; }
+  .mini-val  { font-size: 12px; font-weight: 700; color: #fff; line-height: 1; }
+
+  .progress-wrap { display: flex; align-items: center; gap: 8px; }
+  .progress-bar {
+    flex: 1; height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: #40FF5E;
+    border-radius: 2px;
+    animation: progressAnim 2.5s ease forwards;
+  }
+  @keyframes progressAnim { 0%{width:0%} 100%{width:100%} }
+  .progress-pct { font-size: 11px; color: #40FF5E; min-width: 36px; }
+
+  .scan-done {
+    font-size: 12px; color: #40FF5E;
+    text-align: center;
+    animation: fadeIn 0.5s 2.5s both;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  /* === STATE 2: HAND === */
+  .hand-header { display: flex; align-items: center; gap: 10px; }
+  .hand-badge {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(64,255,94,0.12);
+    border: 1.5px solid #40FF5E;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .hand-rank { font-size: 12px; color: #40FF5E; font-weight: 700; }
+  .hand-name { font-size: 15px; font-weight: 700; color: #fff; }
+  .hand-sub  { font-size: 10px; color: rgba(255,255,255,0.35); }
+
+  .cards-row { display: flex; gap: 7px; }
+  .poker-card {
+    width: 54px; height: 74px;
+    background: #fff;
+    border-radius: 7px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+  }
+  .card-val  { font-size: 19px; font-weight: 900; color: #111; line-height: 1; }
+  .card-suit { font-size: 17px; line-height: 1; color: #111; }
+  .card-val.red, .card-suit.red { color: #CC0000; }
+
+  .board-label { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .board-row { display: flex; gap: 5px; }
+  .board-card {
+    width: 46px; height: 62px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 6px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .board-card .card-val  { font-size: 16px; }
+  .board-card .card-suit { font-size: 14px; }
+
+  /* === STATE 3: ODDS === */
+  .odds-center { display: flex; justify-content: center; }
+  .odds-ring {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    border: 4px solid #40FF5E;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(64,255,94,0.07);
+    box-shadow: 0 0 24px rgba(64,255,94,0.25);
+  }
+  .odds-big   { font-size: 24px; font-weight: 900; color: #40FF5E; line-height: 1; }
+  .odds-label { font-size: 10px; color: rgba(255,255,255,0.45); }
+
+  .odds-bars { display: flex; flex-direction: column; gap: 8px; }
+  .odds-bar-row { display: flex; align-items: center; gap: 8px; }
+  .odds-bar-label { font-size: 11px; font-weight: 700; width: 16px; }
+  .odds-bar-label.win  { color: #40FF5E; }
+  .odds-bar-label.tie  { color: #FFD040; }
+  .odds-bar-label.lose { color: #FF4D4D; }
+  .odds-track {
+    flex: 1; height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px; overflow: hidden;
+  }
+  .odds-fill    { height: 100%; border-radius: 3px; }
+  .win-fill     { background: #40FF5E; width: 87%; }
+  .tie-fill     { background: #FFD040; width: 15%; }
+  .lose-fill    { background: #FF4D4D; width: 10%; }
+  .odds-pct     { font-size: 11px; color: rgba(255,255,255,0.45); min-width: 32px; text-align: right; }
+
+  .outs-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+  }
+  .outs-label { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .outs-val   { font-size: 14px; font-weight: 700; color: #FFD040; }
+
+  /* === STATE 4: SUGGEST === */
+  .action-badge {
+    align-self: center;
+    padding: 14px 40px;
+    border-radius: 12px;
+    border: 2px solid #40FF5E;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    background: rgba(64,255,94,0.05);
+    box-shadow: 0 0 20px rgba(64,255,94,0.2);
+  }
+  .action-text   { font-size: 30px; font-weight: 900; color: #40FF5E; letter-spacing: 3px; }
+  .action-amount { font-size: 12px; color: rgba(255,255,255,0.55); }
+
+  .confidence-row { display: flex; align-items: center; gap: 8px; }
+  .conf-label { font-size: 11px; color: rgba(255,255,255,0.4); min-width: 60px; }
+  .conf-track {
+    flex: 1; height: 5px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px; overflow: hidden;
+  }
+  .conf-fill  { height: 100%; width: 92%; background: #40FF5E; border-radius: 3px; }
+  .conf-pct   { font-size: 11px; color: #40FF5E; min-width: 32px; }
+
+  .reason-box {
+    display: flex; gap: 8px; align-items: flex-start;
+    padding: 9px 11px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    border-left: 2px solid rgba(64,255,94,0.4);
+  }
+  .reason-icon { font-size: 14px; flex-shrink: 0; }
+  .reason-text { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+  .quick-actions { display: flex; gap: 8px; }
+  .qa-btn {
+    flex: 1; padding: 8px 0;
+    border-radius: 8px; text-align: center;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.15s;
+    border: 1px solid;
+  }
+  .qa-btn:hover { opacity: 0.75; }
+  .qa-btn.fold  { background: rgba(255,77,77,0.12);  color: #FF4D4D; border-color: rgba(255,77,77,0.35);  }
+  .qa-btn.call  { background: rgba(255,208,64,0.12); color: #FFD040; border-color: rgba(255,208,64,0.35); }
+  .qa-btn.raise { background: rgba(64,255,94,0.12);  color: #40FF5E; border-color: rgba(64,255,94,0.35);  }
+
+  /* === STATE 5: OPPONENT === */
+  .opponent-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+  }
+  .opp-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .opp-icon  { font-size: 17px; }
+  .opp-info  { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .opp-name  { font-size: 12px; font-weight: 600; color: #fff; }
+  .opp-range { font-size: 10px; color: rgba(255,255,255,0.4); }
+  .opp-threat {
+    padding: 3px 9px; border-radius: 6px;
+    border: 1px solid; font-size: 11px; font-weight: 600;
+  }
+  .threat-low  { color: #40FF5E; background: rgba(64,255,94,0.1);  border-color: rgba(64,255,94,0.4);  }
+  .threat-mid  { color: #FFD040; background: rgba(255,208,64,0.1); border-color: rgba(255,208,64,0.4); }
+  .threat-high { color: #FF4D4D; background: rgba(255,77,77,0.1);  border-color: rgba(255,77,77,0.4);  }
+
+  .pot-odds-row { display: flex; gap: 12px; }
+  .pot-item {
+    flex: 1; padding: 9px 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
+  .pot-label { font-size: 10px; color: rgba(255,255,255,0.4); }
+  .pot-val   { font-size: 17px; font-weight: 700; color: #fff; }
+  .pot-val.green { color: #40FF5E; }
+
+  /* === STATE 6: SUMMARY === */
+  .summary-grid { display: flex; gap: 8px; }
+  .summary-cell {
+    flex: 1; padding: 10px 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
+  .sum-num   { font-size: 20px; font-weight: 900; color: #fff; }
+  .sum-label { font-size: 10px; color: rgba(255,255,255,0.4); }
+  .sum-num.green  { color: #40FF5E; }
+  .sum-num.yellow { color: #FFD040; }
+
+  .win-ratio-row { display: flex; align-items: center; gap: 8px; }
+  .wr-label { font-size: 11px; color: rgba(255,255,255,0.4); min-width: 32px; }
+  .wr-track {
+    flex: 1; height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px; overflow: hidden;
+  }
+  .wr-fill  { height: 100%; width: 71%; background: #40FF5E; border-radius: 3px; }
+  .wr-pct   { font-size: 11px; color: #40FF5E; min-width: 32px; }
+
+  .stack-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 14px;
+    background: rgba(64,255,94,0.07);
+    border-radius: 10px;
+    border: 1px solid rgba(64,255,94,0.18);
+  }
+  .stack-label { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .stack-val   { font-size: 22px; font-weight: 900; color: #40FF5E; }
+
+  /* Footer */
+  .footer {
+    margin-top: 24px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<p class="page-title">JSUI Card · Poker Assistant</p>
+<p class="page-sub">pages/poker/poker.ink · YodaOS Sprite Preview</p>
+
+<div class="card">
+
+  <!-- NAV -->
+  <div class="nav-bar">
+    <div class="nav-item active" onclick="switchState('scan')">识别</div>
+    <div class="nav-item" onclick="switchState('hand')">手牌</div>
+    <div class="nav-item" onclick="switchState('odds')">胜率</div>
+    <div class="nav-item" onclick="switchState('suggest')">建议</div>
+    <div class="nav-item" onclick="switchState('opponent')">对手</div>
+    <div class="nav-item" onclick="switchState('summary')">总结</div>
+  </div>
+
+  <!-- STATE 1: 扫描识别 -->
+  <div class="body active" id="state-scan">
+    <div>
+      <div class="scan-title">扫描牌面中<span id="dots">.</span></div>
+      <div class="scan-hint">请将摄像头对准手牌区域</div>
+    </div>
+    <div class="scan-frame">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="scan-line"></div>
+      <div class="scan-cards-preview">
+        <div class="mini-card"><span class="mini-suit red">♥</span><span class="mini-val">A</span></div>
+        <div class="mini-card"><span class="mini-suit">♠</span><span class="mini-val">K</span></div>
+        <div class="mini-card"><span class="mini-suit red">♦</span><span class="mini-val">Q</span></div>
+        <div class="mini-card"><span class="mini-suit">♣</span><span class="mini-val">J</span></div>
+        <div class="mini-card"><span class="mini-suit">♠</span><span class="mini-val">10</span></div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+      <div class="progress-pct" id="prog-pct">0%</div>
+    </div>
+    <div class="scan-done">✅ 识别完成，点击「手牌」查看结果</div>
+  </div>
+
+  <!-- STATE 2: 手牌展示 -->
+  <div class="body" id="state-hand">
+    <div class="hand-header">
+      <div class="hand-badge"><span class="hand-rank">#1</span></div>
+      <div>
+        <div class="hand-name">皇家同花顺</div>
+        <div class="hand-sub">Your Hand · 5 cards</div>
+      </div>
+    </div>
+    <div class="cards-row">
+      <div class="poker-card"><span class="card-val">A</span><span class="card-suit">♠</span></div>
+      <div class="poker-card"><span class="card-val">K</span><span class="card-suit">♠</span></div>
+      <div class="poker-card"><span class="card-val red">Q</span><span class="card-suit red">♥</span></div>
+      <div class="poker-card"><span class="card-val red">J</span><span class="card-suit red">♥</span></div>
+      <div class="poker-card"><span class="card-val" style="color:#555">10</span><span class="card-suit" style="color:#555">♣</span></div>
+    </div>
+    <div>
+      <div class="board-label">公共牌 · River</div>
+      <div class="board-row" style="margin-top:6px">
+        <div class="board-card"><span class="card-val" style="color:#555">10</span><span class="card-suit" style="color:#555">♠</span></div>
+        <div class="board-card"><span class="card-val red">J</span><span class="card-suit red">♦</span></div>
+        <div class="board-card"><span class="card-val" style="color:#555">Q</span><span class="card-suit" style="color:#555">♣</span></div>
+        <div class="board-card"><span class="card-val">K</span><span class="card-suit">♠</span></div>
+        <div class="board-card"><span class="card-val red">A</span><span class="card-suit red">♥</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 3: 胜率分析 -->
+  <div class="body" id="state-odds">
+    <span class="section-title">胜率分析</span>
+    <div class="odds-center">
+      <div class="odds-ring">
+        <span class="odds-big">87%</span>
+        <span class="odds-label">胜率</span>
+      </div>
+    </div>
+    <div class="odds-bars">
+      <div class="odds-bar-row">
+        <span class="odds-bar-label win">胜</span>
+        <div class="odds-track"><div class="odds-fill win-fill"></div></div>
+        <span class="odds-pct">87%</span>
+      </div>
+      <div class="odds-bar-row">
+        <span class="odds-bar-label tie">平</span>
+        <div class="odds-track"><div class="odds-fill tie-fill"></div></div>
+        <span class="odds-pct">3%</span>
+      </div>
+      <div class="odds-bar-row">
+        <span class="odds-bar-label lose">负</span>
+        <div class="odds-track"><div class="odds-fill lose-fill"></div></div>
+        <span class="odds-pct">10%</span>
+      </div>
+    </div>
+    <div class="outs-row">
+      <span class="outs-label">剩余 Outs</span>
+      <span class="outs-val">9 张</span>
+    </div>
+  </div>
+
+  <!-- STATE 4: 出牌建议 -->
+  <div class="body" id="state-suggest">
+    <span class="section-title">AI 出牌建议</span>
+    <div class="action-badge">
+      <span class="action-text">RAISE</span>
+      <span class="action-amount">Pot × 2</span>
+    </div>
+    <div class="confidence-row">
+      <span class="conf-label">AI 置信度</span>
+      <div class="conf-track"><div class="conf-fill"></div></div>
+      <span class="conf-pct">92%</span>
+    </div>
+    <div class="reason-box">
+      <span class="reason-icon">💡</span>
+      <span class="reason-text">同花顺成型，对手难以应对。加注可最大化价值，同时向对手施加决策压力。</span>
+    </div>
+    <div class="quick-actions">
+      <div class="qa-btn fold">FOLD</div>
+      <div class="qa-btn call">CALL</div>
+      <div class="qa-btn raise">RAISE ↑</div>
+    </div>
+  </div>
+
+  <!-- STATE 5: 对手推测 -->
+  <div class="body" id="state-opponent">
+    <span class="section-title">对手牌力推测</span>
+    <div class="opponent-card">
+      <div class="opp-avatar"><span class="opp-icon">👤</span></div>
+      <div class="opp-info">
+        <span class="opp-name">左手对手</span>
+        <span class="opp-range">范围：对子 ~ 两对</span>
+      </div>
+      <div class="opp-threat threat-low">低威胁</div>
+    </div>
+    <div class="opponent-card">
+      <div class="opp-avatar"><span class="opp-icon">👤</span></div>
+      <div class="opp-info">
+        <span class="opp-name">右手对手</span>
+        <span class="opp-range">范围：同花听牌</span>
+      </div>
+      <div class="opp-threat threat-mid">中威胁</div>
+    </div>
+    <div class="pot-odds-row">
+      <div class="pot-item">
+        <span class="pot-label">底池赔率</span>
+        <span class="pot-val">3:1</span>
+      </div>
+      <div class="pot-item">
+        <span class="pot-label">胜率 vs 2手</span>
+        <span class="pot-val green">87%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 6: 局势总结 -->
+  <div class="body" id="state-summary">
+    <span class="section-title">本局总结</span>
+    <div class="summary-grid">
+      <div class="summary-cell">
+        <span class="sum-num">24</span>
+        <span class="sum-label">对局数</span>
+      </div>
+      <div class="summary-cell">
+        <span class="sum-num green">17</span>
+        <span class="sum-label">赢牌数</span>
+      </div>
+      <div class="summary-cell">
+        <span class="sum-num yellow">1200</span>
+        <span class="sum-label">最大底池</span>
+      </div>
+      <div class="summary-cell">
+        <span class="sum-num green">+640</span>
+        <span class="sum-label">筹码变化</span>
+      </div>
+    </div>
+    <div class="win-ratio-row">
+      <span class="wr-label">胜率</span>
+      <div class="wr-track"><div class="wr-fill"></div></div>
+      <span class="wr-pct">71%</span>
+    </div>
+    <div class="stack-row">
+      <span class="stack-label">当前筹码</span>
+      <span class="stack-val">3,840</span>
+    </div>
+  </div>
+
+</div>
+
+<p class="footer">JSUI · poker.ink · 480px · YodaOS Sprite</p>
+
+<script>
+function switchState(s) {
+  document.querySelectorAll('.nav-item').forEach((el,i)=>{
+    const states=['scan','hand','odds','suggest','opponent','summary'];
+    el.classList.toggle('active', states[i]===s);
+  });
+  document.querySelectorAll('.body').forEach(el=>{
+    el.classList.toggle('active', el.id==='state-'+s);
+  });
+}
+
+// 扫描进度动画
+let prog = 0;
+const progEl  = document.getElementById('prog');
+const pctEl   = document.getElementById('prog-pct');
+const dotsEl  = document.getElementById('dots');
+
+let dotStr = '.';
+setInterval(()=>{
+  dotStr = dotStr.length >= 3 ? '.' : dotStr+'.';
+  if(dotsEl) dotsEl.textContent = dotStr;
+}, 450);
+
+const timer = setInterval(()=>{
+  prog = Math.min(prog+2, 100);
+  if(progEl) progEl.style.width = prog+'%';
+  if(pctEl) pctEl.textContent = prog+'%';
+  if(prog>=100) clearInterval(timer);
+}, 50);
+</script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康运动 · YodaOS Sprite 场景卡片库</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --bg-dark: #000000;
+    --bg-card: #1C1C1C;
+    --dim: rgba(64, 255, 94, 0.55);
+    --dim-low: rgba(64, 255, 94, 0.25);
+    --warn: #FFB340;
+    --danger: #FF4040;
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+  }
+
+  body {
+    background: #0a0a0a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px 80px;
+    font-family: var(--font);
+    color: var(--primary);
+  }
+
+  /* 顶部导航 */
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 0 20px;
+    border-bottom: 1px solid rgba(64,255,94,0.12);
+    width: 480px;
+    margin-bottom: 32px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--dim);
+    text-decoration: none;
+    border: 1.5px solid rgba(64,255,94,0.25);
+    border-radius: 8px;
+    padding: 5px 12px;
+    transition: all 0.2s ease;
+  }
+
+  .back-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+  .nav-scene-name { font-size: 14px; color: var(--primary); font-weight: 500; }
+  .nav-scene-en { font-size: 11px; color: var(--dim-low); letter-spacing: 1px; margin-left: auto; }
+
+  /* 页面标题 */
+  .page-title {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(64,255,94,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    width: 480px;
+    text-align: center;
+  }
+
+  .page-sub {
+    font-size: 12px;
+    color: rgba(64,255,94,0.25);
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+    width: 480px;
+    text-align: center;
+  }
+
+  /* 状态切换 Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 480px;
+  }
+
+  .tab-btn {
+    padding: 6px 13px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(64,255,94,0.25);
+    background: transparent;
+    color: var(--dim);
+    font-family: var(--font);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .tab-btn.active {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.1);
+    color: var(--primary);
+  }
+
+  /* 状态面板 */
+  .state-panel { display: none; width: 480px; }
+  .state-panel.active { display: block; }
+
+  /* 基础卡片 */
+  .yoda-card {
+    width: 480px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .yoda-card.warn-card { border-color: var(--warn); }
+  .yoda-card.danger-card { border-color: var(--danger); }
+
+  /* 卡片头 */
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .card-icon { width: 28px; height: 28px; flex-shrink: 0; }
+
+  .card-title { font-size: 13px; color: var(--dim); }
+  .card-badge {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--dim);
+    border: 1.5px solid rgba(64,255,94,0.25);
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+  .card-badge.warn { color: var(--warn); border-color: rgba(255,179,64,0.4); }
+  .card-badge.danger { color: var(--danger); border-color: rgba(255,64,64,0.4); }
+
+  .divider { height: 1px; background: rgba(64,255,94,0.12); margin: 14px 0; }
+
+  /* ── 通用：大数字展示 ── */
+  .big-num {
+    font-size: 80px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .big-num .unit {
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--dim);
+    margin-left: 4px;
+  }
+
+  .big-num.warn-color { color: var(--warn); }
+  .big-num.danger-color { color: var(--danger); }
+
+  /* ── 数据行：多指标并排 ── */
+  .metrics-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .metric-box {
+    flex: 1;
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .metric-box.highlight {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.08);
+  }
+
+  .metric-box.warn-box {
+    border-color: rgba(255,179,64,0.4);
+    background: rgba(255,179,64,0.05);
+  }
+
+  .metric-label {
+    font-size: 11px;
+    color: var(--dim-low);
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+  }
+
+  .metric-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .metric-value.warn-color { color: var(--warn); }
+  .metric-value.danger-color { color: var(--danger); }
+
+  .metric-unit {
+    font-size: 12px;
+    color: var(--dim);
+    margin-left: 2px;
+  }
+
+  /* ── 进度条 ── */
+  .progress-bar {
+    height: 5px;
+    background: rgba(64,255,94,0.12);
+    border-radius: 3px;
+    margin: 14px 0 6px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--primary);
+    transition: width 0.4s ease;
+  }
+
+  .progress-fill.warn-fill { background: var(--warn); }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--dim-low);
+  }
+
+  /* ── 心率区间条 ── */
+  .hr-zones {
+    display: flex;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 12px 0 6px;
+    gap: 2px;
+  }
+
+  .hr-zone {
+    height: 100%;
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .hr-zone-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--dim-low);
+    margin-bottom: 8px;
+  }
+
+  /* ── 提示横幅 ── */
+  .alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .alert-banner.warn-banner {
+    background: rgba(255,179,64,0.08);
+    border: 1.5px solid rgba(255,179,64,0.35);
+  }
+
+  .alert-banner.danger-banner {
+    background: rgba(255,64,64,0.08);
+    border: 1.5px solid rgba(255,64,64,0.4);
+  }
+
+  .alert-icon { font-size: 20px; flex-shrink: 0; }
+
+  .alert-text { font-size: 14px; line-height: 1.5; }
+  .alert-text strong { display: block; font-size: 16px; margin-bottom: 2px; }
+  .alert-text.warn-text strong { color: var(--warn); }
+  .alert-text.danger-text strong { color: var(--danger); }
+  .alert-text p { color: var(--dim); font-size: 13px; }
+
+  /* ── 完成总结 ── */
+  .summary-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+
+  .summary-sub {
+    font-size: 14px;
+    color: var(--dim);
+    margin-bottom: 18px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .summary-item {
+    background: rgba(64,255,94,0.06);
+    border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .summary-val {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .summary-label {
+    font-size: 11px;
+    color: var(--dim-low);
+  }
+
+  /* ── 准备卡特有 ── */
+  .goal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(64,255,94,0.1);
+  }
+
+  .goal-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .goal-label { font-size: 14px; color: var(--dim); }
+  .goal-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+  /* ── 里程碑 ── */
+  @keyframes pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    60% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .milestone-icon {
+    font-size: 52px;
+    display: block;
+    text-align: center;
+    margin-bottom: 12px;
+    animation: pop 0.5s ease forwards;
+  }
+
+  .milestone-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .milestone-sub {
+    font-size: 14px;
+    color: var(--dim);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .compare-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--dim-low);
+    justify-content: center;
+  }
+
+  .compare-better { color: var(--primary); font-weight: 600; }
+  .compare-worse { color: var(--warn); font-weight: 600; }
+
+  /* 场景说明 */
+  .scene-note {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: rgba(64,255,94,0.03);
+    border: 1px solid rgba(64,255,94,0.1);
+    border-radius: 10px;
+    font-size: 12px;
+    color: rgba(64,255,94,0.35);
+    line-height: 1.7;
+  }
+
+  .scene-note strong { color: rgba(64,255,94,0.55); }
+
+  /* 脉冲动画 */
+  @keyframes pulse-warn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .pulse { animation: pulse-warn 1.2s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+  <a href="../index.html" class="back-btn">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M8 2L4 6L8 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    场景库
+  </a>
+  <span class="nav-scene-name">🏃 健康运动</span>
+  <span class="nav-scene-en">FITNESS</span>
+</div>
+
+<p class="page-title">YodaOS Sprite · 场景卡片</p>
+<p class="page-sub">健康运动 · Fitness · 6 States · 狗命要紧</p>
+
+<!-- 状态切换 -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchState(0)">🎯 准备</button>
+  <button class="tab-btn" onclick="switchState(1)">💚 运动中</button>
+  <button class="tab-btn" onclick="switchState(2)">⚠️ 心率警告</button>
+  <button class="tab-btn" onclick="switchState(3)">🎉 里程碑</button>
+  <button class="tab-btn" onclick="switchState(4)">🧊 冷却</button>
+  <button class="tab-btn" onclick="switchState(5)">📊 总结</button>
+</div>
+
+<!-- ─── STATE 1: 准备 ─── -->
+<div class="state-panel active" id="state-0">
+  <div class="yoda-card">
+    <div class="card-header">
+      <svg class="card-icon" viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="11" stroke="#40FF5E" stroke-width="1.8"/>
+        <path d="M9 14 L12 17 L19 10" stroke="#40FF5E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="card-title">今日计划 · 户外跑步</span>
+      <span class="card-badge">准备就绪</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="goal-row">
+      <span class="goal-label">目标距离</span>
+      <span class="goal-value">5.0 <small style="font-size:13px;color:var(--dim);font-weight:400">公里</small></span>
+    </div>
+    <div class="goal-row">
+      <span class="goal-label">目标配速</span>
+      <span class="goal-value">5'30" <small style="font-size:13px;color:var(--dim);font-weight:400">/ km</small></span>
+    </div>
+    <div class="goal-row">
+      <span class="goal-label">心率区间</span>
+      <span class="goal-value" style="font-size:15px">130–155 <small style="font-size:13px;color:var(--dim);font-weight:400">bpm · 有氧区</small></span>
+    </div>
+    <div class="goal-row" style="border-bottom:none">
+      <span class="goal-label">天气</span>
+      <span class="goal-value" style="font-size:15px">☁️ 18°C <small style="font-size:12px;color:var(--dim);font-weight:400">微风，适合跑步</small></span>
+    </div>
+  </div>
+  <div class="scene-note">
+    <strong>设计说明</strong>：出门前一眼确认今天的计划——跑多少、多快、心率在哪个区间。天气顺手带上，不用再查手机。信息是给用户「确认」的，不是「设置」的，所以只读不交互。
+  </div>
+</div>
+
+<!-- ─── STATE 2: 运动中 ─── -->
+<div class="state-panel" id="state-1">
+  <div class="yoda-card">
+    <div class="card-header">
+      <svg class="card-icon" viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="8" r="3" stroke="#40FF5E" stroke-width="1.8"/>
+        <path d="M10 14 L14 12 L18 14 L16 20 M12 20 L14 16" stroke="#40FF5E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="card-title">跑步中 · 有氧区间</span>
+      <span class="card-badge">3.2 / 5.0 km</span>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 最主角：心率 -->
+    <div style="display:flex; align-items:flex-end; gap:20px; margin-bottom:4px;">
+      <div>
+        <p style="font-size:11px;color:var(--dim-low);letter-spacing:1px;margin-bottom:4px;">心率</p>
+        <div class="big-num" id="hr-display">142<span class="unit">bpm</span></div>
+      </div>
+      <div style="flex:1; padding-bottom:10px;">
+        <!-- 心率区间指示 -->
+        <div class="hr-zone-labels">
+          <span>热身</span><span>有氧</span><span>无氧</span><span>极限</span>
+        </div>
+        <div class="hr-zones">
+          <div class="hr-zone" style="flex:1.5; background:rgba(64,255,94,0.2);"></div>
+          <div class="hr-zone" style="flex:2; background:rgba(64,255,94,0.6);"></div>
+          <div class="hr-zone" style="flex:1.5; background:rgba(255,179,64,0.5);"></div>
+          <div class="hr-zone" style="flex:1; background:rgba(255,64,64,0.4);"></div>
+        </div>
+        <!-- 指针 -->
+        <div style="position:relative; height:12px; margin-top:2px;">
+          <div id="hr-pointer" style="position:absolute; left:48%; transform:translateX(-50%); font-size:10px; color:var(--primary);">▲</div>
+        </div>
+        <p style="font-size:11px;color:var(--dim);text-align:center;margin-top:2px;">✓ 在有氧区，状态不错</p>
+      </div>
+    </div>
+
+    <!-- 次要指标 -->
+    <div class="metrics-row">
+      <div class="metric-box highlight">
+        <div class="metric-label">配速</div>
+        <div class="metric-value">5'22"<span class="metric-unit">/ km</span></div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">已跑</div>
+        <div class="metric-value">3.2<span class="metric-unit">km</span></div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">用时</div>
+        <div class="metric-value">17'<span class="metric-unit">28"</span></div>
+      </div>
+    </div>
+
+    <!-- 距离进度 -->
+    <div class="progress-bar" style="margin-top:14px;">
+      <div class="progress-fill" style="width:64%"></div>
+    </div>
+    <div class="progress-labels">
+      <span>0</span>
+      <span style="color:var(--primary);">3.2 km · 还剩 1.8 km</span>
+      <span>5.0</span>
+    </div>
+  </div>
+  <div class="scene-note">
+    <strong>设计说明</strong>：心率是运动中最核心的健康指标，给最大面积。区间条比数字更直觉——一眼看"指针在哪个颜色区"，不用思考。配速/距离/时间作为次要信息，够用就行。
+  </div>
+</div>
+
+<!-- ─── STATE 3: 心率警告 ─── -->
+<div class="state-panel" id="state-2">
+  <div class="yoda-card danger-card">
+    <div class="card-header">
+      <svg class="card-icon" viewBox="0 0 28 28" fill="none">
+        <path d="M14 4 L4 22 L24 22 Z" stroke="#FF4040" stroke-width="1.8" stroke-linejoin="round"/>
+        <line x1="14" y1="11" x2="14" y2="16" stroke="#FF4040" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="14" cy="19" r="1" fill="#FF4040"/>
+      </svg>
+      <span class="card-title" style="color:rgba(255,64,64,0.7)">心率过高 · 建议减速</span>
+      <span class="card-badge danger pulse">⚠ 立即处理</span>
+    </div>
+    <div class="divider" style="background:rgba(255,64,64,0.2);"></div>
+
+    <div class="alert-banner danger-banner">
+      <span class="alert-icon">❤️</span>
+      <div class="alert-text danger-text">
+        <strong>174 bpm</strong>
+        <p>超出目标区间 19 bpm · 已持续 2 分钟</p>
+      </div>
+    </div>
+
+    <!-- 大红数字 -->
+    <div style="margin-bottom:16px;">
+      <div class="big-num danger-color pulse">174<span class="unit" style="color:rgba(255,64,64,0.55)">bpm</span></div>
+      <p style="font-size:13px;color:rgba(255,64,64,0.5);margin-top:4px;">目标上限：155 bpm</p>
+    </div>
+
+    <!-- 建议行动 -->
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,64,64,0.06);border:1px solid rgba(255,64,64,0.2);border-radius:8px;">
+        <span style="font-size:18px;">🚶</span>
+        <span style="font-size:14px;color:rgba(255,64,64,0.8);">减速步行 1–2 分钟，等心率降至 155 以下</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(64,255,94,0.04);border:1px solid rgba(64,255,94,0.1);border-radius:8px;">
+        <span style="font-size:18px;">💧</span>
+        <span style="font-size:14px;color:var(--dim);">顺带补水，已跑 3.8 km 未喝水</span>
+      </div>
+    </div>
+  </div>
+  <div class="scene-note">
+    <strong>设计说明</strong>：心率警告是唯一需要打断用户的状态。红色边框 + 大红数字 + 脉冲动画，信息级别明确。但不能让人慌——除了警告，同时给出具体可执行的动作（减速步行），不是只说"危险"。
+  </div>
+</div>
+
+<!-- ─── STATE 4: 里程碑 ─── -->
+<div class="state-panel" id="state-3">
+  <div class="yoda-card">
+    <div class="card-header">
+      <svg class="card-icon" viewBox="0 0 28 28" fill="none">
+        <polygon points="14,4 17,11 25,11 19,16 21,24 14,19 7,24 9,16 3,11 11,11" stroke="#40FF5E" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      <span class="card-title">阶段目标达成</span>
+      <span class="card-badge">配速最佳</span>
+    </div>
+    <div class="divider"></div>
+
+    <span class="milestone-icon">🎉</span>
+    <p class="milestone-title">5 公里完成！</p>
+    <p class="milestone-sub">用时 27'15" · 平均配速 5'27" / km</p>
+
+    <div class="metrics-row" style="margin-bottom:14px;">
+      <div class="metric-box highlight">
+        <div class="metric-label">本次配速</div>
+        <div class="metric-value" style="font-size:22px;">5'27"</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">上次配速</div>
+        <div class="metric-value" style="font-size:22px;color:var(--dim);">5'41"</div>
+      </div>
+    </div>
+
+    <div class="compare-row">
+      比上次快了
+      <span class="compare-better">14 秒 / km</span>
+      ，进步明显 💪
+    </div>
+  </div>
+  <div class="scene-note">
+    <strong>设计说明</strong>：里程碑是正向激励时刻，应该让人高兴。大字庆祝 + 和上次对比，给人"我在进步"的真实感受。持续时间不超过 5 秒，然后自动回到运动中状态。
+  </div>
+</div>
+
+<!-- ─── STATE 5: 冷却 ─── -->
+<div class="state-panel" id="state-4">
+  <div class="yoda-card warn-card">
+    <div class="card-header">
+      <svg class="card-icon" viewBox="0 0 28 28" fill="none">
+        <path d="M14 6 C14 6 8 12 8 17 C8 20.3 10.7 23 14 23 C17.3 23 20 20.3 20 17 C20 12 14 6 14 6Z" stroke="#FFB340" stroke-width="1.8"/>
+        <line x1="11" y1="17" x2="17" y2="17" stroke="#FFB340" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="card-title" style="color:rgba(255,179,64,0.7)">运动结束 · 心率冷却中</span>
+      <span class="card-badge warn">别立即停下</span>
+    </div>
+    <div class="divider" style="background:rgba(255,179,64,0.15);"></div>
+
+    <div class="alert-banner warn-banner" style="margin-bottom:14px;">
+      <span class="alert-icon">🚶</span>
+      <div class="alert-text warn-text">
+        <strong>慢走 3–5 分钟</strong>
+        <p>立即停止容易头晕，让心率自然下降</p>
+      </div>
+    </div>
+
+    <!-- 心率下降指示 -->
+    <div style="margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;">
+        <div>
+          <p style="font-size:11px;color:var(--dim-low);margin-bottom:3px;">当前心率</p>
+          <div class="big-num warn-color" style="font-size:64px;" id="cooldown-hr">138<span class="unit" style="color:rgba(255,179,64,0.55)">bpm</span></div>
+        </div>
+        <div style="text-align:right;">
+          <p style="font-size:12px;color:var(--dim-low);">目标</p>
+          <p style="font-size:24px;font-weight:700;color:var(--primary);">100</p>
+          <p style="font-size:11px;color:var(--dim-low);">bpm</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill warn-fill" id="cooldown-fill" style="width:30%"></div>
+    </div>
+    <div class="progress-labels">
+      <span>138 bpm</span>
+      <span id="cooldown-label" style="color:var(--warn);">还差 38 bpm</span>
+      <span>100 bpm</span>
+    </div>
+
+    <!-- 拉伸建议 -->
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);padding:7px 12px;border:1px solid rgba(64,255,94,0.12);border-radius:8px;">
+        🦵 大腿前侧拉伸
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);padding:7px 12px;border:1px solid rgba(64,255,94,0.12);border-radius:8px;">
+        🦶 小腿拉伸
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);padding:7px 12px;border:1px solid rgba(64,255,94,0.12);border-radius:8px;">
+        💧 及时补水
+      </div>
+    </div>
+  </div>
+  <div class="scene-note">
+    <strong>设计说明</strong>：冷却阶段最容易被忽视，但对心脏健康至关重要——用黄色警示边框提示"还没完全结束"。心率进度条让用户知道还差多少才算真正安全。拉伸建议轻量附上，不打扰，但在那里。
+  </div>
+</div>
+
+<!-- ─── STATE 6: 总结 ─── -->
+<div class="state-panel" id="state-5">
+  <div class="yoda-card">
+    <div class="card-header">
+      <svg class="card-icon" viewBox="0 0 28 28" fill="none">
+        <rect x="5" y="5" width="18" height="18" rx="3" stroke="#40FF5E" stroke-width="1.8"/>
+        <line x1="9" y1="14" x2="11" y2="17" stroke="#40FF5E" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="11" y1="17" x2="19" y2="10" stroke="#40FF5E" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span class="card-title">运动总结 · 今天做到了</span>
+      <span class="card-badge">心率已恢复</span>
+    </div>
+    <div class="divider"></div>
+
+    <p class="summary-title">漂亮 🎯</p>
+    <p class="summary-sub">5.0 km 完成 · 心率全程控制在目标区间</p>
+
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-val">5.0</div>
+        <div class="summary-label">公里</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val">27'</div>
+        <div class="summary-label">用时</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val">312</div>
+        <div class="summary-label">千卡</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val">5'27"</div>
+        <div class="summary-label">均配速</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val">142</div>
+        <div class="summary-label">均心率</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val">6,820</div>
+        <div class="summary-label">步数</div>
+      </div>
+    </div>
+
+    <!-- 心率区间占比 -->
+    <div style="margin-bottom:6px;">
+      <p style="font-size:11px;color:var(--dim-low);margin-bottom:8px;letter-spacing:0.5px;">心率区间分布</p>
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;">
+        <div style="flex:0.5;background:rgba(64,255,94,0.25);border-radius:3px;" title="热身 10%"></div>
+        <div style="flex:7;background:rgba(64,255,94,0.7);border-radius:3px;" title="有氧 70%"></div>
+        <div style="flex:1.5;background:rgba(255,179,64,0.6);border-radius:3px;" title="无氧 15%"></div>
+        <div style="flex:0.5;background:rgba(255,64,64,0.5);border-radius:3px;" title="极限 5%"></div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:6px;">
+        <span style="font-size:11px;color:var(--dim-low);">热身 5%</span>
+        <span style="font-size:11px;color:var(--primary);">有氧 70% ✓</span>
+        <span style="font-size:11px;color:var(--warn);">无氧 20%</span>
+        <span style="font-size:11px;color:var(--danger);">极限 5%</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p style="font-size:13px;color:var(--dim);text-align:center;">今天打卡第 7 天 🔥 · 连续运动保持中</p>
+  </div>
+  <div class="scene-note">
+    <strong>设计说明</strong>：总结卡不是数据堆积，是给人"今天做得怎么样"的整体感受。先给结论（漂亮 🎯），再给数据。心率区间分布比单个数字更有价值——能看出今天训练质量。连续打卡给积累感。
+  </div>
+</div>
+
+<!-- 协议标注 -->
+<div style="margin-top:32px;padding:14px 20px;background:rgba(64,255,94,0.03);border:1px solid rgba(64,255,94,0.08);border-radius:10px;width:480px;">
+  <p style="font-size:11px;color:rgba(64,255,94,0.25);letter-spacing:0.5px;margin-bottom:6px;">A2UI v0.8 · JSONL PIPELINE</p>
+  <p style="font-size:12px;color:rgba(64,255,94,0.35);line-height:1.8;">
+    surfaceUpdate → dataModelUpdate → beginRendering<br>
+    catalog: <code style="color:var(--dim);">yoda-os-sprite-v1</code> · canvas: <code style="color:var(--dim);">480 × 400px</code>
+  </p>
+</div>
+
+<script>
+  function switchState(index) {
+    document.querySelectorAll('.state-panel').forEach((p, i) => p.classList.toggle('active', i === index));
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === index));
+  }
+
+  // 运动中：心率数字轻微波动（真实感）
+  let hrBase = 142;
+  setInterval(() => {
+    const panel = document.getElementById('state-1');
+    if (!panel.classList.contains('active')) return;
+    const jitter = Math.floor(Math.random() * 7) - 3;
+    const hr = hrBase + jitter;
+    const el = document.getElementById('hr-display');
+    if (el) el.innerHTML = `${hr}<span class="unit">bpm</span>`;
+    // 更新区间指针位置
+    const ptr = document.getElementById('hr-pointer');
+    if (ptr) {
+      // 130~155 区间在第二段(有氧) → left 约 35%~65%
+      const pct = Math.min(95, Math.max(5, ((hr - 100) / 100) * 100));
+      ptr.style.left = pct + '%';
+      ptr.style.color = hr > 155 ? '#FF4040' : hr > 130 ? '#40FF5E' : '#FFB340';
+    }
+  }, 1200);
+
+  // 冷却：心率缓慢下降
+  let cooldownHr = 138;
+  setInterval(() => {
+    const panel = document.getElementById('state-4');
+    if (!panel.classList.contains('active')) return;
+    if (cooldownHr > 100) cooldownHr = Math.max(100, cooldownHr - 0.3);
+    const el = document.getElementById('cooldown-hr');
+    const fill = document.getElementById('cooldown-fill');
+    const label = document.getElementById('cooldown-label');
+    const hr = Math.round(cooldownHr);
+    if (el) el.innerHTML = `${hr}<span class="unit" style="color:rgba(255,179,64,0.55)">bpm</span>`;
+    const pct = ((138 - hr) / (138 - 100)) * 100;
+    if (fill) fill.style.width = pct + '%';
+    if (label) {
+      if (hr <= 100) {
+        label.textContent = '✓ 已恢复正常';
+        label.style.color = 'var(--primary)';
+      } else {
+        label.textContent = `还差 ${hr - 100} bpm`;
+      }
+    }
+  }, 500);
+</script>
+
+</body>
+</html>

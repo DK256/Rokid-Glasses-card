@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麻将辅助 · YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  /* ── 卡片容器 ── */
+  .card {
+    width: 480px;
+    height: 400px;
+    background: #1C1C1C;
+    border-radius: 12px;
+    border: 2px solid #2A2A2A;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid #2A2A2A;
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 8px; }
+  .header-icon {
+    width: 28px; height: 28px;
+    background: #40FF5E22;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header-icon svg { width: 16px; height: 16px; }
+  .header-title { font-size: 16px; font-weight: 600; color: #fff; }
+  .header-badge {
+    font-size: 12px; font-weight: 500;
+    padding: 2px 8px; border-radius: 20px;
+    background: #40FF5E22; color: #40FF5E;
+    border: 1px solid #40FF5E44;
+  }
+  .header-badge.warn { background: #FFB30022; color: #FFB300; border-color: #FFB30044; }
+  .header-badge.danger { background: #FF453A22; color: #FF453A; border-color: #FF453A44; }
+  .header-badge.blue { background: #0A84FF22; color: #0A84FF; border-color: #0A84FF44; }
+
+  /* ── 内容区 ── */
+  .content { flex: 1; padding: 14px 18px; overflow: hidden; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── 状态1: 扫描识别 ── */
+  .scan-area {
+    flex: 1;
+    border: 2px dashed #40FF5E44;
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #40FF5E, transparent);
+    animation: scan 2s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0% { top: 0; } 100% { top: 100%; }
+  }
+  .scan-icon { color: #40FF5E; opacity: 0.7; }
+  .scan-text { font-size: 16px; color: #888; }
+  .scan-count { font-size: 22px; font-weight: 700; color: #40FF5E; }
+  .scan-sub { font-size: 14px; color: #555; }
+
+  .scan-tiles-row {
+    display: flex; gap: 4px; flex-wrap: wrap; justify-content: center;
+  }
+
+  /* ── 麻将牌 ── */
+  .tile {
+    width: 30px; height: 40px;
+    background: #F5F0E0;
+    border-radius: 4px;
+    border: 1px solid #D0C8A0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    color: #1a1a1a;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .tile.highlight {
+    border-color: #40FF5E;
+    box-shadow: 0 0 8px #40FF5E88, 0 2px 4px rgba(0,0,0,0.5);
+    transform: translateY(-3px);
+  }
+  .tile.danger-tile {
+    border-color: #FF453A;
+    box-shadow: 0 0 8px #FF453A88, 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .tile.wan { color: #c0392b; }
+  .tile.tiao { color: #27ae60; }
+  .tile.bing { color: #2980b9; }
+  .tile.zi { color: #8e44ad; }
+  .tile.suggested {
+    border-color: #FFB300;
+    box-shadow: 0 0 10px #FFB30088, 0 2px 4px rgba(0,0,0,0.5);
+    transform: translateY(-6px);
+  }
+  .tile-label {
+    position: absolute;
+    bottom: -18px;
+    left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #FFB300;
+    white-space: nowrap;
+  }
+
+  /* ── 手牌区 ── */
+  .tiles-row {
+    display: flex; gap: 5px; justify-content: center;
+    padding: 4px 0 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ── 分析区 ── */
+  .analysis-row {
+    display: flex; gap: 8px;
+  }
+  .analysis-item {
+    flex: 1;
+    background: #252525;
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1px solid #333;
+  }
+  .analysis-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+  .analysis-value { font-size: 20px; font-weight: 700; color: #fff; }
+  .analysis-value.green { color: #40FF5E; }
+  .analysis-value.yellow { color: #FFB300; }
+  .analysis-value.red { color: #FF453A; }
+  .analysis-unit { font-size: 12px; color: #666; }
+
+  /* ── 建议出牌区 ── */
+  .suggest-box {
+    background: #252525;
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid #333;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .suggest-left { flex: 1; }
+  .suggest-title { font-size: 13px; color: #666; margin-bottom: 6px; }
+  .suggest-reason { font-size: 14px; color: #aaa; line-height: 1.4; }
+  .suggest-right { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .suggest-arrow {
+    font-size: 24px; color: #40FF5E;
+  }
+
+  /* ── 听牌展示 ── */
+  .ting-section {
+    background: #252525;
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid #40FF5E33;
+  }
+  .ting-title { font-size: 13px; color: #40FF5E; margin-bottom: 8px; font-weight: 600; }
+  .ting-tiles { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ting-tile {
+    background: #40FF5E22;
+    border: 1px solid #40FF5E55;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 16px;
+    color: #40FF5E;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .ting-count { font-size: 12px; color: #666; }
+
+  /* ── 危险警告 ── */
+  .danger-header {
+    background: #FF453A22;
+    border: 1px solid #FF453A44;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .danger-icon { font-size: 20px; }
+  .danger-text { font-size: 16px; font-weight: 600; color: #FF453A; }
+  .danger-sub { font-size: 13px; color: #FF453A88; margin-top: 2px; }
+
+  .discard-list {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .discard-row {
+    display: flex; align-items: center; gap: 8px;
+    background: #252525; border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .discard-player { font-size: 13px; color: #666; width: 40px; flex-shrink: 0; }
+  .discard-tiles-mini { display: flex; gap: 3px; flex: 1; }
+  .tile-mini {
+    width: 22px; height: 30px;
+    background: #F5F0E0; border-radius: 3px;
+    border: 1px solid #D0C8A0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #1a1a1a;
+  }
+  .tile-mini.wan { color: #c0392b; }
+  .tile-mini.tiao { color: #27ae60; }
+  .tile-mini.bing { color: #2980b9; }
+  .tile-mini.zi { color: #8e44ad; }
+  .tile-mini.danger-tile { border-color: #FF453A; box-shadow: 0 0 6px #FF453A66; }
+  .danger-risk {
+    font-size: 12px; padding: 2px 6px;
+    border-radius: 10px; font-weight: 600;
+    background: #FF453A22; color: #FF453A;
+  }
+  .danger-risk.mid { background: #FFB30022; color: #FFB300; }
+
+  /* ── 总结 ── */
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .summary-card {
+    background: #252525; border-radius: 10px;
+    padding: 12px; border: 1px solid #333;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .summary-label { font-size: 12px; color: #666; }
+  .summary-num { font-size: 28px; font-weight: 700; color: #fff; }
+  .summary-num.green { color: #40FF5E; }
+  .summary-num.yellow { color: #FFB300; }
+  .summary-detail { font-size: 12px; color: #555; }
+
+  .fan-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .fan-tag {
+    background: #40FF5E22; color: #40FF5E;
+    border: 1px solid #40FF5E44;
+    border-radius: 6px; padding: 3px 8px;
+    font-size: 13px; font-weight: 600;
+  }
+
+  /* ── 进度条 ── */
+  .progress-bar {
+    height: 4px; background: #333; border-radius: 2px;
+    overflow: hidden; margin-top: 4px;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 2px;
+    background: #40FF5E;
+    transition: width 0.5s ease;
+  }
+  .progress-fill.yellow { background: #FFB300; }
+  .progress-fill.red { background: #FF453A; }
+
+  /* ── 状态导航 ── */
+  .nav {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .nav-btn {
+    padding: 6px 12px; border-radius: 8px;
+    border: 1px solid #333; background: #252525;
+    color: #888; font-size: 13px; cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .nav-btn:hover { border-color: #40FF5E44; color: #ccc; }
+  .nav-btn.active { border-color: #40FF5E; color: #40FF5E; background: #40FF5E11; }
+
+  /* ── 卡片状态切换 ── */
+  .state { display: none; }
+  .state.active { display: flex; flex-direction: column; flex: 1; }
+
+  /* ── 危险边框 ── */
+  .card.danger-mode { border-color: #FF453A88; }
+  .card.warn-mode { border-color: #FFB30088; }
+
+  /* ── 波形动画（扫描中） ── */
+  .wave-row {
+    display: flex; gap: 3px; align-items: flex-end; height: 24px;
+  }
+  .wave-bar {
+    width: 4px; border-radius: 2px;
+    background: #40FF5E;
+    animation: wave 1s ease-in-out infinite;
+  }
+  .wave-bar:nth-child(1) { animation-delay: 0s; }
+  .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+  @keyframes wave {
+    0%, 100% { height: 6px; } 50% { height: 22px; }
+  }
+
+  /* ── 胡牌概率环 ── */
+  .prob-ring {
+    position: relative;
+    width: 72px; height: 72px;
+    flex-shrink: 0;
+  }
+  .prob-ring svg { transform: rotate(-90deg); }
+  .prob-ring .ring-bg { stroke: #333; fill: none; stroke-width: 5; }
+  .prob-ring .ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+  .prob-label {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .prob-num { font-size: 18px; font-weight: 700; color: #fff; }
+  .prob-sub { font-size: 10px; color: #666; }
+</style>
+</head>
+<body>
+
+<!-- ════ 卡片主体 ════ -->
+<div class="card" id="mainCard">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#40FF5E" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="4" width="5" height="7" rx="1"/>
+          <rect x="9.5" y="4" width="5" height="7" rx="1"/>
+          <rect x="16" y="4" width="5" height="7" rx="1"/>
+          <path d="M3 17h18M7 17v3M12 17v3M17 17v3"/>
+        </svg>
+      </div>
+      <span class="header-title">麻将辅助</span>
+    </div>
+    <span class="header-badge" id="headerBadge">扫描中</span>
+  </div>
+
+  <!-- 状态1: 牌面识别 -->
+  <div class="content state active" id="state-scan">
+    <div class="scan-area">
+      <div class="scan-line"></div>
+      <div class="scan-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#40FF5E" stroke-width="1.5">
+          <rect x="3" y="6" width="4" height="5" rx="1"/>
+          <rect x="9" y="6" width="4" height="5" rx="1"/>
+          <rect x="15" y="6" width="4" height="5" rx="1"/>
+          <path d="M3 3h4M3 3v4M17 3h4M21 3v4M3 21h4M3 21v-4M17 21h4M21 21v-4" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="scan-count">11 / 13</div>
+      <div class="scan-text">已识别手牌</div>
+      <div class="scan-tiles-row">
+        <span class="tile wan">一</span>
+        <span class="tile wan">三</span>
+        <span class="tile wan">五</span>
+        <span class="tile tiao">二</span>
+        <span class="tile tiao">四</span>
+        <span class="tile tiao">六</span>
+        <span class="tile bing highlight">八</span>
+        <span class="tile bing">九</span>
+        <span class="tile zi">東</span>
+        <span class="tile zi">西</span>
+        <span class="tile zi">中</span>
+      </div>
+    </div>
+    <div class="analysis-row">
+      <div class="analysis-item">
+        <div class="analysis-label">识别精度</div>
+        <div class="analysis-value green">98<span class="analysis-unit">%</span></div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">未识别</div>
+        <div class="analysis-value yellow">2<span class="analysis-unit">张</span></div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">处理耗时</div>
+        <div class="analysis-value">0.3<span class="analysis-unit">s</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态2: 手牌分析 -->
+  <div class="content state" id="state-hand">
+    <div class="tiles-row">
+      <div style="position:relative"><span class="tile wan">一</span></div>
+      <div style="position:relative"><span class="tile wan">一</span></div>
+      <div style="position:relative"><span class="tile wan">三</span></div>
+      <div style="position:relative"><span class="tile wan">四</span></div>
+      <div style="position:relative"><span class="tile wan">五</span></div>
+      <div style="position:relative"><span class="tile tiao">二</span></div>
+      <div style="position:relative"><span class="tile tiao">三</span></div>
+      <div style="position:relative"><span class="tile tiao">四</span></div>
+      <div style="position:relative"><span class="tile bing">六</span></div>
+      <div style="position:relative"><span class="tile bing">七</span></div>
+      <div style="position:relative"><span class="tile bing">八</span></div>
+      <div style="position:relative"><span class="tile zi">中</span></div>
+      <div style="position:relative"><span class="tile zi">中</span></div>
+    </div>
+    <div class="analysis-row">
+      <div class="analysis-item">
+        <div class="analysis-label">缺门</div>
+        <div class="analysis-value yellow">无</div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">对子</div>
+        <div class="analysis-value">2<span class="analysis-unit">组</span></div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">顺子</div>
+        <div class="analysis-value green">3<span class="analysis-unit">组</span></div>
+      </div>
+    </div>
+    <div class="suggest-box">
+      <div class="suggest-left">
+        <div class="suggest-title">牌型倾向</div>
+        <div class="suggest-reason">平胡结构清晰，万子/条子/饼子均衡。中字对子可做将牌，建议朝平胡方向发展。</div>
+      </div>
+      <div class="prob-ring">
+        <svg width="72" height="72" viewBox="0 0 72 72">
+          <circle class="ring-bg" cx="36" cy="36" r="30"/>
+          <circle class="ring-fill" cx="36" cy="36" r="30"
+            stroke="#40FF5E"
+            stroke-dasharray="188.5"
+            stroke-dashoffset="56"/>
+        </svg>
+        <div class="prob-label">
+          <div class="prob-num">70%</div>
+          <div class="prob-sub">胡牌率</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态3: 出牌建议 -->
+  <div class="content state" id="state-suggest">
+    <div class="tiles-row" style="padding-bottom:24px;">
+      <div style="position:relative"><span class="tile wan">一</span></div>
+      <div style="position:relative"><span class="tile wan">一</span></div>
+      <div style="position:relative"><span class="tile wan">三</span></div>
+      <div style="position:relative"><span class="tile wan">四</span></div>
+      <div style="position:relative"><span class="tile wan">五</span></div>
+      <div style="position:relative"><span class="tile tiao">二</span></div>
+      <div style="position:relative"><span class="tile tiao">三</span></div>
+      <div style="position:relative"><span class="tile tiao">四</span></div>
+      <div style="position:relative"><span class="tile bing">六</span></div>
+      <div style="position:relative"><span class="tile bing">七</span></div>
+      <div style="position:relative"><span class="tile bing">八</span></div>
+      <div style="position:relative"><span class="tile zi">中</span></div>
+      <div style="position:relative">
+        <span class="tile zi suggested">發</span>
+        <span class="tile-label">建议打出</span>
+      </div>
+    </div>
+    <div class="suggest-box">
+      <div class="suggest-left">
+        <div class="suggest-title">为什么打「發」？</div>
+        <div class="suggest-reason">發已无搭子价值，且上家打过「西」，字牌相对安全。打出后立即听牌，胡牌面增加 3 张。</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div class="prob-ring">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle class="ring-bg" cx="36" cy="36" r="30"/>
+            <circle class="ring-fill" cx="36" cy="36" r="30"
+              stroke="#FFB300"
+              stroke-dasharray="188.5"
+              stroke-dashoffset="38"/>
+          </svg>
+          <div class="prob-label">
+            <div class="prob-num" style="color:#FFB300">80%</div>
+            <div class="prob-sub">胡牌率</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="analysis-row">
+      <div class="analysis-item">
+        <div class="analysis-label">摸牌数</div>
+        <div class="analysis-value">8<span class="analysis-unit">次</span></div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">剩余牌</div>
+        <div class="analysis-value">42<span class="analysis-unit">张</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态4: 听牌模式 -->
+  <div class="content state" id="state-ting">
+    <div class="tiles-row" style="padding-bottom:8px;">
+      <span class="tile wan">一</span>
+      <span class="tile wan">一</span>
+      <span class="tile wan">三</span>
+      <span class="tile wan">四</span>
+      <span class="tile wan">五</span>
+      <span class="tile tiao">二</span>
+      <span class="tile tiao">三</span>
+      <span class="tile tiao">四</span>
+      <span class="tile bing">六</span>
+      <span class="tile bing">七</span>
+      <span class="tile bing">八</span>
+      <span class="tile zi">中</span>
+    </div>
+    <div class="ting-section">
+      <div class="ting-title">✦ 听牌 — 等待以下任意一张</div>
+      <div class="ting-tiles">
+        <div class="ting-tile">中 <span class="ting-count">×2</span></div>
+        <div class="ting-tile tiao" style="color:#40FF5E">一筒 <span class="ting-count">×3</span></div>
+        <div class="ting-tile" style="color:#40FF5E">九筒 <span class="ting-count">×4</span></div>
+      </div>
+    </div>
+    <div class="analysis-row">
+      <div class="analysis-item">
+        <div class="analysis-label">等牌张数</div>
+        <div class="analysis-value green">9<span class="analysis-unit">张</span></div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">预估番型</div>
+        <div class="analysis-value yellow">平胡</div>
+      </div>
+      <div class="analysis-item">
+        <div class="analysis-label">剩余牌墙</div>
+        <div class="analysis-value">36<span class="analysis-unit">张</span></div>
+      </div>
+    </div>
+    <div class="fan-row">
+      <span class="fan-tag">平胡 1番</span>
+      <span class="fan-tag">门前清 +1</span>
+      <span class="fan-tag">自摸 +1</span>
+    </div>
+    <div class="progress-bar" style="margin-top:4px;">
+      <div class="progress-fill" style="width:75%; background:#40FF5E;"></div>
+    </div>
+  </div>
+
+  <!-- 状态5: 危险警告 -->
+  <div class="content state" id="state-danger">
+    <div class="danger-header">
+      <span class="danger-icon">⚠️</span>
+      <div>
+        <div class="danger-text">高危提醒！勿出这些牌</div>
+        <div class="danger-sub">对家可能听牌，以下牌张危险</div>
+      </div>
+    </div>
+    <div class="discard-list">
+      <div class="discard-row">
+        <span class="discard-player">对家</span>
+        <div class="discard-tiles-mini">
+          <span class="tile-mini tiao">三</span>
+          <span class="tile-mini tiao">四</span>
+          <span class="tile-mini tiao">六</span>
+          <span class="tile-mini tiao danger-tile">五</span>
+          <span class="tile-mini tiao danger-tile">七</span>
+        </div>
+        <span class="danger-risk">高危</span>
+      </div>
+      <div class="discard-row">
+        <span class="discard-player">上家</span>
+        <div class="discard-tiles-mini">
+          <span class="tile-mini wan">一</span>
+          <span class="tile-mini wan">二</span>
+          <span class="tile-mini wan danger-tile">三</span>
+          <span class="tile-mini zi">東</span>
+        </div>
+        <span class="danger-risk mid">中危</span>
+      </div>
+      <div class="discard-row">
+        <span class="discard-player">下家</span>
+        <div class="discard-tiles-mini">
+          <span class="tile-mini bing">八</span>
+          <span class="tile-mini bing">九</span>
+          <span class="tile-mini zi">西</span>
+        </div>
+        <span class="danger-risk mid">低危</span>
+      </div>
+    </div>
+    <div class="suggest-box" style="padding:8px 12px;">
+      <div class="suggest-left">
+        <div class="suggest-title" style="color:#FF453A">建议防守策略</div>
+        <div class="suggest-reason">打「中」字牌最安全，避免打条子5/7。若无安全牌，考虑拆边张。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态6: 局势总结 -->
+  <div class="content state" id="state-summary">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">本局得分</div>
+        <div class="summary-num green">+32</div>
+        <div class="summary-detail">平胡自摸 × 3家</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">胡牌番型</div>
+        <div class="summary-num yellow">3</div>
+        <div class="summary-detail">番</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">本局排名</div>
+        <div class="summary-num green">1<span style="font-size:14px;color:#666;">st</span></div>
+        <div class="summary-detail">领先 8 分</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">摸牌次数</div>
+        <div class="summary-num">14<span style="font-size:14px;color:#666;">次</span></div>
+        <div class="summary-detail">胡牌效率高</div>
+      </div>
+    </div>
+    <div class="fan-row">
+      <span class="fan-tag">平胡 1番</span>
+      <span class="fan-tag">自摸 1番</span>
+      <span class="fan-tag">门前清 1番</span>
+    </div>
+    <div style="font-size:13px;color:#555;text-align:center;margin-top:4px;">下局建议：关注对家出牌模式，尽早听牌</div>
+  </div>
+</div>
+
+<!-- ════ 状态导航 ════ -->
+<div class="nav">
+  <button class="nav-btn active" onclick="switchState('scan',this,'扫描中','')">🎯 识别中</button>
+  <button class="nav-btn" onclick="switchState('hand',this,'分析中','blue')">🀄 手牌分析</button>
+  <button class="nav-btn" onclick="switchState('suggest',this,'建议出牌','')">💡 出牌建议</button>
+  <button class="nav-btn" onclick="switchState('ting',this,'听牌','green')">✅ 听牌</button>
+  <button class="nav-btn" onclick="switchState('danger',this,'危险！','danger')">⚠️ 危险警告</button>
+  <button class="nav-btn" onclick="switchState('summary',this,'已结束','blue')">📊 局势总结</button>
+</div>
+
+<script>
+function switchState(id, btn, badge, badgeType) {
+  // 切换内容
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+  document.getElementById('state-' + id).classList.add('active');
+
+  // 切换导航高亮
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // 更新 badge
+  const b = document.getElementById('headerBadge');
+  b.textContent = badge;
+  b.className = 'header-badge';
+  if (badgeType) b.classList.add(badgeType);
+
+  // 卡片边框模式
+  const card = document.getElementById('mainCard');
+  card.className = 'card';
+  if (id === 'danger') card.classList.add('danger-mode');
+  else if (id === 'suggest') card.classList.add('warn-mode');
+}
+</script>
+</body>
+</html>

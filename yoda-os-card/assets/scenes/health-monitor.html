@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康监测 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* 心率大字 */
+  .hr-display {
+    text-align: center; padding: 8px 0;
+  }
+  /* 数据网格 */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-cell {
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-cell.warn { border-color: #FF4040; background: rgba(255,64,64,0.05); }
+  .stat-num { font-size: 28px; font-weight: 700; color: #40FF5E; line-height: 34px; }
+  .stat-num.warn { color: #FF4040; }
+  .stat-label { font-size: 13px; color: rgba(64,255,94,0.55); }
+  /* 心率折线 */
+  .hr-chart-bar { display: flex; align-items: flex-end; gap: 4px; height: 48px; margin-bottom: 4px; }
+  .hr-bar { flex: 1; border-radius: 2px 2px 0 0; background: rgba(64,255,94,0.3); min-width: 0; }
+  .hr-bar.high { background: #40FF5E; }
+  .hr-bar.warn { background: #FF4040; }
+  /* 睡眠阶段 */
+  .sleep-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; }
+  .sleep-phase { height: 100%; transition: flex 0.3s; }
+  /* 进度条 */
+  .progress-track { height: 6px; background: rgba(64,255,94,0.15); border-radius: 3px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: #40FF5E; border-radius: 3px; }
+  /* 警告框 */
+  .alert-box {
+    background: rgba(255,64,64,0.08); border: 2px solid #FF4040; border-radius: 12px;
+    padding: 16px; text-align: center;
+  }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-warn { border-color: #FF4040; color: #FF4040; }
+  .btn-warn:hover { background: rgba(255,64,64,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">❤️ Health Monitor — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 正常监测</button>
+  <button class="state-btn" onclick="showState(1)">② 心率异常</button>
+  <button class="state-btn" onclick="showState(2)">③ 血氧监测</button>
+  <button class="state-btn" onclick="showState(3)">④ 睡眠报告</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 每日概览</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：正常监测 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1.5s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.4;}}</style>
+        <span class="text-caption">健康监测 · 正常</span>
+      </div>
+      <span class="text-caption">14:30</span>
+    </div>
+    <div class="hr-display" style="margin-bottom:12px;">
+      <div class="row" style="justify-content:center;align-items:baseline;gap:6px;">
+        <div class="text-display">72</div>
+        <div class="col" style="gap:2px;">
+          <span class="text-body" style="font-weight:500;">BPM</span>
+          <span class="text-caption">心率正常</span>
+        </div>
+      </div>
+    </div>
+    <div class="hr-chart-bar" style="margin-bottom:4px;">
+      <div class="hr-bar" style="height:40%;"></div>
+      <div class="hr-bar" style="height:55%;"></div>
+      <div class="hr-bar" style="height:65%;"></div>
+      <div class="hr-bar high" style="height:70%;"></div>
+      <div class="hr-bar high" style="height:80%;"></div>
+      <div class="hr-bar high" style="height:85%;"></div>
+      <div class="hr-bar high" style="height:75%;"></div>
+      <div class="hr-bar high" style="height:72%;"></div>
+      <div class="hr-bar high" style="height:68%;"></div>
+      <div class="hr-bar high" style="height:72%;"></div>
+      <div class="hr-bar high" style="height:70%;"></div>
+      <div class="hr-bar" style="height:60%;"></div>
+    </div>
+    <div class="row-between" style="margin-bottom:16px;">
+      <span class="text-caption">过去1小时</span>
+      <span class="text-caption">最高 88 · 最低 62</span>
+    </div>
+    <div class="stat-grid" style="flex:1;align-content:flex-start;">
+      <div class="stat-cell">
+        <div class="stat-num">98<span style="font-size:16px;font-weight:400;">%</span></div>
+        <div class="stat-label">血氧 SpO₂</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">36.5<span style="font-size:16px;font-weight:400;">°C</span></div>
+        <div class="stat-label">体温</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">6,842</div>
+        <div class="stat-label">今日步数</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">324</div>
+        <div class="stat-label">消耗卡路里</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">历史数据</button>
+    </div>
+  </div>
+
+  <!-- 状态2：心率异常 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#FF4040;animation:pls 0.6s infinite;"></div>
+        <span class="text-caption" style="color:#FF4040;">⚠️ 心率偏高</span>
+      </div>
+      <span class="text-caption">14:45</span>
+    </div>
+    <div class="alert-box" style="margin-bottom:16px;">
+      <div style="font-size:64px;font-weight:700;color:#FF4040;line-height:72px;">128</div>
+      <div style="font-size:16px;color:#FF4040;font-weight:500;">BPM · 超出正常范围</div>
+      <div class="text-caption" style="margin-top:4px;">正常范围 60-100 BPM</div>
+    </div>
+    <div class="hr-chart-bar" style="margin-bottom:4px;">
+      <div class="hr-bar" style="height:40%;"></div>
+      <div class="hr-bar high" style="height:60%;"></div>
+      <div class="hr-bar high" style="height:75%;"></div>
+      <div class="hr-bar warn" style="height:90%;"></div>
+      <div class="hr-bar warn" style="height:95%;"></div>
+      <div class="hr-bar warn" style="height:100%;"></div>
+      <div class="hr-bar warn" style="height:92%;"></div>
+    </div>
+    <div class="row-between" style="margin-bottom:14px;">
+      <span class="text-caption">持续时间</span>
+      <span class="text-body" style="color:#FF4040;font-weight:600;">3 分 24 秒</span>
+    </div>
+    <div class="text-caption" style="margin-bottom:10px;">可能原因</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;align-content:flex-start;">
+      <span style="font-size:13px;color:rgba(64,255,94,0.6);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;">剧烈运动</span>
+      <span style="font-size:13px;color:rgba(64,255,94,0.6);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;">焦虑/紧张</span>
+      <span style="font-size:13px;color:rgba(64,255,94,0.6);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;">咖啡因摄入</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-warn">忽略</button>
+      <button class="btn btn-warn" style="background:rgba(255,64,64,0.1);">立即就医</button>
+    </div>
+  </div>
+
+  <!-- 状态3：血氧监测 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2C5 5 2 8 2 10a6 6 0 0012 0C14 8 11 5 8 2z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-caption">血氧 SpO₂</span>
+      </div>
+      <span class="text-caption">14:30</span>
+    </div>
+    <div style="text-align:center;padding:8px 0 16px;">
+      <div style="display:inline-block;width:120px;height:120px;border-radius:50%;border:4px solid rgba(64,255,94,0.2);border-top-color:#40FF5E;border-right-color:#40FF5E;border-bottom-color:#40FF5E;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto 10px;">
+        <div class="text-display" style="font-size:40px;line-height:48px;">98<span style="font-size:20px;font-weight:400;">%</span></div>
+      </div>
+      <div class="text-body" style="font-weight:500;margin-bottom:4px;">血氧饱和度正常</div>
+      <div class="text-caption">正常范围 ≥ 95%</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat-grid" style="flex:1;">
+      <div class="stat-cell">
+        <div class="stat-num">72</div>
+        <div class="stat-label">当前心率 BPM</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">16<span style="font-size:14px;font-weight:400;">/分</span></div>
+        <div class="stat-label">呼吸频率</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">36.5<span style="font-size:14px;font-weight:400;">°C</span></div>
+        <div class="stat-label">体温</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">120/80</div>
+        <div class="stat-label">血压 mmHg</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">重新测量</button>
+      <button class="btn">查看趋势</button>
+    </div>
+  </div>
+
+  <!-- 状态4：睡眠报告 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M12 9.5A6 6 0 116.5 4a4.5 4.5 0 005.5 5.5z" stroke="#40FF5E" stroke-width="1.5"/>
+        </svg>
+        <span class="text-caption">昨晚睡眠</span>
+      </div>
+      <span class="text-caption">今早 7:30</span>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-bottom:16px;">
+      <div class="col">
+        <div style="font-size:36px;font-weight:700;color:#40FF5E;line-height:44px;">7<span style="font-size:20px;font-weight:400;">h</span>23<span style="font-size:20px;font-weight:400;">m</span></div>
+        <div class="text-caption">睡眠时长</div>
+      </div>
+      <div class="col" style="align-items:flex-end;">
+        <div style="font-size:28px;font-weight:700;color:#40FF5E;">82<span style="font-size:16px;font-weight:400;"> 分</span></div>
+        <div class="text-caption">睡眠质量</div>
+      </div>
+    </div>
+    <div class="text-caption" style="margin-bottom:8px;">睡眠阶段分布</div>
+    <div class="sleep-bar" style="margin-bottom:6px;">
+      <div class="sleep-phase" style="flex:1;background:rgba(64,255,94,0.15);"></div>
+      <div class="sleep-phase" style="flex:2;background:rgba(64,255,94,0.3);"></div>
+      <div class="sleep-phase" style="flex:3;background:rgba(64,255,94,0.55);"></div>
+      <div class="sleep-phase" style="flex:2;background:rgba(64,255,94,0.8);"></div>
+      <div class="sleep-phase" style="flex:1;background:#40FF5E;"></div>
+    </div>
+    <div class="row" style="gap:16px;justify-content:center;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#40FF5E;"></div><span class="text-caption">深睡 2h12m</span></div>
+      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:rgba(64,255,94,0.55);"></div><span class="text-caption">浅睡 3h45m</span></div>
+      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:rgba(64,255,94,0.3);"></div><span class="text-caption">REM 1h26m</span></div>
+    </div>
+    <div class="stat-grid" style="flex:1;">
+      <div class="stat-cell">
+        <div class="stat-num">23:12</div>
+        <div class="stat-label">入睡时间</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">6:35</div>
+        <div class="stat-label">起床时间</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">睡眠建议</button>
+      <button class="btn">历史趋势</button>
+    </div>
+  </div>
+
+  <!-- 状态5：每日健康概览 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1l2 4 5 .7-3.5 3.4.8 5L8 12l-4.3 2.1.8-5L1 5.7 6 5z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-caption">今日健康</span>
+      </div>
+      <span class="text-caption">3月31日</span>
+    </div>
+    <div class="stat-grid" style="margin-bottom:14px;">
+      <div class="stat-cell">
+        <div class="stat-num">72</div>
+        <div class="stat-label">💓 当前心率</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">98<span style="font-size:14px;">%</span></div>
+        <div class="stat-label">🫁 血氧</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">6842</div>
+        <div class="stat-label">👟 步数</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">324</div>
+        <div class="stat-label">🔥 卡路里</div>
+      </div>
+    </div>
+    <div class="text-caption" style="margin-bottom:8px;">目标进度</div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div>
+        <div class="row-between" style="margin-bottom:4px;">
+          <span class="text-caption">步数目标 8000步</span>
+          <span class="text-caption">85%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:85%;"></div>
+        </div>
+      </div>
+      <div>
+        <div class="row-between" style="margin-bottom:4px;">
+          <span class="text-caption">活动时间 60分钟</span>
+          <span class="text-caption">42%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:42%;opacity:0.6;"></div>
+        </div>
+      </div>
+      <div>
+        <div class="row-between" style="margin-bottom:4px;">
+          <span class="text-caption">睡眠目标 8小时</span>
+          <span class="text-caption">92%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:92%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">健康建议</button>
+      <button class="btn">分享报告</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Health Monitor · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

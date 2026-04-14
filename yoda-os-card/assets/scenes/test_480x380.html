@@ -1,0 +1,204 @@
+{"surfaceUpdate": {"surfaceId": "test_card", "components": [{"id": "root", "component": {"Column": {"children": {"explicitList": ["header_section", "state_selector", "content_area"]}, "spacing": {"literalNumber": 16}, "width": {"literalNumber": 480}, "height": {"literalNumber": 380}, "padding": {"literalString": "16px"}}}}, {"id": "header_section", "component": {"Column": {"children": {"explicitList": ["title_text", "subtitle_text"]}, "spacing": {"literalNumber": 4}}}}, {"id": "title_text", "component": {"Text": {"text": {"path": "/title", "literalString": "测试卡片"}, "usageHint": {"literalString": "title"}}}}, {"id": "subtitle_text", "component": {"Text": {"text": {"path": "/subtitle", "literalString": "480×380px演示"}, "usageHint": {"literalString": "subtitle"}}}}, {"id": "state_selector", "component": {"Row": {"children": {"explicitList": ["state_btn_0", "state_btn_1", "state_btn_2", "state_btn_3"]}, "spacing": {"literalNumber": 8}, "alignment": {"literalString": "center"}}}}, {"id": "state_btn_0", "component": {"Button": {"text": {"path": "/states/0/name", "literalString": "状态A"}, "onClick": {"literalString": "select_state_0"}, "style": {"path": "/states/0/style", "literalString": "normal"}, "usageHint": {"literalString": "button"}}}}, {"id": "state_btn_1", "component": {"Button": {"text": {"path": "/states/1/name", "literalString": "状态B"}, "onClick": {"literalString": "select_state_1"}, "style": {"path": "/states/1/style", "literalString": "normal"}, "usageHint": {"literalString": "button"}}}}, {"id": "state_btn_2", "component": {"Button": {"text": {"path": "/states/2/name", "literalString": "状态C"}, "onClick": {"literalString": "select_state_2"}, "style": {"path": "/states/2/style", "literalString": "normal"}, "usageHint": {"literalString": "button"}}}}, {"id": "state_btn_3", "component": {"Button": {"text": {"path": "/states/3/name", "literalString": "状态D"}, "onClick": {"literalString": "select_state_3"}, "style": {"path": "/states/3/style", "literalString": "normal"}, "usageHint": {"literalString": "button"}}}}, {"id": "content_area", "component": {"Container": {"child": "content_inner", "flex": {"literalNumber": 1}}}}, {"id": "content_inner", "component": {"Column": {"children": {"explicitList": ["state_content"]}, "spacing": {"literalNumber": 12}}}}, {"id": "state_content", "component": {"Card": {"child": "state_specific_content", "padding": {"literalString": "20px"}, "borderRadius": {"literalNumber": 12}, "borderWidth": {"literalNumber": 2}, "borderColor": {"path": "/border_color", "literalString": "#40FF5E"}}}}, {"id": "state_specific_content", "component": {"Column": {"children": {"explicitList": ["state_title", "state_main_content"]}, "spacing": {"literalNumber": 16}}}}, {"id": "state_title", "component": {"Text": {"text": {"path": "/current_state_name", "literalString": "状态A"}, "usageHint": {"literalString": "title"}, "color": {"path": "/title_color", "literalString": "#40FF5E"}}}}, {"id": "state_main_content", "component": {"Column": {"children": {"explicitList": ["dynamic_content_1", "dynamic_content_2", "dynamic_content_3"]}, "spacing": {"literalNumber": 12}}}}, {"id": "dynamic_content_1", "component": {"Text": {"text": {"path": "/dynamic_content_1", "literalString": "内容 1"}, "usageHint": {"literalString": "body"}}}}, {"id": "dynamic_content_2", "component": {"Text": {"text": {"path": "/dynamic_content_2", "literalString": "内容 2"}, "usageHint": {"literalString": "body"}}}}, {"id": "dynamic_content_3", "component": {"Text": {"text": {"path": "/dynamic_content_3", "literalString": "内容 3"}, "usageHint": {"literalString": "body"}}}}]}}
+{"dataModelUpdate": {"surfaceId": "test_card", "contents": [{"key": "title", "valueString": "测试卡片"}, {"key": "subtitle", "valueString": "480×380px演示"}, {"key": "border_color", "valueString": "#40FF5E"}, {"key": "title_color", "valueString": "#40FF5E"}, {"key": "current_state", "valueNumber": 0}, {"key": "current_state_name", "valueString": "状态A"}, {"key": "states/0/name", "valueString": "状态A"}, {"key": "states/0/style", "valueString": "normal"}, {"key": "states/1/name", "valueString": "状态B"}, {"key": "states/1/style", "valueString": "outline"}, {"key": "states/2/name", "valueString": "状态C"}, {"key": "states/2/style", "valueString": "outline"}, {"key": "states/3/name", "valueString": "状态D"}, {"key": "states/3/style", "valueString": "outline"}, {"key": "dynamic_content_1", "valueString": "动态内容 1"}, {"key": "dynamic_content_2", "valueString": "动态内容 2"}, {"key": "dynamic_content_3", "valueString": "动态内容 3"}]}}
+{"beginRendering": {"surfaceId": "test_card", "root": "root", "catalog": "yoda-os-sprite-v1"}}
+
+================================================================================
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YodaOS Sprite - Test Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'HarmonyOS Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* 480×380px显示区域 */
+        .viewport-container {
+            width: 480px;
+            height: 380px;
+            background: #1C1C1C;
+            border-radius: 12px;
+            border: 2px solid #40FF5E;
+            overflow: hidden;
+            margin: 0;
+            padding: 16px;
+            position: relative;
+        }
+        
+        .header {
+            margin-bottom: 16px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #AAAAAA;
+            font-weight: 400;
+        }
+        
+        .state-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+        
+        .state-btn {
+            padding: 8px 16px;
+            border: 2px solid #40FF5E;
+            background: transparent;
+            color: #40FF5E;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .state-btn.active {
+            background: #40FF5E;
+            color: #000000;
+        }
+        
+        .state-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .card {
+            background: #2A2A2A;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #40FF5E;
+        }
+        
+        .state-title {
+            font-size: 20px;
+            color: #40FF5E;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .state-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .dynamic-content {
+            font-size: 16px;
+            color: #FFFFFF;
+            line-height: 1.5;
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            color: #888888;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        /* 确保整个页面不超过480×380px */
+        #app {
+            width: 480px;
+            height: 380px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="viewport-container">
+            <div class="header">
+                <div class="title" id="title">场景卡片</div>
+                <div class="subtitle" id="subtitle"></div>
+            </div>
+            
+            <div class="state-selector" id="state-selector">
+                <!-- 状态按钮通过JS动态生成 -->
+            </div>
+            
+            <div class="content-area">
+                <div class="card">
+                    <div class="state-title" id="state-title">当前状态</div>
+                    <div class="state-content" id="state-content">
+                        <div class="dynamic-content" id="dynamic-content-1">内容 1</div>
+                        <div class="dynamic-content" id="dynamic-content-2">内容 2</div>
+                        <div class="dynamic-content" id="dynamic-content-3">内容 3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="debug-info">
+            显示区域：480×380px | A2UI协议v0.8 | test_card
+        </div>
+    </div>
+
+    <script>
+        // 模拟A2UI JSONL数据
+        const a2uiData = {"messages": ["{\"surfaceUpdate\": {\"surfaceId\": \"test_card\", \"components\": [{\"id\": \"root\", \"component\": {\"Column\": {\"children\": {\"explicitList\": [\"header_section\", \"state_selector\", \"content_area\"]}, \"spacing\": {\"literalNumber\": 16}, \"width\": {\"literalNumber\": 480}, \"height\": {\"literalNumber\": 380}, \"padding\": {\"literalString\": \"16px\"}}}}, {\"id\": \"header_section\", \"component\": {\"Column\": {\"children\": {\"explicitList\": [\"title_text\", \"subtitle_text\"]}, \"spacing\": {\"literalNumber\": 4}}}}, {\"id\": \"title_text\", \"component\": {\"Text\": {\"text\": {\"path\": \"/title\", \"literalString\": \"\u6d4b\u8bd5\u5361\u7247\"}, \"usageHint\": {\"literalString\": \"title\"}}}}, {\"id\": \"subtitle_text\", \"component\": {\"Text\": {\"text\": {\"path\": \"/subtitle\", \"literalString\": \"480\u00d7380px\u6f14\u793a\"}, \"usageHint\": {\"literalString\": \"subtitle\"}}}}, {\"id\": \"state_selector\", \"component\": {\"Row\": {\"children\": {\"explicitList\": [\"state_btn_0\", \"state_btn_1\", \"state_btn_2\", \"state_btn_3\"]}, \"spacing\": {\"literalNumber\": 8}, \"alignment\": {\"literalString\": \"center\"}}}}, {\"id\": \"state_btn_0\", \"component\": {\"Button\": {\"text\": {\"path\": \"/states/0/name\", \"literalString\": \"\u72b6\u6001A\"}, \"onClick\": {\"literalString\": \"select_state_0\"}, \"style\": {\"path\": \"/states/0/style\", \"literalString\": \"normal\"}, \"usageHint\": {\"literalString\": \"button\"}}}}, {\"id\": \"state_btn_1\", \"component\": {\"Button\": {\"text\": {\"path\": \"/states/1/name\", \"literalString\": \"\u72b6\u6001B\"}, \"onClick\": {\"literalString\": \"select_state_1\"}, \"style\": {\"path\": \"/states/1/style\", \"literalString\": \"normal\"}, \"usageHint\": {\"literalString\": \"button\"}}}}, {\"id\": \"state_btn_2\", \"component\": {\"Button\": {\"text\": {\"path\": \"/states/2/name\", \"literalString\": \"\u72b6\u6001C\"}, \"onClick\": {\"literalString\": \"select_state_2\"}, \"style\": {\"path\": \"/states/2/style\", \"literalString\": \"normal\"}, \"usageHint\": {\"literalString\": \"button\"}}}}, {\"id\": \"state_btn_3\", \"component\": {\"Button\": {\"text\": {\"path\": \"/states/3/name\", \"literalString\": \"\u72b6\u6001D\"}, \"onClick\": {\"literalString\": \"select_state_3\"}, \"style\": {\"path\": \"/states/3/style\", \"literalString\": \"normal\"}, \"usageHint\": {\"literalString\": \"button\"}}}}, {\"id\": \"content_area\", \"component\": {\"Container\": {\"child\": \"content_inner\", \"flex\": {\"literalNumber\": 1}}}}, {\"id\": \"content_inner\", \"component\": {\"Column\": {\"children\": {\"explicitList\": [\"state_content\"]}, \"spacing\": {\"literalNumber\": 12}}}}, {\"id\": \"state_content\", \"component\": {\"Card\": {\"child\": \"state_specific_content\", \"padding\": {\"literalString\": \"20px\"}, \"borderRadius\": {\"literalNumber\": 12}, \"borderWidth\": {\"literalNumber\": 2}, \"borderColor\": {\"path\": \"/border_color\", \"literalString\": \"#40FF5E\"}}}}, {\"id\": \"state_specific_content\", \"component\": {\"Column\": {\"children\": {\"explicitList\": [\"state_title\", \"state_main_content\"]}, \"spacing\": {\"literalNumber\": 16}}}}, {\"id\": \"state_title\", \"component\": {\"Text\": {\"text\": {\"path\": \"/current_state_name\", \"literalString\": \"\u72b6\u6001A\"}, \"usageHint\": {\"literalString\": \"title\"}, \"color\": {\"path\": \"/title_color\", \"literalString\": \"#40FF5E\"}}}}, {\"id\": \"state_main_content\", \"component\": {\"Column\": {\"children\": {\"explicitList\": [\"dynamic_content_1\", \"dynamic_content_2\", \"dynamic_content_3\"]}, \"spacing\": {\"literalNumber\": 12}}}}, {\"id\": \"dynamic_content_1\", \"component\": {\"Text\": {\"text\": {\"path\": \"/dynamic_content_1\", \"literalString\": \"\u5185\u5bb9 1\"}, \"usageHint\": {\"literalString\": \"body\"}}}}, {\"id\": \"dynamic_content_2\", \"component\": {\"Text\": {\"text\": {\"path\": \"/dynamic_content_2\", \"literalString\": \"\u5185\u5bb9 2\"}, \"usageHint\": {\"literalString\": \"body\"}}}}, {\"id\": \"dynamic_content_3\", \"component\": {\"Text\": {\"text\": {\"path\": \"/dynamic_content_3\", \"literalString\": \"\u5185\u5bb9 3\"}, \"usageHint\": {\"literalString\": \"body\"}}}}]}}\n{\"dataModelUpdate\": {\"surfaceId\": \"test_card\", \"contents\": [{\"key\": \"title\", \"valueString\": \"\u6d4b\u8bd5\u5361\u7247\"}, {\"key\": \"subtitle\", \"valueString\": \"480\u00d7380px\u6f14\u793a\"}, {\"key\": \"border_color\", \"valueString\": \"#40FF5E\"}, {\"key\": \"title_color\", \"valueString\": \"#40FF5E\"}, {\"key\": \"current_state\", \"valueNumber\": 0}, {\"key\": \"current_state_name\", \"valueString\": \"\u72b6\u6001A\"}, {\"key\": \"states/0/name\", \"valueString\": \"\u72b6\u6001A\"}, {\"key\": \"states/0/style\", \"valueString\": \"normal\"}, {\"key\": \"states/1/name\", \"valueString\": \"\u72b6\u6001B\"}, {\"key\": \"states/1/style\", \"valueString\": \"outline\"}, {\"key\": \"states/2/name\", \"valueString\": \"\u72b6\u6001C\"}, {\"key\": \"states/2/style\", \"valueString\": \"outline\"}, {\"key\": \"states/3/name\", \"valueString\": \"\u72b6\u6001D\"}, {\"key\": \"states/3/style\", \"valueString\": \"outline\"}, {\"key\": \"dynamic_content_1\", \"valueString\": \"\u52a8\u6001\u5185\u5bb9 1\"}, {\"key\": \"dynamic_content_2\", \"valueString\": \"\u52a8\u6001\u5185\u5bb9 2\"}, {\"key\": \"dynamic_content_3\", \"valueString\": \"\u52a8\u6001\u5185\u5bb9 3\"}]}}\n{\"beginRendering\": {\"surfaceId\": \"test_card\", \"root\": \"root\", \"catalog\": \"yoda-os-sprite-v1\"}}"]};
+        
+        // 初始化数据
+        let currentState = 0;
+        const states = ["状态1", "状态2", "状态3", "状态4", "状态5"];
+        const title = "Test Card";
+        
+        // 更新UI
+        function updateUI() {
+            document.getElementById('title').textContent = title;
+            document.getElementById('state-title').textContent = states[currentState];
+            
+            // 更新状态按钮
+            const selector = document.getElementById('state-selector');
+            selector.innerHTML = '';
+            
+            states.forEach((state, index) => {
+                const button = document.createElement('button');
+                button.className = `state-btn ${index === currentState ? 'active' : ''}`;
+                button.textContent = state;
+                button.onclick = () => {
+                    currentState = index;
+                    updateUI();
+                };
+                selector.appendChild(button);
+            });
+            
+            // 更新动态内容
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`dynamic-content-${i}`).textContent = 
+                    `状态 ${currentState + 1} - 内容 ${i}`;
+            }
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', updateUI);
+    </script>
+</body>
+</html>

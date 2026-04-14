@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>驾驶辅助卡片 - 设计师优化版</title>
+    <style>
+        /* ====== 驾驶场景专用设计系统 ====== */
+        
+        :root {
+            /* 驾驶场景专用颜色系统 */
+            --color-safe: #40FF5E;         /* 安全/正常 */
+            --color-safe-soft: rgba(64, 255, 94, 0.1);
+            --color-warning: #FFB340;      /* 警告（柔和的橙色） */
+            --color-warning-soft: rgba(255, 179, 64, 0.1);
+            --color-danger: #FF6B6B;       /* 危险（柔和的红色，避免刺眼） */
+            --color-danger-soft: rgba(255, 107, 107, 0.1);
+            --color-info: #5C8DFF;         /* 信息/路况 */
+            --color-info-soft: rgba(92, 141, 255, 0.1);
+            
+            /* 驾驶场景背景系统 */
+            --color-surface-driving: #0A0A0A;  /* 深色背景减少干扰 */
+            --color-surface-card: #1A1A1A;     /* 卡片背景 */
+            --color-surface-panel: #222222;    /* 面板背景 */
+            
+            /* 驾驶场景文字系统 */
+            --color-text-primary: #FFFFFF;
+            --color-text-secondary: #AAAAAA;
+            --color-text-tertiary: #666666;
+            
+            /* 驾驶场景字号系统 */
+            --font-size-giant: 72px;       /* 超大数字（速度） */
+            --font-size-large: 28px;       /* 重要信息 */
+            --font-size-medium: 18px;      /* 正常内容 */
+            --font-size-small: 14px;       /* 辅助信息 */
+            --font-size-tiny: 12px;        /* 标签/微小信息 */
+            
+            /* 驾驶场景字重系统 */
+            --font-weight-heavy: 700;      /* 重要信息 */
+            --font-weight-medium: 600;     /* 正常内容 */
+            --font-weight-light: 400;      /* 辅助信息 */
+            
+            /* 驾驶场景间距系统 */
+            --spacing-tight: 4px;
+            --spacing-normal: 8px;
+            --spacing-relaxed: 16px;
+            --spacing-loose: 24px;
+            --spacing-extra-loose: 32px;
+            
+            /* 驾驶场景动画时间 */
+            --duration-fast: 150ms;        /* 快速交互 */
+            --duration-normal: 300ms;      /* 正常过渡 */
+            --duration-slow: 500ms;        /* 慢速变化 */
+        }
+        
+        /* 重置与基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: var(--color-text-primary);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* 驾驶场景专用容器 */
+        .viewport-driving {
+            width: 480px;
+            height: 380px;
+            margin: 0 auto;
+            background: var(--color-surface-driving);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 渐变背景（提升视觉深度） */
+        .driving-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(10, 10, 10, 1) 0%,
+                rgba(15, 15, 15, 1) 100%);
+            z-index: -1;
+        }
+        
+        /* 驾驶状态指示器（顶部固定） */
+        .status-indicator {
+            position: absolute;
+            top: var(--spacing-relaxed);
+            left: var(--spacing-relaxed);
+            right: var(--spacing-relaxed);
+            height: 4px;
+            background: var(--color-surface-panel);
+            border-radius: 2px;
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        .status-progress {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, 
+                var(--color-safe) 0%,
+                var(--color-warning) 50%,
+                var(--color-danger) 100%);
+            transform: scaleX(0.3);
+            transform-origin: left;
+            transition: transform var(--duration-normal) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 主内容区域 */
+        .content-driving {
+            padding: 64px var(--spacing-loose) var(--spacing-loose);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 速度显示 - 驾驶场景的核心 */
+        .speed-display {
+            text-align: center;
+            margin-bottom: var(--spacing-loose);
+            position: relative;
+        }
+        
+        .speed-value-wrapper {
+            display: inline-block;
+            position: relative;
+            padding: var(--spacing-relaxed);
+        }
+        
+        .speed-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(
+                circle at center,
+                var(--color-safe-soft) 0%,
+                transparent 70%
+            );
+            opacity: 0;
+            transition: opacity var(--duration-normal);
+            pointer-events: none;
+        }
+        
+        .speed-value {
+            font-size: var(--font-size-giant);
+            font-weight: var(--font-weight-heavy);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            letter-spacing: -2px;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            margin-bottom: var(--spacing-tight);
+        }
+        
+        .speed-unit {
+            font-size: var(--font-size-medium);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-secondary);
+            margin-left: var(--spacing-normal);
+        }
+        
+        /* 速度状态颜色 */
+        .speed-normal { color: var(--color-safe); }
+        .speed-warn { color: var(--color-warning); }
+        .speed-danger { 
+            color: var(--color-danger);
+            animation: pulse-danger 1.2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-danger {
+            0%, 100% { 
+                opacity: 1;
+                text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            }
+            50% { 
+                opacity: 0.9;
+                text-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+            }
+        }
+        
+        /* 速度限制显示 */
+        .speed-limit {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-tight);
+        }
+        
+        .speed-limit-value {
+            color: var(--color-text-primary);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .speed-limit-icon {
+            width: 14px;
+            height: 14px;
+            fill: var(--color-text-tertiary);
+        }
+        
+        /* 驾驶信息卡片（收起/展开式） */
+        .info-panel {
+            background: var(--color-surface-card);
+            border-radius: 16px;
+            padding: var(--spacing-relaxed);
+            margin-top: var(--spacing-relaxed);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all var(--duration-normal);
+            opacity: 0.9;
+        }
+        
+        .info-panel:hover {
+            opacity: 1;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-relaxed);
+            cursor: pointer;
+        }
+        
+        .info-title {
+            font-size: var(--font-size-medium);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-normal);
+        }
+        
+        .info-icon {
+            width: 18px;
+            height: 18px;
+            fill: var(--color-text-secondary);
+        }
+        
+        .info-toggle {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: transform var(--duration-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .info-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .toggle-icon {
+            width: 12px;
+            height: 12px;
+            fill: var(--color-text-secondary);
+            transition: transform var(--duration-fast);
+        }
+        
+        .info-toggle.collapsed .toggle-icon {
+            transform: rotate(90deg);
+        }
+        
+        /* 信息网格 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-relaxed);
+            overflow: hidden;
+            transition: max-height var(--duration-normal);
+            max-height: 200px;
+        }
+        
+        .info-grid.collapsed {
+            max-height: 0;
+        }
+        
+        .info-item {
+            background: var(--color-surface-panel);
+            border-radius: 12px;
+            padding: var(--spacing-relaxed);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all var(--duration-fast);
+        }
+        
+        .info-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .info-label {
+            font-size: var(--font-size-tiny);
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--spacing-tight);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: var(--font-size-large);
+            font-weight: var(--font-weight-heavy);
+            color: var(--color-safe);
+            line-height: 1;
+        }
+        
+        .info-value-danger {
+            color: var(--color-danger);
+        }
+        
+        .info-value-warning {
+            color: var(--color-warning);
+        }
+        
+        /* 警告系统 - 分层设计 */
+        .alert-system {
+            position: absolute;
+            bottom: var(--spacing-loose);
+            left: var(--spacing-loose);
+            right: var(--spacing-loose);
+            z-index: 20;
+        }
+        
+        .alert-panel {
+            background: var(--color-danger-soft);
+            border: 2px solid var(--color-danger);
+            border-radius: 16px;
+            padding: var(--spacing-relaxed);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-relaxed);
+            animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-icon {
+            width: 28px;
+            height: 28px;
+            fill: var(--color-danger);
+            flex-shrink: 0;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-size: var(--font-size-medium);
+            font-weight: var(--font-weight-heavy);
+            color: var(--color-danger);
+            margin-bottom: var(--spacing-tight);
+        }
+        
+        .alert-description {
+            font-size: var(--font-size-small);
+            color: var(--color-text-primary);
+            line-height: 1.4;
+        }
+        
+        .alert-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-fast);
+            border-radius: 8px;
+        }
+        
+        .alert-close:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+        
+        .close-icon {
+            width: 16px;
+            height: 16px;
+            fill: var(--color-danger);
+        }
+        
+        /* 疲劳检测 - 温和提醒 */
+        .fatigue-panel {
+            background: var(--color-warning-soft);
+            border: 1px solid var(--color-warning);
+            border-radius: 16px;
+            padding: var(--spacing-relaxed);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-relaxed);
+            margin-top: var(--spacing-relaxed);
+            animation: fade-in 0.5s ease-out;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fatigue-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--color-warning);
+            flex-shrink: 0;
+        }
+        
+        .fatigue-content {
+            flex: 1;
+        }
+        
+        .fatigue-title {
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-warning);
+            margin-bottom: var(--spacing-tight);
+        }
+        
+        .fatigue-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 179, 64, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .fatigue-progress-fill {
+            height: 100%;
+            background: var(--color-warning);
+            border-radius: 2px;
+            width: 40%;
+            transition: width var(--duration-slow);
+        }
+        
+        /* 路况信息 - 信息性展示 */
+        .traffic-panel {
+            background: var(--color-info-soft);
+            border: 1px solid var(--color-info);
+            border-radius: 16px;
+            padding: var(--spacing-relaxed);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-relaxed);
+            margin-top: var(--spacing-relaxed);
+        }
+        
+        .traffic-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--color-info);
+            flex-shrink: 0;
+        }
+        
+        .traffic-content {
+            flex: 1;
+        }
+        
+        .traffic-title {
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-info);
+            margin-bottom: var(--spacing-tight);
+        }
+        
+        .traffic-description {
+            font-size: var(--font-size-small);
+            color: var(--color-text-secondary);
+            line-height: 1.4;
+        }
+        
+        /* 停车状态 */
+        .parking-panel {
+            background: var(--color-safe-soft);
+            border: 2px solid var(--color-safe);
+            border-radius: 16px;
+            padding: var(--spacing-relaxed);
+            text-align: center;
+            margin-top: var(--spacing-relaxed);
+            animation: pulse-safe 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-safe {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .parking-icon {
+            width: 32px;
+            height: 32px;
+            fill: var(--color-safe);
+            margin-bottom: var(--spacing-relaxed);
+        }
+        
+        .parking-title {
+            font-size: var(--font-size-medium);
+            font-weight: var(--font-weight-heavy);
+            color: var(--color-safe);
+            margin-bottom: var(--spacing-tight);
+        }
+        
+        .parking-description {
+            font-size: var(--font-size-small);
+            color: var(--color-text-secondary);
+        }
+        
+        /* 时间显示（驾驶场景需要时间感知） */
+        .time-display {
+            position: absolute;
+            top: var(--spacing-relaxed);
+            right: var(--spacing-relaxed);
+            text-align: right;
+            z-index: 10;
+        }
+        
+        .current-time {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .elapsed-time {
+            font-size: var(--font-size-tiny);
+            color: var(--color-text-tertiary);
+            margin-top: 2px;
+        }
+        
+        /* 微交互状态 */
+        .hover-scale {
+            transition: transform var(--duration-fast);
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        .focus-glow {
+            transition: box-shadow var(--duration-fast);
+        }
+        
+        .focus-glow:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(64, 255, 94, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 驾驶场景专用容器 -->
+    <div class="viewport-driving">
+        <!-- 渐变背景 -->
+        <div class="driving-bg"></div>
+        
+        <!-- 状态指示器 -->
+        <div class="status-indicator">
+            <div class="status-progress" id="status-progress"></div>
+        </div>
+        
+        <!-- 时间显示 -->
+        <div class="time-display">
+            <div class="current-time" id="current-time">14:30</div>
+            <div class="elapsed-time" id="elapsed-time">已驾驶 45 分钟</div>
+        </div>
+        
+        <!-- 主内容区域 -->
+        <div class="content-driving">
+            <!-- 速度显示 -->
+            <div class="speed-display">
+                <div class="speed-glow" id="speed-glow"></div>
+                <div class="speed-value-wrapper">
+                    <div class="speed-value" id="speed-value">
+                        <span id="speed-number">65</span>
+                        <span class="speed-unit">km/h</span>
+                    </div>
+                </div>
+                <div class="speed-limit">
+                    <svg class="speed-limit-icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                    <span>限速</span>
+                    <span class="speed-limit-value" id="speed-limit">80</span>
+                    <span>km/h</span>
+                </div>
+            </div>
+            
+            <!-- 驾驶信息面板 -->
+            <div class="info-panel">
+                <div class="info-header" onclick="toggleInfoPanel()">
+                    <div class="info-title">
+                        <svg class="info-icon" viewBox="0 0 24 24">
+                            <path d="M13 7.5h-2v-2h2v2zm0 5.5h-2v5h2v-5zm-1-9c-5 0-9 4-9 9s4 9 9 9 9-4 9-9-4-9-9-9zm0 16c-3.9 0-7-3.1-7-7s3.1-7 7-7 7 3.1 7 7-3.1 7-7 7z"/>
+                        </svg>
+                        驾驶信息
+                    </div>
+                    <button class="info-toggle" id="info-toggle">
+                        <svg class="toggle-icon" viewBox="0 0 24 24">
+                            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="info-grid" id="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">续航里程</div>
+                        <div class="info-value" id="range-value">350</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">平均油耗</div>
+                        <div class="info-value">7.8</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">发动机温度</div>
+                        <div class="info-value" id="engine-temp">88</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">轮胎压力</div>
+                        <div class="info-value info-value-warning" id="tire-pressure">2.2</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 动态警告系统 -->
+            <div class="alert-system" id="alert-system" style="display: none;">
+                <div class="alert-panel">
+                    <svg class="alert-icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <div class="alert-content">
+                        <div class="alert-title" id="alert-title">前方急转弯</div>
+                        <div class="alert-description" id="alert-description">请在 200 米前减速至 40 km/h</div>
+                    </div>
+                    <button class="alert-close" onclick="dismissAlert()">
+                        <svg class="close-icon" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 动态面板（根据状态显示） -->
+        <div class="dynamic-panels" id="dynamic-panels">
+            <!-- 面板内容根据驾驶状态动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 驾驶状态数据
+        const DRIVING_STATES = {
+            NORMAL: 'normal',
+            WARNING: 'warning',
+            DANGER: 'danger',
+            PARKED: 'parked'
+        };
+        
+        // 当前状态
+        let currentState = DRIVING_STATES.NORMAL;
+        let currentSpeed = 65;
+        let speedLimit = 80;
+        let infoPanelCollapsed = false;
+        
+        // 驾驶模拟数据
+        let drivingData = {
+            range: 350,
+            engineTemp: 88,
+            tirePressure: 2.2,
+            tripTime: 45, // 分钟
+            alerts: [
+                { id: 1, type: 'danger', title: '前方急转弯', description: '请在 200 米前减速至 40 km/h', active: false },
+                { id: 2, type: 'warning', title: '疲劳驾驶检测', description: '建议休息 15 分钟', active: false },
+                { id: 3, type: 'info', title: '前方拥堵', description: '预计延迟 5 分钟', active: false }
+            ]
+        };
+        
+        // 初始化函数
+        function init() {
+            updateTime();
+            updateSpeedDisplay();
+            updateStatusIndicator();
+            updateInfoPanel();
+            
+            // 模拟驾驶状态变化
+            setInterval(() => {
+                updateDrivingSimulation();
+            }, 3000);
+            
+            // 更新时间
+            setInterval(updateTime, 60000);
+        }
+        
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                           now.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('current-time').textContent = timeStr;
+            document.getElementById('elapsed-time').textContent = 
+                `已驾驶 ${drivingData.tripTime} 分钟`;
+        }
+        
+        // 更新速度显示
+        function updateSpeedDisplay() {
+            const speedNumber = document.getElementById('speed-number');
+            const speedGlow = document.getElementById('speed-glow');
+            const speedLimitElem = document.getElementById('speed-limit');
+            
+            speedNumber.textContent = currentSpeed;
+            speedLimitElem.textContent = speedLimit;
+            
+            // 更新状态和颜色
+            let stateClass = 'speed-normal';
+            let statusProgress = 0.3;
+            
+            if (currentState === DRIVING_STATES.WARNING) {
+                stateClass = 'speed-warn';
+                statusProgress = 0.6;
+                speedGlow.style.opacity = '0.3';
+                speedGlow.style.background = `radial-gradient(
+                    circle at center,
+                    rgba(255, 179, 64, 0.3) 0%,
+                    transparent 70%
+                )`;
+            } else if (currentState === DRIVING_STATES.DANGER) {
+                stateClass = 'speed-danger';
+                statusProgress = 1;
+                speedGlow.style.opacity = '0.5';
+                speedGlow.style.background = `radial-gradient(
+                    circle at center,
+                    rgba(255, 107, 107, 0.4) 0%,
+                    transparent 70%
+                )`;
+            } else {
+                stateClass = 'speed-normal';
+                statusProgress = 0.3;
+                speedGlow.style.opacity = '0';
+            }
+            
+            // 更新速度显示类
+            const speedValue = document.getElementById('speed-value');
+            speedValue.className = `speed-value ${stateClass}`;
+            
+            // 更新状态指示器
+            document.getElementById('status-progress').style.transform = `scaleX(${statusProgress})`;
+        }
+        
+        // 更新状态指示器
+        function updateStatusIndicator() {
+            const progress = document.getElementById('status-progress');
+            
+            if (currentState === DRIVING_STATES.DANGER) {
+                progress.style.background = `linear-gradient(90deg, 
+                    var(--color-warning) 0%,
+                    var(--color-danger) 100%)`;
+            } else if (currentState === DRIVING_STATES.WARNING) {
+                progress.style.background = `linear-gradient(90deg, 
+                    var(--color-safe) 0%,
+                    var(--color-warning) 100%)`;
+            } else {
+                progress.style.background = `var(--color-safe)`;
+            }
+        }
+        
+        // 更新信息面板
+        function updateInfoPanel() {
+            document.getElementById('range-value').textContent = drivingData.range;
+            document.getElementById('engine-temp').textContent = drivingData.engineTemp;
+            document.getElementById('tire-pressure').textContent = drivingData.tirePressure;
+            
+            // 更新轮胎压力颜色
+            const tirePressureElem = document.getElementById('tire-pressure');
+            if (drivingData.tirePressure < 2.3) {
+                tirePressureElem.className = 'info-value info-value-danger';
+            } else if (drivingData.tirePressure < 2.5) {
+                tirePressureElem.className = 'info-value info-value-warning';
+            } else {
+                tirePressureElem.className = 'info-value';
+            }
+        }
+        
+        // 切换信息面板
+        function toggleInfoPanel() {
+            const infoGrid = document.getElementById('info-grid');
+            const infoToggle = document.getElementById('info-toggle');
+            
+            infoPanelCollapsed = !infoPanelCollapsed;
+            
+            if (infoPanelCollapsed) {
+                infoGrid.classList.add('collapsed');
+                infoToggle.classList.add('collapsed');
+            } else {
+                infoGrid.classList.remove('collapsed');
+                infoToggle.classList.remove('collapsed');
+            }
+        }
+        
+        // 显示警告
+        function showAlert(alertId) {
+            const alert = drivingData.alerts.find(a => a.id === alertId);
+            if (!alert) return;
+            
+            const alertSystem = document.getElementById('alert-system');
+            const alertTitle = document.getElementById('alert-title');
+            const alertDescription = document.getElementById('alert-description');
+            
+            alert.active = true;
+            alertTitle.textContent = alert.title;
+            alertDescription.textContent = alert.description;
+            
+            alertSystem.style.display = 'block';
+            
+            // 根据警告类型更新状态
+            if (alert.type === 'danger') {
+                currentState = DRIVING_STATES.DANGER;
+            } else if (alert.type === 'warning') {
+                currentState = DRIVING_STATES.WARNING;
+            }
+            
+            updateSpeedDisplay();
+            updateStatusIndicator();
+        }
+        
+        // 关闭警告
+        function dismissAlert() {
+            const alertSystem = document.getElementById('alert-system');
+            alertSystem.style.display = 'none';
+            
+            // 重置状态
+            currentState = DRIVING_STATES.NORMAL;
+            updateSpeedDisplay();
+            updateStatusIndicator();
+        }
+        
+        // 模拟驾驶数据变化
+        function updateDrivingSimulation() {
+            // 随机变化速度
+            const speedChange = Math.random() * 10 - 5; // -5 到 +5
+            currentSpeed = Math.max(0, Math.min(120, currentSpeed + speedChange));
+            
+            // 随机触发警告
+            if (Math.random() > 0.7) {
+                const randomAlert = drivingData.alerts[Math.floor(Math.random() * drivingData.alerts.length)];
+                showAlert(randomAlert.id);
+            }
+            
+            // 更新驾驶时间
+            drivingData.tripTime += 1;
+            
+            // 更新数据
+            drivingData.range -= Math.random() * 2;
+            drivingData.engineTemp += Math.random() * 2 - 1; // -1 到 +1
+            drivingData.engineTemp = Math.max(70, Math.min(110, drivingData.engineTemp));
+            
+            // 偶尔轮胎压力异常
+            if (Math.random() > 0.9) {
+                drivingData.tirePressure = 2.1 + Math.random() * 0.3;
+            }
+            
+            updateTime();
+            updateSpeedDisplay();
+            updateInfoPanel();
+        }
+        
+        // 切换驾驶状态（演示用）
+        function switchDrivingState(state) {
+            currentState = state;
+            updateSpeedDisplay();
+            updateStatusIndicator();
+            
+            // 显示相应的警告
+            if (state === DRIVING_STATES.DANGER) {
+                showAlert(1); // 前方急转弯
+            } else if (state === DRIVING_STATES.WARNING) {
+                showAlert(2); // 疲劳驾驶
+            } else if (state === DRIVING_STATES.PARKED) {
+                // 显示停车面板
+                showParkingPanel();
+            }
+        }
+        
+        // 显示停车面板
+        function showParkingPanel() {
+            const dynamicPanels = document.getElementById('dynamic-panels');
+            dynamicPanels.innerHTML = `
+                <div class="parking-panel">
+                    <svg class="parking-icon" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H9.5v-8H11v8zm4 0h-1.5v-8H15v8zm1.5-12h-8v1.5h8V5z"/>
+                    </svg>
+                    <div class="parking-title">已停车</div>
+                    <div class="parking-description">车辆已安全停放，可安全操作</div>
+                </div>
+            `;
+        }
+        
+        // 页面加载时初始化
+        window.onload = init;
+    </script>
+</body>
+</html>

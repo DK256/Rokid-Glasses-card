@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通话 / 消息提醒 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    padding: 20px; gap: 16px;
+  }
+
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+
+  .card {
+    width: 480px; min-height: 400px;
+    background: #1C1C1C; border: 2px solid #40FF5E; border-radius: 12px;
+    padding: 24px; display: flex; flex-direction: column; position: relative;
+  }
+
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+
+  /* 来电/通话 大圆形头像 */
+  .caller-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(64,255,94,0.1);
+    border: 2px solid #40FF5E;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto;
+  }
+  .caller-avatar.ring {
+    animation: ring-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes ring-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(64,255,94,0.3); }
+    50% { box-shadow: 0 0 0 16px rgba(64,255,94,0); }
+  }
+
+  /* 通话中波形 */
+  .call-waveform { display: flex; align-items: center; gap: 4px; height: 40px; justify-content: center; }
+  .call-bar {
+    width: 4px; background: #40FF5E; border-radius: 2px;
+    animation: callwave var(--dur) ease-in-out infinite alternate;
+  }
+  @keyframes callwave {
+    from { height: 4px; }
+    to   { height: var(--h); }
+  }
+
+  /* 消息气泡 */
+  .msg-list { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .msg-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px;
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .msg-item:hover { background: rgba(64,255,94,0.1); }
+  .msg-item.unread { border-color: rgba(64,255,94,0.4); }
+  .msg-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(64,255,94,0.1); border: 1.5px solid rgba(64,255,94,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .msg-body { flex: 1; min-width: 0; }
+  .msg-name { font-size: 16px; color: #40FF5E; font-weight: 500; }
+  .msg-preview { font-size: 13px; color: rgba(64,255,94,0.55); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-time  { font-size: 13px; color: rgba(64,255,94,0.4); flex-shrink: 0; }
+  .unread-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #40FF5E;
+    flex-shrink: 0; margin-top: 8px;
+  }
+
+  /* 快捷回复 */
+  .quick-replies { display: flex; gap: 8px; flex-wrap: wrap; }
+  .quick-btn {
+    font-size: 13px; color: #40FF5E;
+    border: 1.5px solid rgba(64,255,94,0.4); border-radius: 20px;
+    padding: 6px 14px; background: transparent; cursor: pointer; font-family: inherit;
+    transition: background 0.2s;
+  }
+  .quick-btn:hover { background: rgba(64,255,94,0.1); }
+
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-answer { background: rgba(64,255,94,0.15); }
+  .btn-reject { border-color: #FF4040; color: #FF4040; }
+  .btn-reject:hover { background: rgba(255,64,64,0.1); }
+  .btn-end { border-color: #FF4040; color: #FF4040; flex: none; width: 120px; }
+  .btn-end:hover { background: rgba(255,64,64,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">📞 Calls & Messages — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 来电提醒</button>
+  <button class="state-btn" onclick="showState(1)">② 通话中</button>
+  <button class="state-btn" onclick="showState(2)">③ 消息列表</button>
+  <button class="state-btn" onclick="showState(3)">④ 新消息提醒</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 未接来电</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：来电提醒 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M4 2C4 2 3 5 5 7C7 9 10 8 10 8L12 10C12 10 10 13 8 12C4 11 2 7 2 4L4 2Z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M10 2C11 2.5 13.5 5 14 7" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M10 5C10.5 5.5 11.5 6 12 7" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">来电</span>
+      </div>
+      <span class="text-caption">10:24</span>
+    </div>
+
+    <div style="text-align:center;padding:12px 0 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+      <div class="caller-avatar ring">👤</div>
+      <div class="text-title">张明</div>
+      <div class="text-caption">手机 · 130 **** 8888</div>
+      <div class="text-caption">产品总监 · 上次通话 昨天</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-reject">拒接</button>
+      <button class="btn btn-reject" style="border-color:rgba(64,255,94,0.4);color:rgba(64,255,94,0.7);">短信回复</button>
+      <button class="btn btn-answer">接听</button>
+    </div>
+  </div>
+
+  <!-- 状态2：通话中 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption" style="color:#40FF5E;">通话中</span>
+      </div>
+      <span class="text-caption">10:24</span>
+    </div>
+
+    <div style="text-align:center;padding:8px 0 16px;">
+      <div class="caller-avatar" style="margin-bottom:12px;">👤</div>
+      <div class="text-subtitle" style="margin-bottom:4px;">张明</div>
+      <div class="text-display" style="font-size:36px;line-height:44px;">00:03:42</div>
+    </div>
+
+    <div class="call-waveform" style="margin:8px 0 16px;">
+      <div class="call-bar" style="--dur:0.4s;--h:12px;"></div>
+      <div class="call-bar" style="--dur:0.6s;--h:28px;"></div>
+      <div class="call-bar" style="--dur:0.5s;--h:36px;"></div>
+      <div class="call-bar" style="--dur:0.7s;--h:20px;"></div>
+      <div class="call-bar" style="--dur:0.45s;--h:32px;"></div>
+      <div class="call-bar" style="--dur:0.55s;--h:16px;"></div>
+      <div class="call-bar" style="--dur:0.65s;--h:24px;"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="text-caption" style="margin-bottom:8px;">通话中关键词（AI识别）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;align-content:flex-start;">
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:3px 10px;">Q2计划</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:3px 10px;">下午3点</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:3px 10px;">文档地址</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">记录待办</button>
+      <button class="btn btn-end">挂断</button>
+    </div>
+  </div>
+
+  <!-- 状态3：消息列表 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 3h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V3z" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 3V1M11 3V1M2 7h12" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">消息 · 3条未读</span>
+      </div>
+      <span class="text-caption">14:30</span>
+    </div>
+
+    <div class="msg-list">
+      <div class="msg-item unread">
+        <div class="msg-avatar">👤</div>
+        <div class="msg-body">
+          <div class="row-between">
+            <div class="msg-name">张明</div>
+            <div class="msg-time">刚刚</div>
+          </div>
+          <div class="msg-preview">Q2 PRD 文档已更新，请查看最新版本，今天下班前给我…</div>
+        </div>
+        <div class="unread-dot"></div>
+      </div>
+      <div class="msg-item unread">
+        <div class="msg-avatar">👩</div>
+        <div class="msg-body">
+          <div class="row-between">
+            <div class="msg-name">产品群 (8)</div>
+            <div class="msg-time">5分钟前</div>
+          </div>
+          <div class="msg-preview">李雨：明天的评审改到下午3点了，@所有人 注意</div>
+        </div>
+        <div class="unread-dot"></div>
+      </div>
+      <div class="msg-item">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-body">
+          <div class="row-between">
+            <div class="msg-name">飞书机器人</div>
+            <div class="msg-time">30分钟前</div>
+          </div>
+          <div class="msg-preview">你有一个新的任务被分配：「整理用户访谈录音」</div>
+        </div>
+      </div>
+      <div class="msg-item">
+        <div class="msg-avatar">📊</div>
+        <div class="msg-body">
+          <div class="row-between">
+            <div class="msg-name">数据周报</div>
+            <div class="msg-time">1小时前</div>
+          </div>
+          <div class="msg-preview">本周 DAU 环比增长 12.3%，留存率 48%…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">全部标为已读</button>
+    </div>
+  </div>
+
+  <!-- 状态4：新消息提醒 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <span class="text-caption" style="color:#40FF5E;">新消息</span>
+      </div>
+      <span class="text-caption">14:28</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:14px;flex:1;flex-direction:column;justify-content:center;">
+      <div class="row" style="align-items:flex-start;gap:14px;">
+        <div class="msg-avatar" style="width:48px;height:48px;font-size:20px;">👤</div>
+        <div class="col" style="flex:1;">
+          <div class="text-subtitle" style="margin-bottom:2px;">张明</div>
+          <div class="text-caption" style="margin-bottom:14px;">微信 · 刚刚</div>
+          <div style="background:rgba(64,255,94,0.07);border:1.5px solid rgba(64,255,94,0.25);border-radius:10px;padding:14px 16px;">
+            <div class="text-body" style="line-height:26px;">
+              Q2 PRD 文档已更新，请查看最新版本，今天下班前给我反馈一下，谢谢！
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:100%;">
+        <div class="text-caption" style="margin-bottom:8px;">快捷回复</div>
+        <div class="quick-replies">
+          <button class="quick-btn">好的，稍后看</button>
+          <button class="quick-btn">收到，没问题</button>
+          <button class="quick-btn">我在忙，稍后</button>
+          <button class="quick-btn">打字回复…</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">忽略</button>
+      <button class="btn">打开查看</button>
+    </div>
+  </div>
+
+  <!-- 状态5：未接来电 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M4 2C4 2 3 5 5 7C7 9 10 8 10 8L12 10C12 10 10 13 8 12C4 11 2 7 2 4L4 2Z" stroke="#FF4040" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M12 2L8 6M8 2l4 4" stroke="#FF4040" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#FF4040;">未接来电</span>
+      </div>
+      <span class="text-caption">10:18</span>
+    </div>
+
+    <div style="text-align:center;padding:12px 0 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+      <div class="caller-avatar" style="border-color:#FF4040;background:rgba(255,64,64,0.08);">👤</div>
+      <div class="text-title">张明</div>
+      <div style="font-size:13px;color:#FF4040;border:1.5px solid rgba(255,64,64,0.4);border-radius:6px;padding:4px 12px;">
+        未接来电 · 10:18
+      </div>
+      <div class="text-caption">已尝试联系 2 次</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="text-caption" style="margin-bottom:8px;">快捷回复</div>
+    <div class="quick-replies" style="margin-bottom:auto;">
+      <button class="quick-btn">稍后回拨</button>
+      <button class="quick-btn">发送短信</button>
+      <button class="quick-btn">10分钟后提醒我</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-answer">立即回拨</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Calls & Messages · v1.0</p>
+
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

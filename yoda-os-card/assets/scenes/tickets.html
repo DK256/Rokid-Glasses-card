@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>购票 / 出行核验 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* 票务卡 */
+  .ticket-card {
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 12px; padding: 16px 20px; position: relative; overflow: hidden;
+  }
+  .ticket-card::before {
+    content: ''; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; border-radius: 50%; background: #000;
+    border: 1.5px solid rgba(64,255,94,0.3);
+  }
+  .ticket-card::after {
+    content: ''; position: absolute; right: -12px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; border-radius: 50%; background: #000;
+    border: 1.5px solid rgba(64,255,94,0.3);
+  }
+  /* 核验成功 */
+  .check-circle {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(64,255,94,0.1); border: 2px solid #40FF5E;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto;
+  }
+  /* 倒计时 */
+  .countdown { font-size: 48px; font-weight: 700; color: #40FF5E; text-align: center; line-height: 56px; }
+  /* 进度条 */
+  .progress-track { height: 6px; background: rgba(64,255,94,0.15); border-radius: 3px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: #40FF5E; border-radius: 3px; }
+  /* 票务信息行 */
+  .ticket-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(64,255,94,0.1); }
+  .ticket-row:last-child { border-bottom: none; }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-primary { background: #40FF5E; color: #000; font-weight: 700; }
+  .btn-primary:hover { background: rgba(64,255,94,0.85); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">✈️ Tickets — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 出行提醒</button>
+  <button class="state-btn" onclick="showState(1)">② 电子票</button>
+  <button class="state-btn" onclick="showState(2)">③ 核验中</button>
+  <button class="state-btn" onclick="showState(3)">④ 核验成功</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 登机/候车</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：出行提醒 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption" style="color:#40FF5E;">出行提醒</span>
+      </div>
+      <span class="text-caption">今天 14:30</span>
+    </div>
+    <div style="text-align:center;padding:8px 0 16px;">
+      <div style="font-size:48px;margin-bottom:8px;">✈️</div>
+      <div class="text-subtitle" style="margin-bottom:4px;">CA1234 · 北京→上海</div>
+      <div class="text-caption">今天 19:35 起飞</div>
+    </div>
+    <div style="background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.3);border-radius:12px;padding:16px;margin-bottom:14px;">
+      <div class="row-between" style="margin-bottom:8px;">
+        <span class="text-caption">距起飞</span>
+        <span class="text-display" style="font-size:36px;line-height:44px;color:#40FF5E;">5h 05m</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">建议出发时间</span>
+        <span class="text-body" style="font-weight:700;color:#40FF5E;">16:30 出发</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+      <div class="row-between">
+        <span class="text-caption">出发地</span>
+        <span class="text-body">北京首都国际机场 T3</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">值机状态</span>
+        <span style="font-size:16px;color:#40FF5E;font-weight:600;">✓ 已值机</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">座位</span>
+        <span class="text-body">22A · 靠窗</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">查看登机牌</button>
+      <button class="btn btn-primary">开始导航</button>
+    </div>
+  </div>
+
+  <!-- 状态2：电子票 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M9 9h2M13 9v2M9 13h4M13 13v-2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">电子登机牌</span>
+      </div>
+      <span class="text-caption">CA1234</span>
+    </div>
+    <div class="ticket-card" style="margin-bottom:14px;">
+      <div class="row-between" style="margin-bottom:12px;">
+        <div class="col">
+          <div style="font-size:36px;font-weight:700;color:#40FF5E;">PEK</div>
+          <div class="text-caption">北京首都</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="text-caption">中国国航</div>
+          <div style="font-size:20px;margin:4px 0;">✈️</div>
+          <div class="text-caption">CA1234</div>
+        </div>
+        <div class="col" style="align-items:flex-end;">
+          <div style="font-size:36px;font-weight:700;color:#40FF5E;">SHA</div>
+          <div class="text-caption">上海虹桥</div>
+        </div>
+      </div>
+      <div style="height:1px;border-top:1.5px dashed rgba(64,255,94,0.3);margin-bottom:12px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div class="col">
+          <div class="text-caption">座位</div>
+          <div class="text-body" style="font-weight:700;">22A</div>
+        </div>
+        <div class="col">
+          <div class="text-caption">登机口</div>
+          <div class="text-body" style="font-weight:700;">D52</div>
+        </div>
+        <div class="col">
+          <div class="text-caption">登机时间</div>
+          <div class="text-body" style="font-weight:700;">19:05</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+      <div style="width:100px;height:100px;border:1.5px solid rgba(64,255,94,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <rect x="6" y="6" width="26" height="26" rx="3" stroke="#40FF5E" stroke-width="2"/>
+          <rect x="12" y="12" width="14" height="14" fill="rgba(64,255,94,0.6)"/>
+          <rect x="48" y="6" width="26" height="26" rx="3" stroke="#40FF5E" stroke-width="2"/>
+          <rect x="54" y="12" width="14" height="14" fill="rgba(64,255,94,0.6)"/>
+          <rect x="6" y="48" width="26" height="26" rx="3" stroke="#40FF5E" stroke-width="2"/>
+          <rect x="12" y="54" width="14" height="14" fill="rgba(64,255,94,0.6)"/>
+          <rect x="48" y="48" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+          <rect x="60" y="48" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+          <rect x="68" y="56" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+          <rect x="48" y="64" width="28" height="8" fill="rgba(64,255,94,0.5)"/>
+        </svg>
+      </div>
+      <div class="text-caption">扫描通过安检/登机口</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">查看行程</button>
+    </div>
+  </div>
+
+  <!-- 状态3：核验中 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 0.8s infinite;"></div>
+        <span class="text-caption">核验中…</span>
+      </div>
+      <span class="text-caption">安检口 A23</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;">
+      <div style="width:100px;height:100px;border-radius:50%;border:4px solid rgba(64,255,94,0.2);border-top-color:#40FF5E;animation:spin 1.5s linear infinite;"></div>
+      <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+      <div class="text-subtitle">核验身份信息</div>
+      <div class="text-caption">正在比对护照/身份证信息</div>
+      <div style="background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.2);border-radius:10px;padding:12px 20px;">
+        <div class="text-body" style="font-weight:600;">王小明</div>
+        <div class="text-caption">CA1234 · 22A · 北京→上海</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态4：核验成功 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" fill="rgba(64,255,94,0.15)" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">核验通过</span>
+      </div>
+      <span class="text-caption">19:08</span>
+    </div>
+    <div style="text-align:center;padding:8px 0 16px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+      <div class="check-circle">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M10 20l8 8 12-16" stroke="#40FF5E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="text-title">核验通过</div>
+      <div style="background:rgba(64,255,94,0.08);border:1.5px solid rgba(64,255,94,0.3);border-radius:10px;padding:12px 24px;text-align:center;">
+        <div class="text-body" style="font-weight:600;">王小明</div>
+        <div class="text-caption" style="margin-top:2px;">CA1234 · 座位 22A</div>
+      </div>
+      <div class="text-caption">请前往 D52 登机口</div>
+    </div>
+    <div class="divider"></div>
+    <div class="row-between" style="margin-bottom:6px;">
+      <span class="text-caption">登机口</span>
+      <span class="text-body" style="font-weight:700;font-size:20px;">D52</span>
+    </div>
+    <div class="row-between">
+      <span class="text-caption">距登机口</span>
+      <span class="text-body">步行约 8 分钟</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary">导航到 D52</button>
+    </div>
+  </div>
+
+  <!-- 状态5：登机/候车 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <span class="text-caption" style="color:#40FF5E;">登机中</span>
+      </div>
+      <span class="text-caption">D52 · 19:05</span>
+    </div>
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:48px;margin-bottom:4px;">✈️</div>
+      <div class="text-subtitle" style="margin-bottom:2px;">CA1234 · 正在登机</div>
+    </div>
+    <div style="background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.3);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="col">
+          <div class="text-caption">座位</div>
+          <div class="text-body" style="font-weight:700;font-size:20px;">22A</div>
+        </div>
+        <div class="col">
+          <div class="text-caption">当前登机组</div>
+          <div class="text-body" style="font-weight:700;">B组 (我的组)</div>
+        </div>
+        <div class="col">
+          <div class="text-caption">起飞时间</div>
+          <div class="text-body" style="font-weight:700;">19:35</div>
+        </div>
+        <div class="col">
+          <div class="text-caption">飞行时长</div>
+          <div class="text-body" style="font-weight:700;">约 2h 15m</div>
+        </div>
+      </div>
+    </div>
+    <div class="text-caption" style="margin-bottom:6px;">登机进度</div>
+    <div class="progress-track" style="margin-bottom:4px;">
+      <div class="progress-fill" style="width:60%;"></div>
+    </div>
+    <div class="row-between" style="flex:1;align-items:flex-start;margin-top:4px;">
+      <span class="text-caption">A组 已登机</span>
+      <span class="text-caption">B组 ← 现在</span>
+      <span class="text-caption">C组 等待中</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn">航班信息</button>
+      <button class="btn">值机行李</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Tickets · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

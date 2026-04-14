@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<!--
+  YodaOS Sprite · 日程 / 提醒卡片
+  ─────────────────────────────────
+  Skill      : yoda-os-card v1.0.0
+  Protocol   : A2UI v0.8
+  Catalog    : yoda-os-sprite-v1
+  Canvas     : 480 × 400px
+  Min font   : caption 13px / button 15px
+  Primary    : #40FF5E
+  Generated  : 2026-03-31
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YodaOS · 日程 / 提醒</title>
+<style>
+/* ─────────────────────────────────────────
+   Design Tokens  (YodaOS-Sprite v1.0.0)
+───────────────────────────────────────── */
+:root {
+  --primary:       #40FF5E;
+  --bg-dark:       #000000;
+  --bg-card:       #1C1C1C;
+  --dim:           rgba(64,255,94,0.55);
+  --dim-low:       rgba(64,255,94,0.25);
+  --divider:       rgba(64,255,94,0.18);
+  --negative:      #FF4040;
+  --warn:          #FFB340;
+  --font:          'HarmonyOS Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --radius:        12px;
+  --border:        2px solid #40FF5E;
+  --border-dim:    1.5px solid rgba(64,255,94,0.4);
+}
+
+/* ─────────────────────────────────────────
+   Typography  (usageHint 对照表)
+   display  52px/60px 600
+   title    24px/30px 500
+   subtitle 20px/26px 500
+   body     16px/22px 400
+   caption  13px/18px 400  ← minimum
+   button   15px/20px 500  ← minimum interactive
+───────────────────────────────────────── */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-dark);
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0 60px;
+}
+
+/* ── 页面级导航 ── */
+.page-header {
+  width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-title {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.state-nav {
+  display: flex;
+  gap: 6px;
+}
+.state-btn {
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dim);
+  background: transparent;
+  border: var(--border-dim);
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.state-btn.active {
+  color: var(--bg-dark);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.state-btn:hover:not(.active) {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ── 卡片容器 480 × 400px ── */
+.card {
+  width: 480px;
+  height: 400px;
+  background: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  display: none;
+  flex-direction: column;
+}
+.card.active { display: flex; }
+
+/* ─────────────────────────────────────────
+   共用子组件
+───────────────────────────────────────── */
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: var(--border-dim);
+  flex-shrink: 0;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-icon { flex-shrink: 0; }
+.header-title {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--primary);
+}
+.header-sub {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dim);
+}
+.badge {
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--bg-dark);
+  background: var(--primary);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+.badge-warn {
+  background: var(--warn);
+  color: var(--bg-dark);
+}
+.badge-alert {
+  background: var(--negative);
+  color: #fff;
+}
+
+/* Card Body */
+.card-body {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 12px 20px 14px;
+  border-top: var(--border-dim);
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Button */
+.btn {
+  flex: 1;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--primary);
+  background: transparent;
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 8px 0;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.btn:hover { background: rgba(64,255,94,0.1); }
+.btn.primary {
+  background: var(--primary);
+  color: var(--bg-dark);
+}
+.btn.primary:hover { background: #5dff7b; }
+
+/* Divider */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--divider);
+  flex-shrink: 0;
+}
+
+/* Row */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Text usageHint styles */
+.t-display { font-size: 52px; line-height: 60px; font-weight: 600; }
+.t-title   { font-size: 24px; line-height: 30px; font-weight: 500; }
+.t-subtitle{ font-size: 20px; line-height: 26px; font-weight: 500; }
+.t-body    { font-size: 16px; line-height: 22px; font-weight: 400; }
+.t-caption { font-size: 13px; line-height: 18px; font-weight: 400; }
+.t-button  { font-size: 15px; line-height: 20px; font-weight: 500; }
+
+.c-primary  { color: var(--primary); }
+.c-dim      { color: var(--dim); }
+.c-dim-low  { color: var(--dim-low); }
+.c-negative { color: var(--negative); }
+.c-warn     { color: var(--warn); }
+.c-dark     { color: var(--bg-dark); }
+
+/* ProgressIndicator */
+.progress-track {
+  width: 100%;
+  height: 4px;
+  background: var(--dim-low);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Timeline item */
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dim-low);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+.timeline-dot.latest {
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(64,255,94,0.2);
+}
+.timeline-content { flex: 1; }
+
+/* 事项列表 row */
+.event-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(64,255,94,0.05);
+  border: var(--border-dim);
+  border-radius: 10px;
+}
+.event-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 42px;
+}
+.event-time-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--dim-low);
+}
+.event-content { flex: 1; }
+.event-tag {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--bg-dark);
+  background: var(--dim);
+  border-radius: 6px;
+  padding: 1px 7px;
+  display: inline-block;
+  margin-top: 3px;
+}
+
+/* 倒计时大数字区域 */
+.countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 0 8px;
+}
+
+/* 状态脉冲动画 */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+.pulse { animation: pulse 2s ease-in-out infinite; }
+
+/* State indicator dots */
+.state-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.state-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dim-low);
+  transition: background 0.2s;
+}
+.state-dot.active { background: var(--primary); }
+
+</style>
+</head>
+<body>
+
+<!-- ── 页面导航 ── -->
+<div class="page-header">
+  <span class="page-title">📅 Calendar · 日程 / 提醒</span>
+  <div class="state-nav">
+    <button class="state-btn active" onclick="switchState(0)">今日</button>
+    <button class="state-btn" onclick="switchState(1)">即将</button>
+    <button class="state-btn" onclick="switchState(2)">出发</button>
+    <button class="state-btn" onclick="switchState(3)">进行</button>
+    <button class="state-btn" onclick="switchState(4)">明日</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     STATE 0 · 今日概览
+     surfaceId: calendar_overview
+════════════════════════════════════ -->
+<div class="card active" id="state-0">
+
+  <!-- surfaceUpdate: header Row -->
+  <div class="card-header">
+    <div class="header-left">
+      <!-- Icon: calendar -->
+      <div class="header-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="3" width="16" height="15" rx="3" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M6 1v4M14 1v4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M2 8h16" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="5.5" y="11" width="3" height="3" rx="1" fill="#40FF5E"/>
+          <rect x="11.5" y="11" width="3" height="3" rx="1" fill="rgba(64,255,94,0.4)"/>
+        </svg>
+      </div>
+      <div>
+        <div class="t-body c-primary">今日概览</div>
+        <!-- dataModelUpdate: date -->
+        <div class="t-caption c-dim">周二 · 3月31日</div>
+      </div>
+    </div>
+    <span class="badge">4 件事</span>
+  </div>
+
+  <!-- surfaceUpdate: body Column -->
+  <div class="card-body" style="gap:10px;">
+
+    <!-- 接下来最重要的事 -->
+    <!-- dataModelUpdate: next_event -->
+    <div class="event-row">
+      <div class="event-time-col">
+        <span class="t-caption c-primary" style="font-weight:500;">10:30</span>
+        <div class="event-time-sep"></div>
+        <span class="t-caption c-dim">11:30</span>
+      </div>
+      <div class="event-content">
+        <div class="t-body c-primary">产品周会</div>
+        <div class="t-caption c-dim" style="margin-top:2px;">腾讯会议 · 606 室</div>
+        <span class="event-tag">工作</span>
+      </div>
+      <!-- 距离开始 -->
+      <div style="text-align:right;flex-shrink:0;">
+        <div class="t-caption c-warn">32分后</div>
+        <div class="t-caption c-dim-low">开始</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 剩余事项列表 -->
+    <!-- dataModelUpdate: remaining_events -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+
+      <div class="row-between">
+        <div class="row" style="gap:8px;">
+          <!-- Dot component -->
+          <div class="timeline-dot"></div>
+          <span class="t-body c-dim">13:00 · 午后健身</span>
+        </div>
+        <span class="t-caption c-dim-low">1h 30min</span>
+      </div>
+
+      <div class="row-between">
+        <div class="row" style="gap:8px;">
+          <div class="timeline-dot"></div>
+          <span class="t-body c-dim">15:30 · 设计评审</span>
+        </div>
+        <span class="t-caption c-dim-low">1h</span>
+      </div>
+
+      <div class="row-between">
+        <div class="row" style="gap:8px;">
+          <div class="timeline-dot"></div>
+          <span class="t-body c-dim">19:00 · 晚餐 · 江边城外</span>
+        </div>
+        <span class="t-caption c-dim-low">2h</span>
+      </div>
+
+    </div>
+
+    <!-- ProgressIndicator: daily completion -->
+    <div style="margin-top:auto;">
+      <div class="row-between" style="margin-bottom:5px;">
+        <span class="t-caption c-dim">今日进度</span>
+        <span class="t-caption c-primary">0 / 4 完成</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- footer buttons -->
+  <div class="card-footer">
+    <button class="btn">新增事项</button>
+    <button class="btn primary">查看全天</button>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════
+     STATE 1 · 即将开始
+     surfaceId: calendar_upcoming
+════════════════════════════════════ -->
+<div class="card" id="state-1">
+
+  <div class="card-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <!-- Icon: alarm -->
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="11" r="7" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M10 8v3.5l2 2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 4l2.5 2M17 4l-2.5 2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="t-body c-primary">即将开始</div>
+        <div class="t-caption c-dim">10:30 · 产品周会</div>
+      </div>
+    </div>
+    <span class="badge-warn badge">紧急</span>
+  </div>
+
+  <div class="card-body" style="align-items:center; justify-content:center; gap:0;">
+
+    <!-- 倒计时 display 组件 -->
+    <div class="countdown-block">
+      <span class="t-caption c-dim">距离开始</span>
+      <!-- dataModelUpdate: countdown_min -->
+      <span class="t-display c-primary pulse">32</span>
+      <span class="t-subtitle c-dim">分钟</span>
+    </div>
+
+    <div class="divider" style="margin: 10px 0;"></div>
+
+    <!-- 事项详情 -->
+    <div style="width:100%;display:flex;flex-direction:column;gap:8px;">
+
+      <div class="row" style="gap:10px;">
+        <!-- Icon: title -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;">
+          <path d="M2 4h12M2 8h8M2 12h6" stroke="rgba(64,255,94,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <!-- dataModelUpdate: event_title -->
+        <span class="t-body c-primary">产品周会</span>
+      </div>
+
+      <div class="row" style="gap:10px;">
+        <!-- Icon: time -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;">
+          <circle cx="8" cy="8" r="6" stroke="rgba(64,255,94,0.55)" stroke-width="1.5"/>
+          <path d="M8 5v3.5l2 2" stroke="rgba(64,255,94,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <!-- dataModelUpdate: event_time -->
+        <span class="t-body c-dim">10:30 – 11:30（60分钟）</span>
+      </div>
+
+      <div class="row" style="gap:10px;">
+        <!-- Icon: location -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;">
+          <path d="M8 1.5C5.51 1.5 3.5 3.51 3.5 6c0 3.31 4.5 8.5 4.5 8.5s4.5-5.19 4.5-8.5c0-2.49-2.01-4.5-4.5-4.5zm0 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="rgba(64,255,94,0.55)"/>
+        </svg>
+        <!-- dataModelUpdate: event_location -->
+        <span class="t-body c-dim">腾讯会议 · 会议室 606</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card-footer">
+    <button class="btn">稍后提醒</button>
+    <button class="btn primary">加入会议</button>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════
+     STATE 2 · 出发提醒
+     surfaceId: calendar_depart
+════════════════════════════════════ -->
+<div class="card" id="state-2">
+
+  <div class="card-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <!-- Icon: directions_run -->
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M12 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" fill="#40FF5E"/>
+          <path d="M10 7.5l-2 5 2 2.5M14 9l-2-1.5-2 2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 11l-2 4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="t-body c-primary">该出发了</div>
+        <div class="t-caption c-dim">19:00 · 晚餐预约</div>
+      </div>
+    </div>
+    <span class="badge-alert badge">立即出发</span>
+  </div>
+
+  <div class="card-body" style="gap:14px;">
+
+    <!-- 目的地信息 -->
+    <div style="background:rgba(64,255,94,0.06); border:var(--border-dim); border-radius:10px; padding:12px 14px;">
+      <div class="t-caption c-dim" style="margin-bottom:4px;">目的地</div>
+      <div class="t-subtitle c-primary">江边城外烤鸭店</div>
+      <div class="t-caption c-dim" style="margin-top:3px;">朝阳区三里屯太古里北区 N4-31</div>
+    </div>
+
+    <!-- 路程信息 Row -->
+    <div style="display:flex; gap:10px;">
+
+      <div style="flex:1; background:rgba(64,255,94,0.06); border:var(--border-dim); border-radius:10px; padding:10px 12px; text-align:center;">
+        <div class="t-caption c-dim" style="margin-bottom:3px;">驾车</div>
+        <!-- dataModelUpdate: drive_time -->
+        <div class="t-subtitle c-primary">28 分</div>
+        <div class="t-caption c-dim-low">约 12 km</div>
+      </div>
+
+      <div style="flex:1; background:rgba(64,255,94,0.06); border:var(--border-dim); border-radius:10px; padding:10px 12px; text-align:center;">
+        <div class="t-caption c-dim" style="margin-bottom:3px;">公交</div>
+        <!-- dataModelUpdate: transit_time -->
+        <div class="t-subtitle c-dim">42 分</div>
+        <div class="t-caption c-dim-low">地铁 10 号线</div>
+      </div>
+
+      <div style="flex:1; background:rgba(64,255,94,0.06); border:var(--border-dim); border-radius:10px; padding:10px 12px; text-align:center;">
+        <div class="t-caption c-dim" style="margin-bottom:3px;">打车</div>
+        <!-- dataModelUpdate: taxi_time -->
+        <div class="t-subtitle c-dim">25 分</div>
+        <div class="t-caption c-dim-low">约 ¥38</div>
+      </div>
+
+    </div>
+
+    <!-- 提示文字 -->
+    <div class="row" style="gap:8px;">
+      <!-- Icon: warning -->
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;">
+        <path d="M8 2L1.5 13h13L8 2z" stroke="#FFB340" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M8 7v3M8 11.5v.5" stroke="#FFB340" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <!-- dataModelUpdate: traffic_hint -->
+      <span class="t-caption c-warn">当前路况拥堵，建议提前 10 分钟出发</span>
+    </div>
+
+  </div>
+
+  <div class="card-footer">
+    <button class="btn">忽略</button>
+    <button class="btn primary">开始导航</button>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════
+     STATE 3 · 进行中
+     surfaceId: calendar_ongoing
+════════════════════════════════════ -->
+<div class="card" id="state-3">
+
+  <div class="card-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <!-- Icon: play_circle -->
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M8 7l5 3-5 3V7z" fill="#40FF5E"/>
+        </svg>
+      </div>
+      <div>
+        <div class="t-body c-primary">进行中</div>
+        <div class="t-caption c-dim">已开始 25 分钟</div>
+      </div>
+    </div>
+    <span class="badge">剩余 35 min</span>
+  </div>
+
+  <div class="card-body" style="gap:14px;">
+
+    <!-- 当前事项详情 -->
+    <div style="background:rgba(64,255,94,0.06); border:var(--border-dim); border-radius:10px; padding:14px 16px;">
+      <div class="row-between" style="margin-bottom:8px;">
+        <!-- dataModelUpdate: ongoing_title -->
+        <span class="t-subtitle c-primary">产品周会</span>
+        <span class="t-caption c-dim">10:30 – 11:30</span>
+      </div>
+      <!-- ProgressIndicator: linear, value 0.42 -->
+      <div class="progress-track" style="margin-bottom:5px;">
+        <div class="progress-fill" style="width:42%;"></div>
+      </div>
+      <div class="row-between">
+        <span class="t-caption c-dim">进度 42%</span>
+        <!-- dataModelUpdate: ongoing_location -->
+        <span class="t-caption c-dim">腾讯会议 606</span>
+      </div>
+    </div>
+
+    <!-- 下一项预告 -->
+    <div>
+      <div class="t-caption c-dim-low" style="margin-bottom:8px;">接下来</div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="margin-top:4px;"></div>
+        <div class="timeline-content">
+          <div class="row-between">
+            <!-- dataModelUpdate: next_title -->
+            <span class="t-body c-dim">午后健身</span>
+            <span class="t-caption c-dim-low">13:00</span>
+          </div>
+          <div class="t-caption c-dim-low">健身房 · 60 分钟</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 快捷操作 -->
+    <div class="row-between">
+      <span class="t-caption c-dim">提前结束 / 延长时间</span>
+      <div class="row" style="gap:8px;">
+        <button class="btn" style="flex:none; padding:5px 14px; font-size:13px; line-height:18px;">- 15min</button>
+        <button class="btn" style="flex:none; padding:5px 14px; font-size:13px; line-height:18px;">+ 15min</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card-footer">
+    <button class="btn">标记完成</button>
+    <button class="btn primary">查看详情</button>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════
+     STATE 4 · 明日预告
+     surfaceId: calendar_tomorrow
+════════════════════════════════════ -->
+<div class="card" id="state-4">
+
+  <div class="card-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <!-- Icon: nights_stay / moon -->
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M15.5 11.5A7 7 0 018 4a7 7 0 000 14c3.31 0 6.11-2.29 6.93-5.36A5.5 5.5 0 0115.5 11.5z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="t-body c-primary">明日预告</div>
+        <!-- dataModelUpdate: tomorrow_date -->
+        <div class="t-caption c-dim">周三 · 4月1日 · 5 件事</div>
+      </div>
+    </div>
+    <span class="badge">明天</span>
+  </div>
+
+  <div class="card-body" style="gap:12px;">
+
+    <!-- 最早事项高亮 -->
+    <div style="background:rgba(64,255,94,0.06); border:var(--border-dim); border-radius:10px; padding:12px 14px;">
+      <div class="t-caption c-dim" style="margin-bottom:4px;">最早事项</div>
+      <div class="row-between">
+        <div>
+          <!-- dataModelUpdate: first_event_title -->
+          <div class="t-subtitle c-primary">晨会</div>
+          <div class="t-caption c-dim" style="margin-top:2px;">09:00 · 会议室 A</div>
+        </div>
+        <!-- dataModelUpdate: first_event_countdown -->
+        <div style="text-align:right;">
+          <div class="t-caption c-dim">距现在</div>
+          <div class="t-body c-warn" style="font-weight:500;">10h 30min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 明日事项时间线 -->
+    <div style="display:flex; flex-direction:column; gap:8px;">
+
+      <!-- TimelineItem: isLatest=false -->
+      <div class="timeline-item">
+        <div class="timeline-dot latest"></div>
+        <div class="timeline-content">
+          <div class="row-between">
+            <span class="t-body c-dim">晨会</span>
+            <span class="t-caption c-dim-low">09:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="row-between">
+            <span class="t-body c-dim">客户拜访 · 字节跳动</span>
+            <span class="t-caption c-dim-low">10:30</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="row-between">
+            <span class="t-body c-dim">午餐 · 和 Alex</span>
+            <span class="t-caption c-dim-low">12:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="row-between">
+            <span class="t-body c-dim">季度复盘 OKR Review</span>
+            <span class="t-caption c-dim-low">14:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="row-between">
+            <span class="t-body c-dim">团建晚餐</span>
+            <span class="t-caption c-dim-low">18:30</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 睡前准备提示 -->
+    <div class="row" style="gap:8px; margin-top:auto; padding-top:4px; border-top:var(--border-dim);">
+      <!-- Icon: tips_and_updates -->
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0;">
+        <circle cx="7.5" cy="7.5" r="6" stroke="rgba(64,255,94,0.55)" stroke-width="1.3"/>
+        <path d="M7.5 4v4M7.5 10v1" stroke="rgba(64,255,94,0.55)" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <!-- dataModelUpdate: sleep_tip -->
+      <span class="t-caption c-dim">明天 09:00 最早开始，建议 23:30 前休息</span>
+    </div>
+
+  </div>
+
+  <div class="card-footer">
+    <button class="btn">设置提醒</button>
+    <button class="btn primary">查看全天</button>
+  </div>
+
+</div>
+
+
+<!-- ── 状态指示点 ── -->
+<div class="state-dots" style="margin-top:16px;">
+  <div class="state-dot active" id="dot-0"></div>
+  <div class="state-dot" id="dot-1"></div>
+  <div class="state-dot" id="dot-2"></div>
+  <div class="state-dot" id="dot-3"></div>
+  <div class="state-dot" id="dot-4"></div>
+</div>
+
+
+<script>
+/* ─────────────────────────────────────────
+   State machine  —  A2UI dataModelUpdate
+   模拟渲染器接收 JSONL 后切换状态
+───────────────────────────────────────── */
+const STATES = [
+  { label: "今日", id: 0 },
+  { label: "即将", id: 1 },
+  { label: "出发", id: 2 },
+  { label: "进行", id: 3 },
+  { label: "明日", id: 4 }
+];
+
+let currentState = 0;
+
+function switchState(n) {
+  // 隐藏所有卡片
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  // 激活目标卡片
+  document.getElementById('state-' + n).classList.add('active');
+
+  // 更新导航按钮
+  document.querySelectorAll('.state-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === n);
+  });
+
+  // 更新状态点
+  document.querySelectorAll('.state-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === n);
+  });
+
+  currentState = n;
+}
+
+/* 
+  Auto-advance demo（模拟 A2UI beginRendering 触发新状态）
+  每 4 秒自动切换到下一个状态，循环演示
+*/
+// 如需自动演示，取消以下注释：
+// setInterval(() => {
+//   switchState((currentState + 1) % STATES.length);
+// }, 4000);
+</script>
+
+</body>
+</html>

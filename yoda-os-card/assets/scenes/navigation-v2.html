@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航 V2 · YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --primary-dim: rgba(64,255,94,0.55);
+    --primary-low: rgba(64,255,94,0.15);
+    --primary-faint: rgba(64,255,94,0.06);
+    --negative: #FF4040;
+    --negative-low: rgba(255,64,64,0.12);
+    --moderate: #FFB340;
+    --moderate-low: rgba(255,179,64,0.12);
+    --bg-page: #0a0a0a;
+    --bg-card: #1C1C1C;
+    --bg-surface: #252525;
+    --border: rgba(64,255,94,0.3);
+    --text-primary: #40FF5E;
+    --text-dim: rgba(64,255,94,0.55);
+    --text-low: rgba(64,255,94,0.35);
+    --font: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    --fs-display: 52px;
+    --fs-title: 24px;
+    --fs-subtitle: 20px;
+    --fs-body: 16px;
+    --fs-caption: 13px;
+    --fs-button: 15px;
+  }
+
+  body {
+    background: var(--bg-page);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    font-family: var(--font);
+    color: var(--text-primary);
+  }
+
+  .page-title {
+    font-size: 13px;
+    color: var(--text-low);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .state-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    width: 480px;
+    flex-wrap: wrap;
+  }
+  .s-btn {
+    padding: 6px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .s-btn.active {
+    background: var(--primary-low);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .card {
+    width: 480px;
+    height: 400px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .state-panel {
+    display: none;
+    width: 480px;
+    height: 400px;
+    position: absolute;
+    top: 0; left: 0;
+    padding: 20px;
+    flex-direction: column;
+  }
+  .state-panel.active { display: flex; }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: var(--fs-subtitle);
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .card-badge {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    background: var(--primary-faint);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .card-badge.warn { background: var(--negative-low); border-color: var(--negative); color: var(--negative); }
+  .card-badge.moderate { background: var(--moderate-low); border-color: var(--moderate); color: var(--moderate); }
+
+  /* 方向指示器 */
+  .direction-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .dir-arrow {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dir-info {
+    flex: 1;
+  }
+  .dir-action {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .dir-street {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+  .dir-dist {
+    font-size: var(--fs-caption);
+    color: var(--text-low);
+  }
+
+  /* 距离大数字 */
+  .dist-display {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .dist-num {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .dist-unit {
+    font-size: var(--fs-subtitle);
+    color: var(--text-dim);
+  }
+
+  /* 路线信息行 */
+  .route-info {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .route-chip {
+    padding: 6px 12px;
+    background: var(--bg-surface);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .route-chip-label {
+    font-size: var(--fs-caption);
+    color: var(--text-low);
+  }
+  .route-chip-val {
+    font-size: var(--fs-caption);
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* 转弯预告 */
+  .next-turn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--moderate-low);
+    border: 1px solid var(--moderate);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: auto;
+  }
+  .next-turn-label {
+    font-size: 11px;
+    color: var(--moderate);
+    margin-bottom: 2px;
+  }
+  .next-turn-text {
+    font-size: var(--fs-caption);
+    color: rgba(255,179,64,0.8);
+  }
+
+  /* 警告框 */
+  .alert-box {
+    background: var(--negative-low);
+    border: 1px solid var(--negative);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .alert-title {
+    font-size: var(--fs-body);
+    color: var(--negative);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .alert-desc {
+    font-size: var(--fs-caption);
+    color: rgba(255,64,64,0.7);
+    line-height: 1.4;
+  }
+
+  /* 路线选择 */
+  .route-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+  .route-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border-radius: 10px;
+    border: 1px solid transparent;
+  }
+  .route-option.recommended {
+    border-color: var(--primary);
+    background: var(--primary-faint);
+  }
+  .route-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--primary-low);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .route-name {
+    font-size: var(--fs-body);
+    color: var(--primary);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .route-detail {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+  }
+  .route-time {
+    margin-left: auto;
+    text-align: right;
+  }
+  .route-time-val {
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .route-time-sub {
+    font-size: 11px;
+    color: var(--text-low);
+  }
+
+  /* 到达显示 */
+  .arrive-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 10px;
+  }
+  .arrive-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--primary-low);
+    border: 3px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .arrive-title {
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .arrive-sub {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* 分隔线 */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 10px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">YODAOS SPRITE · 导航 V2</div>
+
+<div class="state-nav">
+  <button class="s-btn active" onclick="showState(1)">路线规划</button>
+  <button class="s-btn" onclick="showState(2)">行进中</button>
+  <button class="s-btn" onclick="showState(3)">转弯提醒</button>
+  <button class="s-btn" onclick="showState(4)">重新规划</button>
+  <button class="s-btn" onclick="showState(5)">已到达</button>
+</div>
+
+<div class="card" id="main-card">
+
+  <!-- 状态1：路线规划 -->
+  <div class="state-panel active" id="state-1">
+    <div class="card-header">
+      <div class="card-title">路线规划</div>
+      <div class="card-badge">驾车导航</div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:4px;">前往</div>
+      <div style="font-size:var(--fs-body);color:var(--primary);font-weight:500;">北京首都国际机场 T3 航站楼</div>
+    </div>
+    <div class="route-options">
+      <div class="route-option recommended">
+        <div class="route-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2L10 18M6 6L10 2L14 6" stroke="#40FF5E" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="route-name">推荐路线 · 最快</div>
+          <div class="route-detail">京承高速 → 首都机场高速</div>
+        </div>
+        <div class="route-time">
+          <div class="route-time-val">38分</div>
+          <div class="route-time-sub">42.3km</div>
+        </div>
+      </div>
+      <div class="route-option">
+        <div class="route-icon" style="background:var(--bg-card);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 10 Q10 3 17 10" stroke="#40FF5E" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M3 10 Q10 17 17 10" stroke="rgba(64,255,94,0.4)" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="3,3"/>
+          </svg>
+        </div>
+        <div>
+          <div class="route-name" style="color:var(--text-dim);">备选路线</div>
+          <div class="route-detail">四环路 → 机场辅路（拥堵）</div>
+        </div>
+        <div class="route-time">
+          <div class="route-time-val" style="color:var(--moderate);">62分</div>
+          <div class="route-time-sub">38.7km</div>
+        </div>
+      </div>
+      <div class="route-option">
+        <div class="route-icon" style="background:var(--bg-card);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="7" stroke="rgba(64,255,94,0.4)" stroke-width="1.8"/>
+            <path d="M10 6v4l3 2" stroke="rgba(64,255,94,0.4)" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="route-name" style="color:var(--text-dim);">收费最少</div>
+          <div class="route-detail">走国道，绕行较多</div>
+        </div>
+        <div class="route-time">
+          <div class="route-time-val" style="color:var(--text-dim);">75分</div>
+          <div class="route-time-sub">52.1km</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态2：行进中 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="card-title">导航中</div>
+      <div class="card-badge">高速行驶</div>
+    </div>
+    <div class="direction-box">
+      <div class="dir-arrow">
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <path d="M30 50V14M18 26L30 14L42 26" stroke="#40FF5E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="dir-info">
+        <div class="dir-action">沿当前道路直行</div>
+        <div class="dir-street">京承高速 G101</div>
+        <div class="dir-dist">限速 120 km/h</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;align-items:flex-end;margin-bottom:12px;">
+      <div>
+        <div style="font-size:var(--fs-caption);color:var(--text-low);">剩余距离</div>
+        <div class="dist-display">
+          <div class="dist-num">24.6</div>
+          <div class="dist-unit">km</div>
+        </div>
+      </div>
+      <div style="flex:1;padding-bottom:8px;">
+        <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:6px;">到达时间</div>
+        <div style="font-size:28px;font-weight:700;color:var(--primary);">16:48</div>
+        <div style="font-size:var(--fs-caption);color:var(--text-dim);">约 22 分钟</div>
+      </div>
+    </div>
+    <div class="next-turn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12h14M15 8l4 4-4 4" stroke="#FFB340" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="next-turn-label">前方 3.2km</div>
+        <div class="next-turn-text">右转进入首都机场高速</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态3：转弯提醒 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="card-title">即将转弯</div>
+      <div class="card-badge moderate">200m 内</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px;background:var(--moderate-low);border:1px solid var(--moderate);border-radius:12px;padding:16px;margin-bottom:14px;">
+      <div style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <path d="M16 48 L16 20 Q16 16 20 16 L40 16 L40 8 L56 24 L40 40 L40 32 L24 32 L24 48 Z" stroke="#FFB340" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,179,64,0.1)"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size:26px;font-weight:700;color:var(--moderate);line-height:1;margin-bottom:4px;">右转</div>
+        <div style="font-size:var(--fs-body);color:rgba(255,179,64,0.8);">首都机场高速入口</div>
+        <div style="font-size:var(--fs-caption);color:rgba(255,179,64,0.6);margin-top:4px;">距路口约 200 米</div>
+      </div>
+    </div>
+    <div style="font-size:var(--fs-caption);color:var(--text-low);margin-bottom:8px;">转弯后路况</div>
+    <div class="route-info">
+      <div class="route-chip">
+        <div class="route-chip-label">道路</div>
+        <div class="route-chip-val">机场高速</div>
+      </div>
+      <div class="route-chip">
+        <div class="route-chip-label">限速</div>
+        <div class="route-chip-val">100 km/h</div>
+      </div>
+      <div class="route-chip">
+        <div class="route-chip-label">路况</div>
+        <div class="route-chip-val" style="color:var(--primary);">畅通</div>
+      </div>
+    </div>
+    <div style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:var(--fs-caption);color:var(--text-low);">距目的地</div>
+      <div style="font-size:var(--fs-subtitle);font-weight:700;color:var(--primary);">18.4 km · 约 15 分钟</div>
+    </div>
+  </div>
+
+  <!-- 状态4：重新规划 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="card-title">重新规划路线</div>
+      <div class="card-badge warn">偏离路线</div>
+    </div>
+    <div class="alert-box">
+      <div class="alert-title">已偏离导航路线</div>
+      <div class="alert-desc">正在为您重新计算最优路线，请稍等...</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--primary);border-top-color:transparent;animation:spin 1s linear infinite;flex-shrink:0;"></div>
+      <div style="font-size:var(--fs-body);color:var(--primary);">正在重新规划...</div>
+    </div>
+    <div class="route-options">
+      <div class="route-option recommended">
+        <div class="route-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2L10 18M6 6L10 2L14 6" stroke="#40FF5E" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="route-name">新推荐路线</div>
+          <div class="route-detail">从当前位置重新导航</div>
+        </div>
+        <div class="route-time">
+          <div class="route-time-val">25分</div>
+          <div class="route-time-sub">19.8km</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:auto;font-size:var(--fs-caption);color:var(--text-low);text-align:center;">
+      当前位置：朝阳区酒仙桥路
+    </div>
+  </div>
+
+  <!-- 状态5：已到达 -->
+  <div class="state-panel" id="state-5">
+    <div class="card-header">
+      <div class="card-title">已到达目的地</div>
+      <div class="card-badge">导航完成</div>
+    </div>
+    <div class="arrive-display">
+      <div class="arrive-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M20 4C13.4 4 8 9.4 8 16c0 10 12 20 12 20s12-10 12-20C32 9.4 26.6 4 20 4z" stroke="#40FF5E" stroke-width="2.5" fill="rgba(64,255,94,0.15)"/>
+          <circle cx="20" cy="16" r="4" fill="#40FF5E"/>
+        </svg>
+      </div>
+      <div class="arrive-title">到达目的地！</div>
+      <div class="arrive-sub">北京首都国际机场 T3 航站楼<br>导航用时 38 分钟</div>
+      <div style="display:flex;gap:10px;">
+        <div style="padding:8px 16px;background:var(--bg-surface);border-radius:8px;text-align:center;">
+          <div style="font-size:var(--fs-body);font-weight:700;color:var(--primary);">42.3km</div>
+          <div style="font-size:11px;color:var(--text-low);">行驶里程</div>
+        </div>
+        <div style="padding:8px 16px;background:var(--bg-surface);border-radius:8px;text-align:center;">
+          <div style="font-size:var(--fs-body);font-weight:700;color:var(--primary);">38分</div>
+          <div style="font-size:11px;color:var(--text-low);">用时</div>
+        </div>
+        <div style="padding:8px 16px;background:var(--bg-surface);border-radius:8px;text-align:center;">
+          <div style="font-size:var(--fs-body);font-weight:700;color:var(--primary);">¥20</div>
+          <div style="font-size:11px;color:var(--text-low);">过路费</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p, i) => p.classList.toggle('active', i + 1 === n));
+  document.querySelectorAll('.s-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === n));
+  const card = document.getElementById('main-card');
+  if (n === 4) card.style.borderColor = '#FF4040';
+  else if (n === 3) card.style.borderColor = '#FFB340';
+  else card.style.borderColor = '';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能家居 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* 设备卡片 */
+  .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .device-card {
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .device-card.on  { border-color: rgba(64,255,94,0.5); background: rgba(64,255,94,0.1); }
+  .device-card.off { opacity: 0.5; }
+  .device-icon { font-size: 24px; }
+  .device-name { font-size: 16px; color: #40FF5E; font-weight: 500; }
+  .device-sub  { font-size: 13px; color: rgba(64,255,94,0.55); }
+  .device-status {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .device-status.on  { background: rgba(64,255,94,0.2); color: #40FF5E; }
+  .device-status.off { background: rgba(64,255,94,0.06); color: rgba(64,255,94,0.4); }
+  /* 拨盘 */
+  .dial {
+    width: 120px; height: 120px; border-radius: 50%;
+    border: 4px solid rgba(64,255,94,0.2);
+    position: relative; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dial-arc {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #40FF5E;
+    border-right-color: #40FF5E;
+  }
+  /* 安全状态 */
+  .sensor-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+  }
+  .sensor-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .sensor-dot.safe { background: #40FF5E; }
+  .sensor-dot.alert { background: #FF4040; animation: pls 0.8s infinite; }
+  @keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  /* 进度条 */
+  .progress-track { height: 6px; background: rgba(64,255,94,0.15); border-radius: 3px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: #40FF5E; border-radius: 3px; }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-warn { border-color: #FF4040; color: #FF4040; }
+  .btn-warn:hover { background: rgba(255,64,64,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">🏠 Smart Home — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 设备总览</button>
+  <button class="state-btn" onclick="showState(1)">② 温控调节</button>
+  <button class="state-btn" onclick="showState(2)">③ 场景模式</button>
+  <button class="state-btn" onclick="showState(3)">④ 安全监控</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 能耗报告</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：设备总览 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2L2 6v8h12V6L8 2z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+          <rect x="5.5" y="9" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.2"/>
+        </svg>
+        <span class="text-caption">我的家 · 在家</span>
+      </div>
+      <span class="text-caption">14:30 · 22°C室内</span>
+    </div>
+    <div class="row-between" style="margin-bottom:14px;">
+      <span class="text-caption">8台设备 · 5台已开</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:2px 8px;">全部关闭</span>
+    </div>
+    <div class="device-grid" style="flex:1;align-content:flex-start;">
+      <div class="device-card on">
+        <div class="row-between">
+          <div class="device-icon">💡</div>
+          <span class="device-status on">开启</span>
+        </div>
+        <div class="device-name">客厅灯光</div>
+        <div class="device-sub">亮度 70% · 暖光</div>
+      </div>
+      <div class="device-card on">
+        <div class="row-between">
+          <div class="device-icon">❄️</div>
+          <span class="device-status on">开启</span>
+        </div>
+        <div class="device-name">空调</div>
+        <div class="device-sub">22°C · 制冷模式</div>
+      </div>
+      <div class="device-card on">
+        <div class="row-between">
+          <div class="device-icon">📺</div>
+          <span class="device-status on">开启</span>
+        </div>
+        <div class="device-name">电视</div>
+        <div class="device-sub">爱奇艺 · 音量 30</div>
+      </div>
+      <div class="device-card off">
+        <div class="row-between">
+          <div class="device-icon">🤖</div>
+          <span class="device-status off">关闭</span>
+        </div>
+        <div class="device-name">扫地机器人</div>
+        <div class="device-sub">已停靠充电</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">场景模式</button>
+      <button class="btn">全部设备</button>
+    </div>
+  </div>
+
+  <!-- 状态2：温控调节 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2v8" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="8" cy="12" r="2" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M11 5l1.5-1.5M5 5L3.5 3.5M12 9h1.5M2.5 9H4" stroke="#40FF5E" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">温度控制</span>
+      </div>
+      <span class="text-caption">室内 22°C</span>
+    </div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="dial" style="margin-bottom:12px;">
+        <div class="dial-arc" style="transform:rotate(-45deg);"></div>
+        <div class="col" style="align-items:center;gap:2px;">
+          <div style="font-size:40px;font-weight:700;color:#40FF5E;line-height:48px;">22°</div>
+          <div class="text-caption">目标温度</div>
+        </div>
+      </div>
+      <div class="row" style="justify-content:center;gap:20px;">
+        <button style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(64,255,94,0.4);background:transparent;color:#40FF5E;font-size:20px;cursor:pointer;">−</button>
+        <div class="col" style="align-items:center;">
+          <div class="text-caption">当前</div>
+          <div class="text-body" style="font-weight:600;">21.5°C</div>
+        </div>
+        <button style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(64,255,94,0.4);background:transparent;color:#40FF5E;font-size:20px;cursor:pointer;">+</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="row-between">
+        <span class="text-caption">运行模式</span>
+        <div style="display:flex;gap:6px;">
+          <span style="font-size:13px;color:#40FF5E;border:1.5px solid #40FF5E;border-radius:6px;padding:3px 10px;cursor:pointer;">制冷</span>
+          <span style="font-size:13px;color:rgba(64,255,94,0.5);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;cursor:pointer;">制热</span>
+          <span style="font-size:13px;color:rgba(64,255,94,0.5);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;cursor:pointer;">送风</span>
+        </div>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">风速</span>
+        <span class="text-body">自动</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">预计达到目标</span>
+        <span class="text-body" style="color:#40FF5E;font-weight:600;">约 8 分钟</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">定时关闭</button>
+      <button class="btn">关闭空调</button>
+    </div>
+  </div>
+
+  <!-- 状态3：场景模式 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1l2 4 5 .7-3.5 3.4.8 5L8 12l-4.3 2.1.8-5L1 5.7 6 5z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-caption">场景模式</span>
+      </div>
+      <span class="text-caption">当前：回家</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;align-content:flex-start;">
+      <div class="device-card on" style="text-align:center;align-items:center;padding:16px 14px;">
+        <div style="font-size:28px;margin-bottom:4px;">🏠</div>
+        <div class="device-name">回家模式</div>
+        <div class="device-sub">当前激活</div>
+        <span class="device-status on" style="margin-top:4px;">进行中</span>
+      </div>
+      <div class="device-card" style="text-align:center;align-items:center;padding:16px 14px;">
+        <div style="font-size:28px;margin-bottom:4px;">🌙</div>
+        <div class="device-name">睡眠模式</div>
+        <div class="device-sub">灯关·空调26°</div>
+        <span class="device-status off" style="margin-top:4px;">待机</span>
+      </div>
+      <div class="device-card" style="text-align:center;align-items:center;padding:16px 14px;">
+        <div style="font-size:28px;margin-bottom:4px;">🎬</div>
+        <div class="device-name">影音模式</div>
+        <div class="device-sub">灯暗·音响开</div>
+        <span class="device-status off" style="margin-top:4px;">待机</span>
+      </div>
+      <div class="device-card" style="text-align:center;align-items:center;padding:16px 14px;">
+        <div style="font-size:28px;margin-bottom:4px;">🚪</div>
+        <div class="device-name">离家模式</div>
+        <div class="device-sub">全部关闭</div>
+        <span class="device-status off" style="margin-top:4px;">待机</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">创建场景</button>
+    </div>
+  </div>
+
+  <!-- 状态4：安全监控 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2L3 4v4c0 3.3 2.2 6.4 5 7.5C10.8 14.4 13 11.3 13 8V4L8 2z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M5.5 8l2 2 3-3" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">安全正常</span>
+      </div>
+      <span class="text-caption">14:30</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="sensor-item">
+        <div class="sensor-dot safe"></div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">门锁</div>
+          <div class="text-caption">已锁定 · 最后操作 09:12</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4" y="7" width="8" height="7" rx="2" stroke="#40FF5E" stroke-width="1.5"/><path d="M6 7V5a2 2 0 014 0v2" stroke="#40FF5E" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sensor-item">
+        <div class="sensor-dot safe"></div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">窗户传感器</div>
+          <div class="text-caption">全部关闭 · 4个正常</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h12v12H2z" stroke="#40FF5E" stroke-width="1.5"/><path d="M2 8h12M8 2v12" stroke="#40FF5E" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sensor-item">
+        <div class="sensor-dot safe"></div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">烟雾报警器</div>
+          <div class="text-caption">正常 · 无烟雾检测</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="#40FF5E" stroke-width="1.5"/><path d="M8 5v3" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.5" fill="#40FF5E"/></svg>
+      </div>
+      <div class="sensor-item">
+        <div class="sensor-dot safe"></div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">摄像头</div>
+          <div class="text-caption">3台在线 · 无异常检测</div>
+        </div>
+        <span class="text-caption" style="color:#40FF5E;">在线</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">查看录像</button>
+      <button class="btn">安全报告</button>
+    </div>
+  </div>
+
+  <!-- 状态5：能耗报告 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M9 1l-4 7h4l-1 7 5-8H9l1-6z" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-caption">能耗报告</span>
+      </div>
+      <span class="text-caption">本月 3月</span>
+    </div>
+    <div class="row-between" style="margin-bottom:14px;">
+      <div class="col">
+        <div style="font-size:36px;font-weight:700;color:#40FF5E;line-height:44px;">48.6<span style="font-size:18px;font-weight:400;"> kWh</span></div>
+        <div class="text-caption">本月总用电</div>
+      </div>
+      <div class="col" style="align-items:flex-end;">
+        <div style="font-size:22px;font-weight:700;color:#40FF5E;">¥ 38.4</div>
+        <div class="text-caption">约合电费</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:4px;height:50px;margin-bottom:10px;">
+      <div style="flex:1;background:rgba(64,255,94,0.25);height:40%;border-radius:2px 2px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.3);height:55%;border-radius:2px 2px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.4);height:70%;border-radius:2px 2px 0 0;"></div>
+      <div style="flex:1;background:#40FF5E;height:90%;border-radius:2px 2px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.55);height:75%;border-radius:2px 2px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.4);height:60%;border-radius:2px 2px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.35);height:50%;border-radius:2px 2px 0 0;"></div>
+    </div>
+    <div class="text-caption" style="margin-bottom:10px;">用电大户</div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+      <div>
+        <div class="row-between" style="margin-bottom:4px;">
+          <span class="text-body">空调</span>
+          <span class="text-caption">22.3 kWh · 46%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:46%;"></div></div>
+      </div>
+      <div>
+        <div class="row-between" style="margin-bottom:4px;">
+          <span class="text-body">热水器</span>
+          <span class="text-caption">12.4 kWh · 26%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:26%;opacity:0.7;"></div></div>
+      </div>
+      <div>
+        <div class="row-between" style="margin-bottom:4px;">
+          <span class="text-body">冰箱</span>
+          <span class="text-caption">8.2 kWh · 17%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:17%;opacity:0.5;"></div></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">节能建议</button>
+      <button class="btn">历史对比</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Smart Home · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YodaOS Sprite - 烹饪卡片（480×380px）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'HarmonyOS Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        /* 480×380px 显示区域容器 */
+        .viewport-container {
+            width: 480px;
+            height: 380px;
+            background: #1C1C1C;
+            border-radius: 12px;
+            border: 2px solid #40FF5E;
+            overflow: hidden;
+            margin: 0;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 标题区域 */
+        .header-section {
+            margin-bottom: 16px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #AAAAAA;
+            font-weight: 400;
+        }
+        
+        /* 状态选择器 - 集成在显示区域内 */
+        .state-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .state-btn {
+            padding: 10px 18px;
+            border: 2px solid #40FF5E;
+            background: transparent;
+            color: #40FF5E;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .state-btn:hover {
+            background: rgba(64, 255, 94, 0.1);
+        }
+        
+        .state-btn.active {
+            background: #40FF5E;
+            color: #000000;
+            font-weight: 600;
+        }
+        
+        /* 内容区域 - 自适应填充 */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        
+        /* 卡片主体 */
+        .card-main {
+            background: #2A2A2A;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #40FF5E;
+            min-height: 200px;
+        }
+        
+        .state-title {
+            font-size: 20px;
+            color: #40FF5E;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .state-icon {
+            width: 24px;
+            height: 24px;
+            fill: #40FF5E;
+        }
+        
+        /* 烹饪特定样式 */
+        .ingredient-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(64, 255, 94, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #40FF5E;
+        }
+        
+        .ingredient-name {
+            font-size: 16px;
+            color: #FFFFFF;
+        }
+        
+        .ingredient-amount {
+            font-size: 16px;
+            color: #40FF5E;
+            font-weight: 600;
+        }
+        
+        .step-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+        }
+        
+        .timer-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .timer-value {
+            font-size: 32px;
+            color: #40FF5E;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .timer-label {
+            font-size: 16px;
+            color: #AAAAAA;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #40FF5E;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .completion-message {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .completion-icon {
+            font-size: 48px;
+            color: #40FF5E;
+            margin-bottom: 16px;
+        }
+        
+        .completion-text {
+            font-size: 20px;
+            color: #40FF5E;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .completion-desc {
+            font-size: 16px;
+            color: #AAAAAA;
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            font-size: 14px;
+            color: #888888;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        /* 确保所有文本符合16px最小字号 */
+        .text-sm {
+            font-size: 16px !important;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 520px) {
+            .viewport-container {
+                width: 100%;
+                max-width: 480px;
+                height: 380px;
+                border-radius: 0;
+            }
+        }
+        
+        /* 调试信息 */
+        .debug-info {
+            margin-top: 16px;
+            color: #888888;
+            font-size: 14px;
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 480×380px 显示区域 -->
+    <div class="viewport-container">
+        <!-- 标题区域 -->
+        <div class="header-section">
+            <div class="title">烹饪助手</div>
+            <div class="subtitle">智能烹饪指导 - 红烧肉</div>
+        </div>
+        
+        <!-- 状态选择器（集成导航） -->
+        <div class="state-selector">
+            <button class="state-btn active" data-state="0">准备食材</button>
+            <button class="state-btn" data-state="1">烹饪中</button>
+            <button class="state-btn" data-state="2">计时中</button>
+            <button class="state-btn" data-state="3">用量提醒</button>
+            <button class="state-btn" data-state="4">完成</button>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <div class="card-main">
+                <!-- 状态1: 准备食材 -->
+                <div class="state-content" id="state-0">
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
+                        </svg>
+                        准备食材
+                    </div>
+                    <div class="step-content">
+                        请准备以下食材，按比例称重：
+                    </div>
+                    <div class="ingredient-list">
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">五花肉</span>
+                            <span class="ingredient-amount">500g</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">老抽</span>
+                            <span class="ingredient-amount">30ml</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">冰糖</span>
+                            <span class="ingredient-amount">40g</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">生姜</span>
+                            <span class="ingredient-amount">3片</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">八角</span>
+                            <span class="ingredient-amount">2颗</span>
+                        </div>
+                    </div>
+                    <div class="tooltip">提示：将食材洗净切块，准备好烹饪工具</div>
+                </div>
+                
+                <!-- 状态2: 烹饪中 -->
+                <div class="state-content" id="state-1" style="display: none;">
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"/>
+                        </svg>
+                        烹饪中
+                    </div>
+                    <div class="step-content">
+                        当前步骤：将五花肉焯水后，与调料一起放入锅中，小火慢炖。
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 40%;"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="font-size: 16px; color: #AAAAAA; margin-bottom: 8px;">烹饪进度</div>
+                        <div style="font-size: 24px; color: #40FF5E; font-weight: 600;">40%</div>
+                    </div>
+                    <div class="tooltip">提示：保持小火，定时翻动食材</div>
+                </div>
+                
+                <!-- 状态3: 计时中 -->
+                <div class="state-content" id="state-2" style="display: none;">
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2ZM12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20ZM12.5 7H11V13L16.2 16.2L17 14.9L12.5 12.2V7Z"/>
+                        </svg>
+                        计时中
+                    </div>
+                    <div class="timer-display">
+                        <div class="timer-label">剩余时间</div>
+                        <div class="timer-value" id="timer-value">15:30</div>
+                        <div class="timer-label">小火慢炖阶段</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%;"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button style="padding: 12px 24px; background: #40FF5E; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            +5分钟
+                        </button>
+                    </div>
+                    <div class="tooltip">提示：计时结束后会自动提醒</div>
+                </div>
+                
+                <!-- 状态4: 用量提醒 -->
+                <div class="state-content" id="state-3" style="display: none;">
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                        </svg>
+                        用量提醒
+                    </div>
+                    <div class="step-content" style="text-align: center; margin: 30px 0;">
+                        <div style="font-size: 48px; color: #FFB340; margin-bottom: 16px;">⚠️</div>
+                        <div style="font-size: 20px; color: #FFB340; font-weight: 600; margin-bottom: 8px;">用量提醒</div>
+                        <div style="font-size: 16px; color: #FFFFFF; margin-bottom: 20px;">
+                            需要添加：<span style="color: #40FF5E; font-weight: 600;">食盐 5g</span>
+                        </div>
+                        <div style="font-size: 14px; color: #AAAAAA;">
+                            根据口味调整，建议分次添加
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button style="padding: 12px 32px; background: #40FF5E; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-right: 12px;">
+                            已添加
+                        </button>
+                        <button style="padding: 12px 32px; background: transparent; color: #40FF5E; border: 2px solid #40FF5E; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            稍后提醒
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 状态5: 完成 -->
+                <div class="state-content" id="state-4" style="display: none;">
+                    <div class="completion-message">
+                        <div class="completion-icon">✓</div>
+                        <div class="completion-text">烹饪完成！</div>
+                        <div class="completion-desc">
+                            红烧肉已烹饪完成，请及时享用。<br>
+                            总用时：1小时25分钟
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button style="padding: 12px 32px; background: #40FF5E; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-right: 12px;">
+                            查看食谱
+                        </button>
+                        <button style="padding: 12px 32px; background: transparent; color: #40FF5E; border: 2px solid #40FF5E; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            重新开始
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 调试信息 -->
+    <div class="debug-info">
+        显示区域：480×380px | 烹饪卡片 v3 | 符合YodaOS设计规范 v1
+    </div>
+
+    <script>
+        // 状态管理
+        let currentState = 0;
+        const states = [
+            { id: 'state-0', name: '准备食材' },
+            { id: 'state-1', name: '烹饪中' },
+            { id: 'state-2', name: '计时中' },
+            { id: 'state-3', name: '用量提醒' },
+            { id: 'state-4', name: '完成' }
+        ];
+        
+        // 初始化状态切换
+        function initStateSwitching() {
+            const stateButtons = document.querySelectorAll('.state-btn');
+            const stateContents = document.querySelectorAll('.state-content');
+            
+            // 设置按钮点击事件
+            stateButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const stateIndex = parseInt(this.getAttribute('data-state'));
+                    switchState(stateIndex);
+                });
+            });
+            
+            // 初始显示第一个状态
+            switchState(0);
+        }
+        
+        // 切换状态
+        function switchState(newState) {
+            // 更新当前状态
+            currentState = newState;
+            
+            // 更新按钮状态
+            const stateButtons = document.querySelectorAll('.state-btn');
+            stateButtons.forEach(button => {
+                const buttonState = parseInt(button.getAttribute('data-state'));
+                if (buttonState === newState) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // 更新内容显示
+            const stateContents = document.querySelectorAll('.state-content');
+            stateContents.forEach(content => {
+                const contentId = content.id;
+                const contentState = parseInt(contentId.split('-')[1]);
+                if (contentState === newState) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+            
+            // 更新标题
+            const subtitle = document.querySelector('.subtitle');
+            subtitle.textContent = `智能烹饪指导 - ${states[newState].name}`;
+            
+            // 如果是计时状态，启动倒计时
+            if (newState === 2) {
+                startTimer();
+            }
+        }
+        
+        // 计时器功能
+        let timerInterval;
+        function startTimer() {
+            let minutes = 15;
+            let seconds = 30;
+            
+            // 清除之前的计时器
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // 更新显示
+            function updateTimerDisplay() {
+                const timerElement = document.getElementById('timer-value');
+                const minStr = minutes.toString().padStart(2, '0');
+                const secStr = seconds.toString().padStart(2, '0');
+                timerElement.textContent = `${minStr}:${secStr}`;
+                
+                // 更新进度条
+                const totalSeconds = 15 * 60 + 30;
+                const remainingSeconds = minutes * 60 + seconds;
+                const progressPercent = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+                document.querySelector('#state-2 .progress-fill').style.width = `${progressPercent}%`;
+            }
+            
+            // 初始显示
+            updateTimerDisplay();
+            
+            // 启动计时器
+            timerInterval = setInterval(() => {
+                if (seconds > 0) {
+                    seconds--;
+                } else if (minutes > 0) {
+                    minutes--;
+                    seconds = 59;
+                } else {
+                    // 计时结束
+                    clearInterval(timerInterval);
+                    alert('计时结束！请进行下一步操作。');
+                    return;
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initStateSwitching();
+            
+            // 添加按钮事件
+            document.querySelector('#state-3 button').addEventListener('click', function() {
+                alert('已记录添加食盐');
+            });
+            
+            document.querySelector('#state-4 button:nth-child(1)').addEventListener('click', function() {
+                alert('显示完整食谱');
+            });
+            
+            document.querySelector('#state-4 button:nth-child(2)').addEventListener('click', function() {
+                switchState(0);
+            });
+            
+            // +5分钟按钮
+            document.querySelector('#state-2 button').addEventListener('click', function() {
+                const timerElement = document.getElementById('timer-value');
+                let [min, sec] = timerElement.textContent.split(':').map(Number);
+                min += 5;
+                const minStr = min.toString().padStart(2, '0');
+                const secStr = sec.toString().padStart(2, '0');
+                timerElement.textContent = `${minStr}:${secStr}`;
+                alert('已增加5分钟计时');
+            });
+        });
+        
+        // 确保所有文本符合最小16px字号
+        function enforceMinFontSize() {
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                const computedStyle = window.getComputedStyle(el);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                if (fontSize < 16 && !el.classList.contains('text-sm')) {
+                    el.classList.add('text-sm');
+                }
+            });
+        }
+        
+        // 验证显示区域尺寸
+        function validateViewportSize() {
+            const viewport = document.querySelector('.viewport-container');
+            const rect = viewport.getBoundingClientRect();
+            console.log(`显示区域尺寸：${rect.width}×${rect.height}px`);
+            
+            if (rect.width > 480 || rect.height > 380) {
+                console.warn('警告：显示区域超过480×380px限制！');
+            } else {
+                console.log('✓ 显示区域符合480×380px限制');
+            }
+        }
+        
+        // 页面完全加载后验证
+        window.addEventListener('load', function() {
+            enforceMinFontSize();
+            setTimeout(validateViewportSize, 100);
+        });
+    </script>
+</body>
+</html>

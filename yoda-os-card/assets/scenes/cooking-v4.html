@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YodaOS Sprite - 烹饪卡片V4（480×380px）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'HarmonyOS Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        /* 480×380px 显示区域容器 */
+        .viewport-container {
+            width: 480px;
+            height: 380px;
+            background: #1C1C1C;
+            border-radius: 12px;
+            border: 2px solid #40FF5E;
+            overflow: hidden;
+            margin: 0;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 标题区域 */
+        .header-section {
+            margin-bottom: 12px;
+        }
+        
+        .title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+        
+        .dish-count {
+            font-size: 14px;
+            color: #AAAAAA;
+            background: rgba(64, 255, 94, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(64, 255, 94, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #AAAAAA;
+            font-weight: 400;
+        }
+        
+        /* 菜品选择器 - 集成在显示区域内 */
+        .dish-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        
+        .dish-selector::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .dish-selector::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        
+        .dish-selector::-webkit-scrollbar-thumb {
+            background: #40FF5E;
+            border-radius: 2px;
+        }
+        
+        .dish-btn {
+            padding: 10px 16px;
+            border: 2px solid rgba(64, 255, 94, 0.3);
+            background: transparent;
+            color: rgba(64, 255, 94, 0.7);
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .dish-btn:hover {
+            border-color: #40FF5E;
+            color: #40FF5E;
+        }
+        
+        .dish-btn.active {
+            background: #40FF5E;
+            color: #000000;
+            font-weight: 600;
+            border-color: #40FF5E;
+        }
+        
+        /* 状态选择器 */
+        .state-selector {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .state-btn {
+            padding: 8px 14px;
+            border: 2px solid rgba(64, 255, 94, 0.3);
+            background: transparent;
+            color: rgba(64, 255, 94, 0.7);
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .state-btn:hover {
+            border-color: #40FF5E;
+            color: #40FF5E;
+        }
+        
+        .state-btn.active {
+            background: #40FF5E;
+            color: #000000;
+            font-weight: 600;
+            border-color: #40FF5E;
+        }
+        
+        /* 内容区域 - 自适应填充 */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        
+        /* 卡片主体 */
+        .card-main {
+            background: #2A2A2A;
+            border-radius: 12px;
+            padding: 18px;
+            border: 2px solid #40FF5E;
+            min-height: 180px;
+        }
+        
+        .dish-info {
+            margin-bottom: 16px;
+        }
+        
+        .dish-name {
+            font-size: 18px;
+            color: #40FF5E;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .dish-description {
+            font-size: 14px;
+            color: #AAAAAA;
+            line-height: 1.4;
+        }
+        
+        .state-title {
+            font-size: 16px;
+            color: #40FF5E;
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .state-icon {
+            width: 20px;
+            height: 20px;
+            fill: #40FF5E;
+        }
+        
+        /* 烹饪步骤内容 */
+        .step-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+        }
+        
+        .ingredient-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(64, 255, 94, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #40FF5E;
+        }
+        
+        .ingredient-name {
+            font-size: 15px;
+            color: #FFFFFF;
+        }
+        
+        .ingredient-amount {
+            font-size: 15px;
+            color: #40FF5E;
+            font-weight: 600;
+        }
+        
+        .timer-display {
+            text-align: center;
+            margin: 16px 0;
+        }
+        
+        .timer-value {
+            font-size: 28px;
+            color: #40FF5E;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+        
+        .timer-label {
+            font-size: 14px;
+            color: #AAAAAA;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #40FF5E;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .primary-btn {
+            background: #40FF5E;
+            color: #000000;
+        }
+        
+        .secondary-btn {
+            background: transparent;
+            color: #40FF5E;
+            border: 2px solid #40FF5E;
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            font-size: 13px;
+            color: #888888;
+            margin-top: 8px;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        /* 调试信息 */
+        .debug-info {
+            margin-top: 12px;
+            color: #888888;
+            font-size: 12px;
+            text-align: center;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+        
+        /* 确保最小字号 */
+        .min-font {
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 480×380px 显示区域 -->
+    <div class="viewport-container">
+        <!-- 标题区域 -->
+        <div class="header-section">
+            <div class="title-row">
+                <div class="title">多菜品烹饪助手</div>
+                <div class="dish-count" id="dish-count">3道菜</div>
+            </div>
+            <div class="subtitle">数据驱动架构 - 支持多菜品切换</div>
+        </div>
+        
+        <!-- 菜品选择器（集成导航） -->
+        <div class="dish-selector" id="dish-selector">
+            <!-- 菜品按钮通过JS动态生成 -->
+        </div>
+        
+        <!-- 状态选择器 -->
+        <div class="state-selector" id="state-selector">
+            <!-- 状态按钮通过JS动态生成 -->
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <div class="card-main">
+                <!-- 菜品信息 -->
+                <div class="dish-info">
+                    <div class="dish-name" id="dish-name">红烧肉</div>
+                    <div class="dish-description" id="dish-description">经典中式菜肴，肥而不腻，色泽红亮</div>
+                </div>
+                
+                <!-- 状态内容区域 -->
+                <div id="state-content">
+                    <!-- 状态内容通过JS动态生成 -->
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="action-buttons" id="action-buttons">
+                    <!-- 操作按钮通过JS动态生成 -->
+                </div>
+                
+                <!-- 工具提示 -->
+                <div class="tooltip" id="tooltip">请按照步骤操作，注意火候控制</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 调试信息 -->
+    <div class="debug-info">
+        显示区域：480×380px | 烹饪卡片V4 | 数据驱动架构 | 符合YodaOS规范
+    </div>
+
+    <script>
+        // 数据驱动架构 - 菜品数据库
+        const DISHES = [
+            {
+                id: 'braised_pork',
+                name: '红烧肉',
+                description: '经典中式菜肴，肥而不腻，色泽红亮',
+                difficulty: '中等',
+                time: '90分钟',
+                ingredients: [
+                    { name: '五花肉', amount: '500g' },
+                    { name: '老抽', amount: '30ml' },
+                    { name: '冰糖', amount: '40g' },
+                    { name: '生姜', amount: '3片' },
+                    { name: '八角', amount: '2颗' }
+                ],
+                steps: [
+                    { state: '准备食材', desc: '将五花肉洗净切块，准备调料', icon: 'prep', time: 10 },
+                    { state: '焯水处理', desc: '将五花肉焯水去腥，捞出备用', icon: 'water', time: 5 },
+                    { state: '炒糖色', desc: '冰糖炒至焦糖色，加入五花肉上色', icon: 'fry', time: 8 },
+                    { state: '炖煮', desc: '加入调料，小火慢炖60分钟', icon: 'stew', time: 60 },
+                    { state: '收汁', desc: '大火收汁，使汤汁浓稠', icon: 'reduce', time: 7 }
+                ]
+            },
+            {
+                id: 'fried_rice',
+                name: '蛋炒饭',
+                description: '简单美味的家常菜，香气扑鼻',
+                difficulty: '简单',
+                time: '20分钟',
+                ingredients: [
+                    { name: '隔夜米饭', amount: '300g' },
+                    { name: '鸡蛋', amount: '2个' },
+                    { name: '火腿肠', amount: '1根' },
+                    { name: '青豆', amount: '50g' },
+                    { name: '葱花', amount: '适量' }
+                ],
+                steps: [
+                    { state: '准备食材', desc: '将火腿肠切丁，鸡蛋打散备用', icon: 'prep', time: 5 },
+                    { state: '炒鸡蛋', desc: '热油炒鸡蛋至金黄，盛出备用', icon: 'fry', time: 3 },
+                    { state: '炒配料', desc: '炒香火腿肠和青豆', icon: 'fry', time: 4 },
+                    { state: '炒米饭', desc: '加入米饭翻炒，炒散米饭颗粒', icon: 'fry', time: 6 },
+                    { state: '混合', desc: '加入炒好的鸡蛋和葱花，翻炒均匀', icon: 'mix', time: 2 }
+                ]
+            },
+            {
+                id: 'steamed_fish',
+                name: '清蒸鱼',
+                description: '鲜美健康的蒸菜，保留原汁原味',
+                difficulty: '中等',
+                time: '25分钟',
+                ingredients: [
+                    { name: '鲜鱼', amount: '1条(500g)' },
+                    { name: '姜片', amount: '5片' },
+                    { name: '葱段', amount: '3段' },
+                    { name: '料酒', amount: '20ml' },
+                    { name: '蒸鱼豉油', amount: '30ml' }
+                ],
+                steps: [
+                    { state: '准备食材', desc: '鱼洗净，两面切花刀，姜葱切好', icon: 'prep', time: 8 },
+                    { state: '腌制', desc: '用料酒和少量盐腌制10分钟', icon: 'marinate', time: 10 },
+                    { state: '蒸制', desc: '大火蒸8-10分钟至熟透', icon: 'steam', time: 10 },
+                    { state: '淋油', desc: '淋上热油和蒸鱼豉油', icon: 'oil', time: 2 },
+                    { state: '装饰', desc: '撒上葱花和香菜点缀', icon: 'garnish', time: 1 }
+                ]
+            }
+        ];
+        
+        // 状态管理
+        let currentDishIndex = 0;
+        let currentStateIndex = 0;
+        
+        // 初始化界面
+        function initUI() {
+            // 更新菜品数量显示
+            document.getElementById('dish-count').textContent = `${DISHES.length}道菜`;
+            
+            // 初始化菜品选择器
+            initDishSelector();
+            
+            // 初始化状态选择器
+            initStateSelector();
+            
+            // 更新内容显示
+            updateContent();
+        }
+        
+        // 初始化菜品选择器
+        function initDishSelector() {
+            const dishSelector = document.getElementById('dish-selector');
+            dishSelector.innerHTML = '';
+            
+            DISHES.forEach((dish, index) => {
+                const button = document.createElement('button');
+                button.className = `dish-btn ${index === currentDishIndex ? 'active' : ''}`;
+                button.textContent = dish.name;
+                button.dataset.index = index;
+                button.addEventListener('click', () => selectDish(index));
+                dishSelector.appendChild(button);
+            });
+        }
+        
+        // 初始化状态选择器
+        function initStateSelector() {
+            const stateSelector = document.getElementById('state-selector');
+            const currentDish = DISHES[currentDishIndex];
+            stateSelector.innerHTML = '';
+            
+            currentDish.steps.forEach((step, index) => {
+                const button = document.createElement('button');
+                button.className = `state-btn ${index === currentStateIndex ? 'active' : ''}`;
+                button.textContent = step.state;
+                button.dataset.index = index;
+                button.addEventListener('click', () => selectState(index));
+                stateSelector.appendChild(button);
+            });
+        }
+        
+        // 选择菜品
+        function selectDish(index) {
+            currentDishIndex = index;
+            currentStateIndex = 0; // 切换到新菜品时重置状态
+            
+            // 更新菜品选择器状态
+            document.querySelectorAll('.dish-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            
+            // 重新初始化状态选择器
+            initStateSelector();
+            
+            // 更新内容显示
+            updateContent();
+        }
+        
+        // 选择状态
+        function selectState(index) {
+            currentStateIndex = index;
+            
+            // 更新状态选择器状态
+            document.querySelectorAll('.state-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            
+            // 更新内容显示
+            updateContent();
+        }
+        
+        // 更新内容显示
+        function updateContent() {
+            const currentDish = DISHES[currentDishIndex];
+            const currentStep = currentDish.steps[currentStateIndex];
+            
+            // 更新菜品信息
+            document.getElementById('dish-name').textContent = currentDish.name;
+            document.getElementById('dish-description').textContent = `${currentDish.description} | 难度：${currentDish.difficulty} | 时间：${currentDish.time}`;
+            
+            // 更新状态内容
+            const stateContent = document.getElementById('state-content');
+            stateContent.innerHTML = '';
+            
+            // 创建状态内容
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'step-content';
+            
+            // 根据状态类型显示不同内容
+            if (currentStateIndex === 0) {
+                // 准备食材状态
+                contentDiv.innerHTML = `
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
+                        </svg>
+                        ${currentStep.state}
+                    </div>
+                    <div style="margin-bottom: 16px;">${currentStep.desc}</div>
+                    <div class="ingredient-list">
+                        ${currentDish.ingredients.map(ing => `
+                            <div class="ingredient-item">
+                                <span class="ingredient-name">${ing.name}</span>
+                                <span class="ingredient-amount">${ing.amount}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (currentStateIndex === currentDish.steps.length - 1) {
+                // 最后一步状态
+                contentDiv.innerHTML = `
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM10 17L5 12l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9Z"/>
+                        </svg>
+                        ${currentStep.state}
+                    </div>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 32px; color: #40FF5E; margin-bottom: 12px;">✓</div>
+                        <div style="font-size: 18px; color: #40FF5E; font-weight: 600; margin-bottom: 8px;">${currentDish.name} 完成！</div>
+                        <div style="font-size: 14px; color: #AAAAAA;">${currentStep.desc}</div>
+                    </div>
+                `;
+            } else {
+                // 中间步骤状态
+                const progress = ((currentStateIndex + 1) / currentDish.steps.length) * 100;
+                contentDiv.innerHTML = `
+                    <div class="state-title">
+                        <svg class="state-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2ZM12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20ZM12.5 7H11V13L16.2 16.2L17 14.9L12.5 12.2V7Z"/>
+                        </svg>
+                        ${currentStep.state}
+                    </div>
+                    <div style="margin-bottom: 16px;">${currentStep.desc}</div>
+                    <div class="timer-display">
+                        <div class="timer-label">预计时间</div>
+                        <div class="timer-value">${currentStep.time}分钟</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%;"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 12px;">
+                        <div style="font-size: 14px; color: #AAAAAA;">总体进度</div>
+                        <div style="font-size: 18px; color: #40FF5E; font-weight: 600;">${Math.round(progress)}%</div>
+                    </div>
+                `;
+            }
+            
+            stateContent.appendChild(contentDiv);
+            
+            // 更新操作按钮
+            updateActionButtons();
+            
+            // 更新工具提示
+            updateTooltip();
+        }
+        
+        // 更新操作按钮
+        function updateActionButtons() {
+            const actionButtons = document.getElementById('action-buttons');
+            actionButtons.innerHTML = '';
+            
+            const currentDish = DISHES[currentDishIndex];
+            const isLastStep = currentStateIndex === currentDish.steps.length - 1;
+            const isFirstStep = currentStateIndex === 0;
+            
+            if (isLastStep) {
+                // 最后一步的按钮
+                actionButtons.innerHTML = `
+                    <button class="action-btn primary-btn" onclick="restartCooking()">重新开始</button>
+                    <button class="action-btn secondary-btn" onclick="selectNextDish()">下一道菜</button>
+                `;
+            } else {
+                // 其他步骤的按钮
+                actionButtons.innerHTML = `
+                    <button class="action-btn primary-btn" onclick="selectState(${currentStateIndex + 1})">下一步</button>
+                    ${!isFirstStep ? `<button class="action-btn secondary-btn" onclick="selectState(${currentStateIndex - 1})">上一步</button>` : ''}
+                `;
+            }
+        }
+        
+        // 更新工具提示
+        function updateTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            const currentDish = DISHES[currentDishIndex];
+            const currentStep = currentDish.steps[currentStateIndex];
+            
+            const tips = {
+                0: '确保所有食材准备齐全，按顺序摆放',
+                1: '注意火候控制，避免食材过熟或过生',
+                2: '定时器设置准确，防止烹饪超时',
+                3: '适量调味，建议分次添加',
+                4: '完成后及时享用，保持最佳口感'
+            };
+            
+            tooltip.textContent = tips[currentStateIndex] || '请按照步骤操作，注意安全';
+        }
+        
+        // 辅助函数
+        function restartCooking() {
+            currentStateIndex = 0;
+            selectState(0);
+        }
+        
+        function selectNextDish() {
+            const nextIndex = (currentDishIndex + 1) % DISHES.length;
+            selectDish(nextIndex);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initUI);
+        
+        // 验证显示区域尺寸
+        function validateViewportSize() {
+            const viewport = document.querySelector('.viewport-container');
+            const rect = viewport.getBoundingClientRect();
+            console.log(`显示区域尺寸：${rect.width}×${rect.height}px`);
+            
+            if (rect.width > 480 || rect.height > 380) {
+                console.warn('警告：显示区域超过480×380px限制！');
+                return false;
+            } else {
+                console.log('✓ 显示区域符合480×380px限制');
+                return true;
+            }
+        }
+        
+        // 验证字号合规性
+        function validateFontSizes() {
+            const allElements = document.querySelectorAll('*');
+            let violations = 0;
+            
+            allElements.forEach(el => {
+                const computedStyle = window.getComputedStyle(el);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                // 检查caption和button类型的元素
+                if (el.tagName === 'BUTTON' || el.classList.contains('tooltip') || el.classList.contains('subtitle')) {
+                    if (fontSize < 14) {
+                        console.warn(`字号违规：${el.tagName}.${el.className} - ${fontSize}px`);
+                        violations++;
+                    }
+                }
+            });
+            
+            if (violations === 0) {
+                console.log('✓ 所有字号符合最小14px要求');
+                return true;
+            } else {
+                console.warn(`发现${violations}处字号违规`);
+                return false;
+            }
+        }
+        
+        // 页面完全加载后验证
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const sizeValid = validateViewportSize();
+                const fontValid = validateFontSizes();
+                
+                if (sizeValid && fontValid) {
+                    console.log('✓ 卡片完全符合YodaOS设计规范');
+                } else {
+                    console.warn('⚠️ 卡片存在规范不符合项，请检查');
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

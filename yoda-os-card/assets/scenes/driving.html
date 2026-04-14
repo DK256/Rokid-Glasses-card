@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YodaOS · 驾驶辅助场景</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --warn: #FFB800;
+    --danger: #FF4444;
+    --bg: #000000;
+    --card-bg: #1C1C1C;
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    --dim: rgba(64,255,94,0.55);
+    --dim-low: rgba(64,255,94,0.3);
+  }
+
+  body {
+    background: #111;
+    font-family: var(--font);
+    color: var(--primary);
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .back-link {
+    font-size: 12px;
+    color: var(--dim-low);
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--primary); }
+
+  .page-title-area { text-align: right; }
+  .page-title-en { font-size: 11px; letter-spacing: 2px; color: var(--dim-low); text-transform: uppercase; }
+  .page-title-zh { font-size: 20px; font-weight: 700; }
+
+  .state-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(64,255,94,0.2);
+    background: transparent;
+    color: var(--dim-low);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: rgba(64,255,94,0.5); color: var(--dim); }
+  .tab-btn.active { border-color: var(--primary); background: rgba(64,255,94,0.1); color: var(--primary); }
+
+  .card-stage {
+    display: flex;
+    justify-content: center;
+    min-height: 440px;
+  }
+
+  .ar-card {
+    width: 480px;
+    background: var(--card-bg);
+    border: 2px solid rgba(64,255,94,0.25);
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .ar-card.active { display: flex; }
+  .ar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(64,255,94,0.4), transparent);
+  }
+
+  /* 危险状态边框 */
+  .ar-card.danger-mode {
+    border-color: rgba(255,68,68,0.5);
+  }
+  .ar-card.danger-mode::before {
+    background: linear-gradient(90deg, transparent, rgba(255,68,68,0.5), transparent);
+  }
+  .ar-card.warn-mode {
+    border-color: rgba(255,184,0,0.4);
+  }
+  .ar-card.warn-mode::before {
+    background: linear-gradient(90deg, transparent, rgba(255,184,0,0.5), transparent);
+  }
+
+  .card-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .badge-dot.warn { background: var(--warn); animation: pulse 0.8s ease-in-out infinite; }
+  .badge-dot.danger { background: var(--danger); animation: pulse 0.5s ease-in-out infinite; }
+  .badge-dot.idle { background: rgba(64,255,94,0.3); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .card-time { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 速度仪表盘 ── */
+  .speed-panel {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(64,255,94,0.08);
+    margin-bottom: 18px;
+  }
+
+  .speed-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .speed-num {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+  }
+  .speed-num.warn-color { color: var(--warn); }
+  .speed-num.danger-color { color: var(--danger); }
+
+  .speed-unit {
+    font-size: 14px;
+    color: var(--dim-low);
+    margin-top: 4px;
+  }
+
+  .speed-divider {
+    width: 1px;
+    height: 60px;
+    background: rgba(64,255,94,0.1);
+  }
+
+  .speed-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .limit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    width: fit-content;
+  }
+  .limit-badge.ok {
+    background: rgba(64,255,94,0.08);
+    border: 1px solid rgba(64,255,94,0.2);
+    color: var(--dim);
+  }
+  .limit-badge.over {
+    background: rgba(255,184,0,0.1);
+    border: 1px solid rgba(255,184,0,0.3);
+    color: var(--warn);
+  }
+  .limit-badge.danger {
+    background: rgba(255,68,68,0.12);
+    border: 1px solid rgba(255,68,68,0.4);
+    color: var(--danger);
+  }
+
+  .road-name { font-size: 18px; font-weight: 600; }
+  .road-sub { font-size: 13px; color: var(--dim-low); margin-top: 2px; }
+
+  /* ── 信息行 ── */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: rgba(64,255,94,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+
+  .info-cell {
+    background: rgba(64,255,94,0.03);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-label { font-size: 10px; color: var(--dim-low); text-transform: uppercase; letter-spacing: 1px; }
+  .info-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .info-sub { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 超速警告 ── */
+  .warn-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  .warn-banner.speed-warn {
+    background: rgba(255,184,0,0.1);
+    border: 2px solid rgba(255,184,0,0.4);
+  }
+  .warn-banner.fatigue-warn {
+    background: rgba(255,68,68,0.1);
+    border: 2px solid rgba(255,68,68,0.4);
+  }
+
+  .warn-icon-big {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+  .speed-warn .warn-icon-big { background: rgba(255,184,0,0.15); }
+  .fatigue-warn .warn-icon-big { background: rgba(255,68,68,0.15); }
+
+  .warn-content { flex: 1; }
+  .warn-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .speed-warn .warn-title { color: var(--warn); }
+  .fatigue-warn .warn-title { color: var(--danger); }
+  .warn-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+  /* ── 路况提醒 ── */
+  .traffic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .traffic-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(64,255,94,0.1);
+    background: rgba(64,255,94,0.03);
+  }
+  .traffic-item.active-event {
+    border-color: rgba(255,184,0,0.3);
+    background: rgba(255,184,0,0.05);
+  }
+
+  .traffic-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-ok { background: var(--primary); }
+  .dot-warn { background: var(--warn); }
+  .dot-ahead { background: rgba(64,255,94,0.3); }
+
+  .traffic-info { flex: 1; }
+  .traffic-event { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .traffic-event.warn-event { color: var(--warn); }
+  .traffic-detail { font-size: 12px; color: var(--dim-low); }
+  .traffic-dist { font-size: 14px; font-weight: 700; color: var(--dim); flex-shrink: 0; }
+
+  /* ── 停车状态 ── */
+  .park-hero {
+    text-align: center;
+    padding: 16px 0 20px;
+  }
+  .park-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+  .park-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .park-sub { font-size: 14px; color: var(--dim); margin-bottom: 16px; }
+
+  .park-timer {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 8px;
+    background: rgba(64,255,94,0.08);
+    border: 1px solid rgba(64,255,94,0.2);
+    margin-bottom: 16px;
+  }
+  .park-timer-num { font-size: 36px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .park-timer-label { font-size: 12px; color: var(--dim-low); margin-top: 2px; }
+
+  /* ── 说明 ── */
+  .state-desc {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: rgba(64,255,94,0.03);
+    border: 1px solid rgba(64,255,94,0.08);
+    border-radius: 8px;
+  }
+  .state-desc h3 { font-size: 12px; color: var(--dim-low); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+  .state-desc p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+  .state-desc em { color: var(--dim); font-style: normal; }
+</style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="../index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    返回卡片库
+  </a>
+  <div class="page-title-area">
+    <p class="page-title-en">Driving Assist</p>
+    <p class="page-title-zh">驾驶辅助</p>
+  </div>
+</nav>
+
+<div class="state-tabs">
+  <button class="tab-btn active" data-state="cruising">① 正常行驶</button>
+  <button class="tab-btn" data-state="speeding">② 超速警告</button>
+  <button class="tab-btn" data-state="fatigue">③ 疲劳提醒</button>
+  <button class="tab-btn" data-state="traffic">④ 前方路况</button>
+  <button class="tab-btn" data-state="parked">⑤ 已停车</button>
+</div>
+
+<div class="card-stage">
+
+  <!-- 状态 1：正常行驶 -->
+  <div class="ar-card active" id="state-cruising">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>行驶中</span>
+      </div>
+      <span class="card-time">10:14</span>
+    </div>
+
+    <div class="speed-panel">
+      <div class="speed-main">
+        <span class="speed-num">68</span>
+        <span class="speed-unit">km/h</span>
+      </div>
+      <div class="speed-divider"></div>
+      <div class="speed-meta">
+        <div class="limit-badge ok">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/>
+            <text x="6" y="9" font-size="7" fill="currentColor" text-anchor="middle" font-weight="700">80</text>
+          </svg>
+          限速 80 · 已合规
+        </div>
+        <p class="road-name">京沪高速 G2</p>
+        <p class="road-sub">超车道 · 路况畅通</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">行驶时间</span>
+        <span class="info-value">1:24</span>
+        <span class="info-sub">小时</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">今日里程</span>
+        <span class="info-value">98</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">前方路况</span>
+        <span class="info-value" style="color:var(--primary);font-size:14px;">畅通</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 2：超速警告 -->
+  <div class="ar-card warn-mode" id="state-speeding">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot warn"></span>
+        <span style="color:var(--warn);">超速警告</span>
+      </div>
+      <span class="card-time">10:22</span>
+    </div>
+
+    <div class="warn-banner speed-warn">
+      <div class="warn-icon-big">⚠️</div>
+      <div class="warn-content">
+        <p class="warn-title">当前速度超出限制</p>
+        <p class="warn-sub">请减速至 80 km/h 以下，前方 2km 有测速摄像头</p>
+      </div>
+    </div>
+
+    <div class="speed-panel" style="border-color:rgba(255,184,0,0.15);">
+      <div class="speed-main">
+        <span class="speed-num warn-color">97</span>
+        <span class="speed-unit" style="color:rgba(255,184,0,0.5);">km/h</span>
+      </div>
+      <div class="speed-divider" style="background:rgba(255,184,0,0.15);"></div>
+      <div class="speed-meta">
+        <div class="limit-badge over">
+          超出限速 80  ＋17
+        </div>
+        <p class="road-name" style="color:var(--warn);">G2 京沪高速</p>
+        <p class="road-sub">前方测速区域</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">超速幅度</span>
+        <span class="info-value" style="color:var(--warn);">+17</span>
+        <span class="info-sub">km/h</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">测速距离</span>
+        <span class="info-value">1.8</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">风险等级</span>
+        <span class="info-value" style="color:var(--warn);font-size:14px;">中等</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 3：疲劳提醒 -->
+  <div class="ar-card danger-mode" id="state-fatigue">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot danger"></span>
+        <span style="color:var(--danger);">疲劳提醒</span>
+      </div>
+      <span class="card-time">13:48</span>
+    </div>
+
+    <div class="warn-banner fatigue-warn">
+      <div class="warn-icon-big">😴</div>
+      <div class="warn-content">
+        <p class="warn-title">检测到疲劳驾驶迹象</p>
+        <p class="warn-sub">您已连续驾驶 3.5 小时，建议立即就近休息</p>
+      </div>
+    </div>
+
+    <div class="speed-panel" style="border-color:rgba(255,68,68,0.1);">
+      <div class="speed-main">
+        <span class="speed-num" style="font-size:52px;color:rgba(255,68,68,0.7);">62</span>
+        <span class="speed-unit" style="color:rgba(255,68,68,0.4);">km/h</span>
+      </div>
+      <div class="speed-divider" style="background:rgba(255,68,68,0.1);"></div>
+      <div class="speed-meta">
+        <div class="limit-badge" style="border-color:rgba(255,68,68,0.3);background:rgba(255,68,68,0.08);color:rgba(255,68,68,0.8);">
+          连续驾驶 3.5h
+        </div>
+        <p class="road-name" style="color:rgba(255,68,68,0.7);">前方 4km · 服务区</p>
+        <p class="road-sub">建议立即驶入休息</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">连续驾驶</span>
+        <span class="info-value" style="color:var(--danger);">3.5</span>
+        <span class="info-sub">小时</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">服务区距离</span>
+        <span class="info-value">3.9</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">疲劳等级</span>
+        <span class="info-value" style="color:var(--danger);font-size:14px;">高风险</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 4：前方路况 -->
+  <div class="ar-card" id="state-traffic">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot warn"></span>
+        <span style="color:var(--warn);">路况提醒</span>
+      </div>
+      <span class="card-time">10:31</span>
+    </div>
+
+    <div class="speed-panel">
+      <div class="speed-main">
+        <span class="speed-num">74</span>
+        <span class="speed-unit">km/h</span>
+      </div>
+      <div class="speed-divider"></div>
+      <div class="speed-meta">
+        <div class="limit-badge ok">限速 100 · 合规</div>
+        <p class="road-name">G4 京港澳高速</p>
+        <p class="road-sub">前方路况变化</p>
+      </div>
+    </div>
+
+    <div class="traffic-list">
+      <div class="traffic-item active-event">
+        <div class="traffic-dot dot-warn"></div>
+        <div class="traffic-info">
+          <p class="traffic-event warn-event">前方施工占道</p>
+          <p class="traffic-detail">右侧两车道封闭，建议提前并线</p>
+        </div>
+        <span class="traffic-dist">3.2km</span>
+      </div>
+      <div class="traffic-item">
+        <div class="traffic-dot dot-ahead"></div>
+        <div class="traffic-info">
+          <p class="traffic-event" style="color:var(--dim);">收费站</p>
+          <p class="traffic-detail">ETC 通道 · 无需停车</p>
+        </div>
+        <span class="traffic-dist">12km</span>
+      </div>
+      <div class="traffic-item">
+        <div class="traffic-dot dot-ok"></div>
+        <div class="traffic-info">
+          <p class="traffic-event" style="color:var(--primary);">服务区</p>
+          <p class="traffic-detail">固安服务区 · 可加油</p>
+        </div>
+        <span class="traffic-dist">28km</span>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">施工距离</span>
+        <span class="info-value" style="color:var(--warn);">3.2</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">拥堵影响</span>
+        <span class="info-value" style="font-size:14px;">+6min</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">建议车道</span>
+        <span class="info-value" style="font-size:14px;">左侧</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 5：已停车 -->
+  <div class="ar-card" id="state-parked">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot idle"></span>
+        <span style="color:var(--dim-low);">已停车</span>
+      </div>
+      <span class="card-time">11:02</span>
+    </div>
+
+    <div class="park-hero">
+      <span class="park-icon">🅿️</span>
+      <p class="park-title">已安全停车</p>
+      <p class="park-sub">北京西站停车场 P3 区 · B-127</p>
+      <div class="park-timer">
+        <p class="park-timer-num">00:12</p>
+        <p class="park-timer-label">停车计时</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">本次行程</span>
+        <span class="info-value">2:18</span>
+        <span class="info-sub">小时</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">总里程</span>
+        <span class="info-value">186</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">停车费率</span>
+        <span class="info-value" style="font-size:14px;">5元/h</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="state-desc">
+  <h3>设计说明</h3>
+  <p id="desc-text">
+    <em>正常行驶状态</em>：极简原则最高体现。大号速度数字（64px）是唯一主角，驾驶员眼睛 0.5 秒内扫一眼就完成信息摄取。路名和路况作为背景信息存在，不争夺注意力。
+  </p>
+</div>
+
+<script>
+  const descs = {
+    cruising: '🚗 <em>正常行驶状态</em>：极简原则最高体现。大号速度数字（64px）是唯一主角，驾驶员眼睛 0.5 秒内扫一眼就完成信息摄取。路名和路况作为背景信息存在，不争夺注意力。绿色系维持"一切正常"的平静感。',
+    speeding: '⚠️ <em>超速警告状态</em>：整张卡片变成黄色警戒系统。速度数字保持最大但变黄，右侧"超出限速 +17"比文字更直觉。关键信息是测速摄像头距离——1.8km，给司机足够的减速窗口。',
+    fatigue:  '😴 <em>疲劳提醒状态</em>：这是最高安全优先级的状态，边框变红。数字变暗（故意降低对速度的关注），最重要的信息是"服务区 3.9km"——立刻给出解决方案，不只是警告。音频同步朗读最近休息区信息。',
+    traffic:  '🚧 <em>路况提醒状态</em>：时间轴式路况列表，三个事件按距离排序。当前最近的施工用黄色高亮，后续的收费站和服务区用低对比度展示。驾驶员一眼知道"3.2km后需要并线"。',
+    parked:   '🅿️ <em>已停车状态</em>：任务完成，系统切换为"停车守护模式"。记录停车位置（P3区B127）和计时，防止停车场迷路。费率显示帮助用户预估返回时间。音频静音，卡片降低亮度。'
+  };
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.state;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.ar-card').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('state-' + s).classList.add('active');
+      document.getElementById('desc-text').innerHTML = descs[s];
+    });
+  });
+</script>
+</body>
+</html>

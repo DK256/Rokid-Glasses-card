@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YodaOS Sprite - 驾驶辅助卡片（480×380px）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'HarmonyOS Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        /* 480×380px 显示区域容器 */
+        .viewport-container {
+            width: 480px;
+            height: 380px;
+            background: #1C1C1C;
+            border-radius: 12px;
+            border: 2px solid #40FF5E;
+            overflow: hidden;
+            margin: 0;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 驾驶状态系统 */
+        .viewport-container.danger-mode {
+            border-color: #FF4040;
+            box-shadow: 0 0 20px rgba(255, 64, 64, 0.3);
+        }
+        
+        .viewport-container.warn-mode {
+            border-color: #FFB340;
+            box-shadow: 0 0 15px rgba(255, 179, 64, 0.3);
+        }
+        
+        /* 标题区域 */
+        .header-section {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .title-area {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 2px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #AAAAAA;
+            font-weight: 400;
+        }
+        
+        .status-indicator {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .status-normal {
+            background: rgba(64, 255, 94, 0.1);
+            color: #40FF5E;
+            border: 1px solid rgba(64, 255, 94, 0.3);
+        }
+        
+        .status-warn {
+            background: rgba(255, 179, 64, 0.1);
+            color: #FFB340;
+            border: 1px solid rgba(255, 179, 64, 0.3);
+        }
+        
+        .status-danger {
+            background: rgba(255, 64, 64, 0.1);
+            color: #FF4040;
+            border: 1px solid rgba(255, 64, 64, 0.3);
+        }
+        
+        /* 状态选择器 - 集成在显示区域内 */
+        .state-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .state-btn {
+            padding: 10px 16px;
+            border: 2px solid rgba(64, 255, 94, 0.3);
+            background: transparent;
+            color: rgba(64, 255, 94, 0.7);
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            min-width: 90px;
+            text-align: center;
+        }
+        
+        .state-btn:hover {
+            border-color: #40FF5E;
+            color: #40FF5E;
+        }
+        
+        .state-btn.active {
+            background: #40FF5E;
+            color: #000000;
+            font-weight: 600;
+            border-color: #40FF5E;
+        }
+        
+        /* 内容区域 - 自适应填充 */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        
+        /* 驾驶卡片主体 */
+        .card-main {
+            background: #2A2A2A;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #40FF5E;
+            min-height: 200px;
+        }
+        
+        .card-main.danger-mode {
+            border-color: #FF4040;
+        }
+        
+        .card-main.warn-mode {
+            border-color: #FFB340;
+        }
+        
+        /* 速度显示区域 */
+        .speed-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .speed-value {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .speed-normal {
+            color: #40FF5E;
+        }
+        
+        .speed-warn {
+            color: #FFB340;
+        }
+        
+        .speed-danger {
+            color: #FF4040;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .speed-unit {
+            font-size: 20px;
+            color: #AAAAAA;
+            margin-left: 4px;
+        }
+        
+        .speed-limit {
+            font-size: 18px;
+            color: #888888;
+            margin-top: 8px;
+        }
+        
+        .speed-limit-value {
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        
+        /* 警告信息 */
+        .warning-area {
+            background: rgba(255, 64, 64, 0.1);
+            border: 2px solid #FF4040;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .warning-icon {
+            font-size: 32px;
+            color: #FF4040;
+            margin-bottom: 12px;
+        }
+        
+        .warning-title {
+            font-size: 18px;
+            color: #FF4040;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .warning-desc {
+            font-size: 15px;
+            color: #FFFFFF;
+            line-height: 1.4;
+        }
+        
+        /* 驾驶信息 */
+        .drive-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        
+        .info-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #AAAAAA;
+            margin-bottom: 6px;
+        }
+        
+        .info-value {
+            font-size: 20px;
+            color: #40FF5E;
+            font-weight: 600;
+        }
+        
+        /* 疲劳检测 */
+        .fatigue-warning {
+            background: rgba(255, 179, 64, 0.1);
+            border: 2px solid #FFB340;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .fatigue-title {
+            font-size: 16px;
+            color: #FFB340;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .fatigue-desc {
+            font-size: 14px;
+            color: #FFFFFF;
+            line-height: 1.4;
+        }
+        
+        /* 路况信息 */
+        .traffic-info {
+            background: rgba(64, 255, 94, 0.1);
+            border: 2px solid #40FF5E;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .traffic-title {
+            font-size: 16px;
+            color: #40FF5E;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .traffic-desc {
+            font-size: 14px;
+            color: #FFFFFF;
+            line-height: 1.4;
+        }
+        
+        /* 停车信息 */
+        .parking-info {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .parking-icon {
+            font-size: 48px;
+            color: #40FF5E;
+            margin-bottom: 16px;
+        }
+        
+        .parking-title {
+            font-size: 20px;
+            color: #40FF5E;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .parking-desc {
+            font-size: 16px;
+            color: #AAAAAA;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .primary-btn {
+            background: #40FF5E;
+            color: #000000;
+        }
+        
+        .secondary-btn {
+            background: transparent;
+            color: #40FF5E;
+            border: 2px solid #40FF5E;
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            font-size: 13px;
+            color: #888888;
+            margin-top: 12px;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        /* 调试信息 */
+        .debug-info {
+            margin-top: 16px;
+            color: #888888;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 480×380px 显示区域 -->
+    <div class="viewport-container" id="viewport-container">
+        <!-- 标题区域 -->
+        <div class="header-section">
+            <div class="title-area">
+                <div class="title">驾驶辅助系统</div>
+                <div class="subtitle">智能安全监控 · AR实景导航</div>
+            </div>
+            <div class="status-indicator status-normal" id="status-indicator">正常</div>
+        </div>
+        
+        <!-- 状态选择器（集成导航） -->
+        <div class="state-selector">
+            <button class="state-btn active" data-state="0">正常行驶</button>
+            <button class="state-btn" data-state="1">超速警告</button>
+            <button class="state-btn" data-state="2">疲劳提醒</button>
+            <button class="state-btn" data-state="3">路况提醒</button>
+            <button class="state-btn" data-state="4">已停车</button>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <div class="card-main" id="card-main">
+                <!-- 状态1: 正常行驶 -->
+                <div class="state-content" id="state-0">
+                    <div class="speed-display">
+                        <div class="speed-value speed-normal">68<span class="speed-unit">km/h</span></div>
+                        <div class="speed-limit">当前路段限速 <span class="speed-limit-value">80km/h</span></div>
+                    </div>
+                    
+                    <div class="drive-info">
+                        <div class="info-item">
+                            <div class="info-label">行驶时间</div>
+                            <div class="info-value">45<span style="font-size: 14px;">分钟</span></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">剩余油量</div>
+                            <div class="info-value">65<span style="font-size: 14px;">%</span></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">车外温度</div>
+                            <div class="info-value">18<span style="font-size: 14px;">°C</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="tooltip">保持安全车速，注意前方路况</div>
+                </div>
+                
+                <!-- 状态2: 超速警告 -->
+                <div class="state-content" id="state-1" style="display: none;">
+                    <div class="warning-area">
+                        <div class="warning-icon">⚠️</div>
+                        <div class="warning-title">超速警告</div>
+                        <div class="warning-desc">
+                            当前车速 <span style="color: #FF4040; font-weight: 600;">92km/h</span><br>
+                            已超过限速 <span style="color: #FF4040; font-weight: 600;">12km/h</span>
+                        </div>
+                    </div>
+                    
+                    <div class="speed-display">
+                        <div class="speed-value speed-danger">92<span class="speed-unit">km/h</span></div>
+                        <div class="speed-limit">当前路段限速 <span class="speed-limit-value" style="color: #FF4040;">80km/h</span></div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn primary-btn" onclick="acknowledgeWarning()">确认警告</button>
+                        <button class="action-btn secondary-btn" onclick="reduceSpeed()">降低车速</button>
+                    </div>
+                    
+                    <div class="tooltip">安全第一，请立即降低车速</div>
+                </div>
+                
+                <!-- 状态3: 疲劳提醒 -->
+                <div class="state-content" id="state-2" style="display: none;">
+                    <div class="fatigue-warning">
+                        <div class="fatigue-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB340">
+                                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                            </svg>
+                            疲劳驾驶提醒
+                        </div>
+                        <div class="fatigue-desc">
+                            您已连续驾驶 <span style="color: #FFB340; font-weight: 600;">2小时15分钟</span><br>
+                            检测到注意力下降，建议休息
+                        </div>
+                    </div>
+                    
+                    <div class="drive-info">
+                        <div class="info-item">
+                            <div class="info-label">连续驾驶</div>
+                            <div class="info-value" style="color: #FFB340;">2:15</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">建议休息</div>
+                            <div class="info-value" style="color: #40FF5E;">15分钟</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">最近服务区</div>
+                            <div class="info-value">8km</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn primary-btn" onclick="navigateToRestArea()">导航到服务区</button>
+                        <button class="action-btn secondary-btn" onclick="dismissFatigueAlert()">稍后提醒</button>
+                    </div>
+                    
+                    <div class="tooltip">疲劳驾驶危险，请及时休息</div>
+                </div>
+                
+                <!-- 状态4: 路况提醒 -->
+                <div class="state-content" id="state-3" style="display: none;">
+                    <div class="traffic-info">
+                        <div class="traffic-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#40FF5E">
+                                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"/>
+                            </svg>
+                            前方路况提醒
+                        </div>
+                        <div class="traffic-desc">
+                            <span style="color: #FFB340; font-weight: 600;">前方500米</span> 施工路段<br>
+                            车道变窄，限速 <span style="color: #40FF5E; font-weight: 600;">40km/h</span><br>
+                            预计通过时间 <span style="color: #FFB340; font-weight: 600;">3分钟</span>
+                        </div>
+                    </div>
+                    
+                    <div class="speed-display">
+                        <div class="speed-value speed-warn">62<span class="speed-unit">km/h</span></div>
+                        <div class="speed-limit">建议车速 <span class="speed-limit-value" style="color: #FFB340;">40km/h</span></div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn primary-btn" onclick="adjustSpeedForRoadwork()">调整车速</button>
+                        <button class="action-btn secondary-btn" onclick="showAlternativeRoute()">查看绕行路线</button>
+                    </div>
+                    
+                    <div class="tooltip">注意施工路段，减速慢行</div>
+                </div>
+                
+                <!-- 状态5: 已停车 -->
+                <div class="state-content" id="state-4" style="display: none;">
+                    <div class="parking-info">
+                        <div class="parking-icon">🅿️</div>
+                        <div class="parking-title">车辆已停妥</div>
+                        <div class="parking-desc">
+                            安全停车完成<br>
+                            本次行驶距离：<span style="color: #40FF5E; font-weight: 600;">38.5公里</span><br>
+                            行驶时间：<span style="color: #40FF5E; font-weight: 600;">45分钟</span>
+                        </div>
+                    </div>
+                    
+                    <div class="drive-info">
+                        <div class="info-item">
+                            <div class="info-label">平均油耗</div>
+                            <div class="info-value">7.2L/100km</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">驾驶评分</div>
+                            <div class="info-value">92分</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">下次保养</div>
+                            <div class="info-value">850km</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn primary-btn" onclick="viewTripSummary()">查看行程总结</button>
+                        <button class="action-btn secondary-btn" onclick="startNewTrip()">开始新行程</button>
+                    </div>
+                    
+                    <div class="tooltip">安全驾驶，一路平安</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 调试信息 -->
+    <div class="debug-info">
+        显示区域：480×380px | 驾驶辅助卡片 v2 | 符合YodaOS设计规范 v1
+    </div>
+
+    <script>
+        // 驾驶状态管理
+        let currentState = 0;
+        const states = [
+            { id: 'state-0', name: '正常行驶', mode: 'normal' },
+            { id: 'state-1', name: '超速警告', mode: 'danger' },
+            { id: 'state-2', name: '疲劳提醒', mode: 'warn' },
+            { id: 'state-3', name: '路况提醒', mode: 'warn' },
+            { id: 'state-4', name: '已停车', mode: 'normal' }
+        ];
+        
+        // 初始化状态切换
+        function initStateSwitching() {
+            const stateButtons = document.querySelectorAll('.state-btn');
+            const stateContents = document.querySelectorAll('.state-content');
+            
+            // 设置按钮点击事件
+            stateButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const stateIndex = parseInt(this.getAttribute('data-state'));
+                    switchState(stateIndex);
+                });
+            });
+            
+            // 初始显示第一个状态
+            switchState(0);
+        }
+        
+        // 切换状态
+        function switchState(newState) {
+            // 更新当前状态
+            currentState = newState;
+            const currentStateData = states[newState];
+            
+            // 更新按钮状态
+            const stateButtons = document.querySelectorAll('.state-btn');
+            stateButtons.forEach(button => {
+                const buttonState = parseInt(button.getAttribute('data-state'));
+                if (buttonState === newState) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // 更新内容显示
+            const stateContents = document.querySelectorAll('.state-content');
+            stateContents.forEach(content => {
+                const contentId = content.id;
+                const contentState = parseInt(contentId.split('-')[1]);
+                if (contentState === newState) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+            
+            // 更新状态指示器
+            const statusIndicator = document.getElementById('status-indicator');
+            statusIndicator.textContent = currentStateData.name;
+            statusIndicator.className = 'status-indicator';
+            
+            // 更新容器和卡片模式
+            const viewportContainer = document.getElementById('viewport-container');
+            const cardMain = document.getElementById('card-main');
+            
+            viewportContainer.className = 'viewport-container';
+            cardMain.className = 'card-main';
+            
+            switch(currentStateData.mode) {
+                case 'danger':
+                    statusIndicator.classList.add('status-danger');
+                    viewportContainer.classList.add('danger-mode');
+                    cardMain.classList.add('danger-mode');
+                    break;
+                case 'warn':
+                    statusIndicator.classList.add('status-warn');
+                    viewportContainer.classList.add('warn-mode');
+                    cardMain.classList.add('warn-mode');
+                    break;
+                default:
+                    statusIndicator.classList.add('status-normal');
+                    break;
+            }
+        }
+        
+        // 驾驶辅助功能
+        function acknowledgeWarning() {
+            alert('已确认超速警告，请注意安全驾驶');
+            switchState(0); // 返回正常状态
+        }
+        
+        function reduceSpeed() {
+            alert('正在降低车速至安全范围');
+            // 模拟车速降低
+            document.querySelector('#state-1 .speed-value').textContent = '75';
+            setTimeout(() => {
+                switchState(0);
+            }, 2000);
+        }
+        
+        function navigateToRestArea() {
+            alert('正在导航到最近服务区');
+        }
+        
+        function dismissFatigueAlert() {
+            alert('疲劳提醒已暂停，15分钟后再次提醒');
+            switchState(0);
+        }
+        
+        function adjustSpeedForRoadwork() {
+            alert('正在调整车速至40km/h');
+            document.querySelector('#state-3 .speed-value').textContent = '40';
+        }
+        
+        function showAlternativeRoute() {
+            alert('显示绕行路线：增加2公里，节省5分钟');
+        }
+        
+        function viewTripSummary() {
+            alert('显示行程总结：行驶38.5公里，用时45分钟，平均油耗7.2L/100km');
+        }
+        
+        function startNewTrip() {
+            alert('开始新的行程记录');
+            switchState(0);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initStateSwitching();
+            
+            // 模拟动态数据更新
+            setInterval(() => {
+                if (currentState === 0) {
+                    // 正常行驶状态下模拟车速变化
+                    const speedElement = document.querySelector('#state-0 .speed-value');
+                    let currentSpeed = parseInt(speedElement.textContent);
+                    const change = Math.random() > 0.5 ? 1 : -1;
+                    const newSpeed = Math.max(50, Math.min(80, currentSpeed + change));
+                    speedElement.textContent = newSpeed;
+                }
+            }, 3000);
+        });
+        
+        // 验证显示区域尺寸
+        function validateViewportSize() {
+            const viewport = document.querySelector('.viewport-container');
+            const rect = viewport.getBoundingClientRect();
+            console.log(`驾驶卡片显示区域：${rect.width}×${rect.height}px`);
+            
+            if (rect.width > 480 || rect.height > 380) {
+                console.warn('警告：显示区域超过480×380px限制！');
+                return false;
+            } else {
+                console.log('✓ 显示区域符合480×380px限制');
+                return true;
+            }
+        }
+        
+        // 验证字号合规性
+        function validateFontSizes() {
+            let violations = 0;
+            
+            // 检查按钮字号
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                const computedStyle = window.getComputedStyle(button);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                if (fontSize < 16) {
+                    console.warn(`按钮字号违规：${fontSize}px`);
+                    violations++;
+                }
+            });
+            
+            // 检查重要文本字号
+            const importantTexts = [
+                '.speed-value',
+                '.warning-title',
+                '.fatigue-title',
+                '.traffic-title',
+                '.parking-title'
+            ];
+            
+            importantTexts.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    const computedStyle = window.getComputedStyle(el);
+                    const fontSize = parseFloat(computedStyle.fontSize);
+                    if (fontSize < 16) {
+                        console.warn(`重要文本字号违规：${selector} - ${fontSize}px`);
+                        violations++;
+                    }
+                });
+            });
+            
+            if (violations === 0) {
+                console.log('✓ 所有重要字号符合最小16px要求');
+                return true;
+            } else {
+                console.warn(`发现${violations}处字号违规`);
+                return false;
+            }
+        }
+        
+        // 验证颜色规范
+        function validateColors() {
+            const viewportContainer = document.querySelector('.viewport-container');
+            const computedStyle = window.getComputedStyle(viewportContainer);
+            const borderColor = computedStyle.borderColor;
+            const expectedColor = 'rgb(64, 255, 94)'; // #40FF5E
+            
+            if (borderColor !== expectedColor && !viewportContainer.classList.contains('danger-mode') && !viewportContainer.classList.contains('warn-mode')) {
+                console.warn(`边框颜色违规：${borderColor}，应为 ${expectedColor}`);
+                return false;
+            }
+            
+            console.log('✓ 颜色规范符合要求');
+            return true;
+        }
+        
+        // 页面完全加载后验证
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                console.log('=== 驾驶卡片规范验证 ===');
+                const sizeValid = validateViewportSize();
+                const fontValid = validateFontSizes();
+                const colorValid = validateColors();
+                
+                if (sizeValid && fontValid && colorValid) {
+                    console.log('✓ 驾驶卡片完全符合YodaOS设计规范');
+                } else {
+                    console.warn('⚠️ 驾驶卡片存在规范不符合项');
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

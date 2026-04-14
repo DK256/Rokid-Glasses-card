@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习场景卡片 - 设计师优化版</title>
+    <style>
+        /* ====== 学习场景专用设计系统 ====== */
+        
+        :root {
+            /* 学习场景颜色系统 */
+            --color-primary: #40FF5E;         /* 主色：绿色 */
+            --color-primary-soft: rgba(64, 255, 94, 0.1);
+            --color-primary-hover: #55FF6F;
+            
+            --color-success: #40FF5E;         /* 掌握/正确 */
+            --color-warning: #FFB340;         /* 提醒/待掌握 */
+            --color-error: #FF6B6B;           /* 错误/需要复习 */
+            --color-accent: #5C8DFF;          /* 强调色：蓝色 */
+            --color-accent-soft: rgba(92, 141, 255, 0.1);
+            
+            /* 学习场景背景系统 */
+            --color-surface-1: #0A0A0A;       /* 背景层 */
+            --color-surface-2: #1A1A1A;       /* 卡片背景 */
+            --color-surface-3: #222222;       /* 面板背景 */
+            --color-surface-4: #2A2A2A;       /* 高亮背景 */
+            
+            /* 学习场景文字系统 */
+            --color-text-primary: #FFFFFF;
+            --color-text-secondary: #CCCCCC;
+            --color-text-tertiary: #888888;
+            
+            /* 学习场景字号系统 */
+            --font-size-display: 32px;        /* 超大文字（单词） */
+            --font-size-heading: 18px;        /* 标题 */
+            --font-size-large: 20px;          /* 重要信息 */
+            --font-size-medium: 16px;         /* 正文内容 */
+            --font-size-small: 14px;          /* 辅助信息 */
+            --font-size-tiny: 12px;           /* 标签/微小信息 */
+            
+            /* 学习场景字重系统 */
+            --font-weight-bold: 600;          /* 强调 */
+            --font-weight-medium: 500;        /* 正文 */
+            --font-weight-regular: 400;       /* 辅助 */
+            
+            /* 学习场景间距系统 */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            /* 学习场景圆角系统 */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+        
+        /* 重置与基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: var(--color-text-primary);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* 学习场景容器（480×380px） */
+        .viewport-learning {
+            width: 480px;
+            height: 380px;
+            margin: 0 auto;
+            background: var(--color-surface-1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ====== 1. 头部区域 ====== */
+        .header-section {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--color-surface-2);
+        }
+        
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .course-title {
+            font-size: var(--font-size-heading);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .course-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--color-primary);
+        }
+        
+        .progress-badge {
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            background: var(--color-primary-soft);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: 100px;
+            border: 1px solid var(--color-primary);
+        }
+        
+        .course-subtitle {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+            opacity: 0.8;
+        }
+        
+        /* ====== 2. 导航区域（学习模式） ====== */
+        .nav-section {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--color-surface-2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-btn {
+            flex: 1;
+            padding: var(--spacing-sm) var(--spacing-sm);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            background: var(--color-surface-3);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .nav-btn:hover {
+            border-color: var(--color-primary);
+            background: var(--color-surface-4);
+        }
+        
+        .nav-btn.active {
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        .nav-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            opacity: 0.9;
+        }
+        
+        /* ====== 3. 内容区域 ====== */
+        .content-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            background: var(--color-surface-1);
+        }
+        
+        /* 学习卡片 */
+        .learning-card {
+            background: var(--color-surface-2);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            border: 2px solid rgba(64, 255, 94, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .learning-card:hover {
+            border-color: rgba(64, 255, 94, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(64, 255, 94, 0.1);
+        }
+        
+        /* 单词展示区域 */
+        .word-display {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .word-value {
+            font-size: var(--font-size-display);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+        
+        .word-phonetic {
+            font-size: var(--font-size-medium);
+            color: var(--color-accent);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .phonetic-icon {
+            width: 16px;
+            height: 16px;
+            fill: var(--color-accent);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .phonetic-icon:hover {
+            transform: scale(1.2);
+        }
+        
+        .word-type {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+            font-style: italic;
+        }
+        
+        /* 释义区域 */
+        .definition-section {
+            background: var(--color-surface-3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .definition-label {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--spacing-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .definition-text {
+            font-size: var(--font-size-medium);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .definition-sub {
+            font-size: var(--font-size-small);
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        /* 例句区域 */
+        .example-section {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .example-label {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .example-icon {
+            width: 14px;
+            height: 14px;
+            fill: var(--color-accent);
+        }
+        
+        .example-english {
+            font-size: var(--font-size-medium);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-xs);
+            padding-left: var(--spacing-sm);
+            border-left: 3px solid var(--color-primary);
+        }
+        
+        .example-chinese {
+            font-size: var(--font-size-small);
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+            padding-left: var(--spacing-sm);
+        }
+        
+        /* 记忆技巧区域 */
+        .memory-section {
+            background: var(--color-accent-soft);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            border-left: 3px solid var(--color-accent);
+        }
+        
+        .memory-label {
+            font-size: var(--font-size-small);
+            color: var(--color-accent);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .memory-icon {
+            width: 14px;
+            height: 14px;
+            fill: var(--color-accent);
+        }
+        
+        .memory-text {
+            font-size: var(--font-size-small);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+        }
+        
+        /* ====== 4. 进度指示器 ====== */
+        .progress-section {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .progress-label {
+            font-size: var(--font-size-small);
+            color: var(--color-text-tertiary);
+        }
+        
+        .progress-count {
+            font-size: var(--font-size-small);
+            color: var(--color-primary);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--color-surface-3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* ====== 5. 操作按钮区域 ====== */
+        .action-section {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-medium);
+            font-weight: var(--font-weight-bold);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .btn-primary {
+            background: var(--color-primary);
+            color: #000000;
+        }
+        
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(64, 255, 94, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text-secondary);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-accent {
+            background: var(--color-accent);
+            color: #FFFFFF;
+        }
+        
+        .btn-accent:hover {
+            background: #6B9DFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 141, 255, 0.4);
+        }
+        
+        /* ====== 空状态 ====== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: var(--spacing-md);
+            color: var(--color-text-tertiary);
+        }
+        
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            fill: var(--color-text-tertiary);
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            font-size: var(--font-size-medium);
+            text-align: center;
+        }
+        
+        .empty-subtext {
+            font-size: var(--font-size-small);
+            text-align: center;
+            opacity: 0.7;
+        }
+        
+        /* ====== 动画效果 ====== */
+        .flip-animation {
+            animation: flip 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes flip {
+            0% {
+                transform: rotateY(0deg);
+            }
+            50% {
+                transform: rotateY(90deg);
+            }
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ====== 统计卡片（复习模式） ====== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .stat-card {
+            background: var(--color-surface-3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .stat-card:hover {
+            background: var(--color-surface-4);
+            transform: translateY(-2px);
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-tiny);
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--spacing-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: var(--font-size-large);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+        
+        .stat-value.success { color: var(--color-success); }
+        .stat-value.warning { color: var(--color-warning); }
+        .stat-value.error { color: var(--color-error); }
+        
+        /* ====== 测验模式 ====== */
+        .quiz-card {
+            background: var(--color-surface-2);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            border: 2px solid rgba(92, 141, 255, 0.3);
+        }
+        
+        .quiz-word {
+            font-size: var(--font-size-display);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .quiz-option {
+            padding: var(--spacing-md);
+            background: var(--color-surface-3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-medium);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--color-accent);
+            background: var(--color-surface-4);
+            transform: translateX(4px);
+        }
+        
+        .quiz-option.correct {
+            background: rgba(64, 255, 94, 0.1);
+            border-color: var(--color-success);
+            color: var(--color-success);
+        }
+        
+        .quiz-option.wrong {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: var(--color-error);
+            color: var(--color-error);
+        }
+    </style>
+</head>
+<body>
+    <!-- 学习场景专用容器 -->
+    <div class="viewport-learning">
+        <!-- 头部区域 -->
+        <div class="header-section">
+            <div class="header-row">
+                <div class="course-title">
+                    <svg class="course-icon" viewBox="0 0 24 24">
+                        <path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/>
+                    </svg>
+                    英语词汇课程
+                </div>
+                <div class="progress-badge" id="progress-badge">12/50</div>
+            </div>
+            <div class="course-subtitle" id="course-subtitle">今日学习目标：新词学习</div>
+        </div>
+        
+        <!-- 导航区域（学习模式） -->
+        <div class="nav-section" id="nav-section">
+            <button class="nav-btn active" data-mode="learn" onclick="switchMode('learn')">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                </svg>
+                <span>学习</span>
+            </button>
+            <button class="nav-btn" data-mode="review" onclick="switchMode('review')">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                <span>复习</span>
+            </button>
+            <button class="nav-btn" data-mode="quiz" onclick="switchMode('quiz')">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21.71.33 1.47.33 2.26 0 4.41-3.59 8-8 8z"/>
+                </svg>
+                <span>测验</span>
+            </button>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-section" id="content-section">
+            <!-- 学习卡片（学习模式） -->
+            <div class="learning-card slide-in" id="learning-card">
+                <!-- 单词展示 -->
+                <div class="word-display">
+                    <div class="word-value" id="word-value">serendipity</div>
+                    <div class="word-phonetic">
+                        <span id="word-phonetic">/ˌserənˈdɪpəti/</span>
+                        <svg class="phonetic-icon" viewBox="0 0 24 24" onclick="playPronunciation()">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    </div>
+                    <div class="word-type" id="word-type">noun</div>
+                </div>
+                
+                <!-- 释义 -->
+                <div class="definition-section">
+                    <div class="definition-label">释义</div>
+                    <div class="definition-text" id="definition-text">意外发现有价值或令人愉快之物的运气；机缘巧合</div>
+                    <div class="definition-sub" id="definition-sub">The occurrence of events by chance in a happy or beneficial way.</div>
+                </div>
+                
+                <!-- 例句 -->
+                <div class="example-section">
+                    <div class="example-label">
+                        <svg class="example-icon" viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+                        </svg>
+                        例句
+                    </div>
+                    <div class="example-english" id="example-english">
+                        "It was pure serendipity that we met at the coffee shop."
+                    </div>
+                    <div class="example-chinese" id="example-chinese">
+                        "我们在咖啡店相遇纯属机缘巧合。"
+                    </div>
+                </div>
+                
+                <!-- 记忆技巧 -->
+                <div class="memory-section">
+                    <div class="memory-label">
+                        <svg class="memory-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        记忆技巧
+                    </div>
+                    <div class="memory-text" id="memory-text">
+                        S（Surprise意外）+ Ere（时间）+ N（Nice美好）+ Dipity（运气）= 意外的美好运气
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="progress-section" id="progress-section" style="padding: 0 var(--spacing-lg) var(--spacing-md);">
+            <div class="progress-header">
+                <div class="progress-label">学习进度</div>
+                <div class="progress-count" id="progress-count">12/50</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 24%;"></div>
+            </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="action-section" id="action-section" style="padding: 0 var(--spacing-lg) var(--spacing-lg);">
+            <button class="action-btn btn-secondary" onclick="previousWord()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+                上一词
+            </button>
+            <button class="action-btn btn-primary" onclick="nextWord()">
+                下一词
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 学习数据
+        const VOCABULARY_DATA = [
+            {
+                word: "serendipity",
+                phonetic: "/ˌserənˈdɪpəti/",
+                type: "noun",
+                definition: "意外发现有价值或令人愉快之物的运气；机缘巧合",
+                definitionEn: "The occurrence of events by chance in a happy or beneficial way.",
+                exampleEn: "It was pure serendipity that we met at the coffee shop.",
+                exampleCn: "我们在咖啡店相遇纯属机缘巧合。",
+                memory: "S（Surprise意外）+ Ere（时间）+ N（Nice美好）+ Dipity（运气）= 意外的美好运气"
+            },
+            {
+                word: "ephemeral",
+                phonetic: "/əˈfemərəl/",
+                type: "adjective",
+                definition: "短暂的；转瞬即逝的",
+                definitionEn: "Lasting for a very short time.",
+                exampleEn: "The ephemeral beauty of cherry blossoms reminds us to cherish the present.",
+                exampleCn: "樱花短暂的美丽提醒我们要珍惜当下。",
+                memory: "E（Eager渴望）+ Phe（Photo照片）+ M（Memory记忆）+ Eral（Real真实）= 渴望照片能记录短暂的真实"
+            },
+            {
+                word: "ubiquitous",
+                phonetic: "/juːˈbɪkwɪtəs/",
+                type: "adjective",
+                definition: "无处不在的；普遍存在的",
+                definitionEn: "Present, appearing, or found everywhere.",
+                exampleEn: "Smartphones have become ubiquitous in modern society.",
+                exampleCn: "智能手机在现代社会已经无处不在。",
+                memory: "U（You你）+ Bi（Bicycle自行车）+ Quit（Quit退出）+ Ous（Our我们的）= 你骑自行车退出我们的无处不在"
+            }
+        ];
+        
+        // 当前状态
+        let currentMode = 'learn';
+        let currentIndex = 0;
+        let completedCount = 12;
+        let totalCount = 50;
+        
+        // 学习数据统计
+        let learningStats = {
+            mastered: 8,
+            reviewing: 15,
+            needReview: 5
+        };
+        
+        // 切换学习模式
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // 更新导航按钮状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            
+            // 更新课程副标题
+            const subtitles = {
+                'learn': '今日学习目标：新词学习',
+                'review': '复习需要巩固的词汇',
+                'quiz': '测验今日所学内容'
+            };
+            document.getElementById('course-subtitle').textContent = subtitles[mode];
+            
+            // 根据模式渲染不同内容
+            renderContentByMode(mode);
+        }
+        
+        // 根据模式渲染内容
+        function renderContentByMode(mode) {
+            const contentSection = document.getElementById('content-section');
+            const progressSection = document.getElementById('progress-section');
+            const actionSection = document.getElementById('action-section');
+            
+            if (mode === 'learn') {
+                renderLearningCard(contentSection);
+                progressSection.style.display = 'block';
+                renderLearningActions(actionSection);
+            } else if (mode === 'review') {
+                renderReviewStats(contentSection);
+                progressSection.style.display = 'block';
+                renderReviewActions(actionSection);
+            } else if (mode === 'quiz') {
+                renderQuizCard(contentSection);
+                progressSection.style.display = 'none';
+                renderQuizActions(actionSection);
+            }
+        }
+        
+        // 渲染学习卡片
+        function renderLearningCard(container) {
+            const word = VOCABULARY_DATA[currentIndex];
+            
+            container.innerHTML = `
+                <div class="learning-card slide-in" id="learning-card">
+                    <!-- 单词展示 -->
+                    <div class="word-display">
+                        <div class="word-value">${word.word}</div>
+                        <div class="word-phonetic">
+                            <span>${word.phonetic}</span>
+                            <svg class="phonetic-icon" viewBox="0 0 24 24" onclick="playPronunciation()">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            </svg>
+                        </div>
+                        <div class="word-type">${word.type}</div>
+                    </div>
+                    
+                    <!-- 释义 -->
+                    <div class="definition-section">
+                        <div class="definition-label">释义</div>
+                        <div class="definition-text">${word.definition}</div>
+                        <div class="definition-sub">${word.definitionEn}</div>
+                    </div>
+                    
+                    <!-- 例句 -->
+                    <div class="example-section">
+                        <div class="example-label">
+                            <svg class="example-icon" viewBox="0 0 24 24">
+                                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+                            </svg>
+                            例句
+                        </div>
+                        <div class="example-english">${word.exampleEn}</div>
+                        <div class="example-chinese">${word.exampleCn}</div>
+                    </div>
+                    
+                    <!-- 记忆技巧 -->
+                    <div class="memory-section">
+                        <div class="memory-label">
+                            <svg class="memory-icon" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            记忆技巧
+                        </div>
+                        <div class="memory-text">${word.memory}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染复习统计
+        function renderReviewStats(container) {
+            container.innerHTML = `
+                <div class="stats-grid slide-in">
+                    <div class="stat-card">
+                        <div class="stat-label">已掌握</div>
+                        <div class="stat-value success">${learningStats.mastered}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">复习中</div>
+                        <div class="stat-value warning">${learningStats.reviewing}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">待复习</div>
+                        <div class="stat-value error">${learningStats.needReview}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">总词汇</div>
+                        <div class="stat-value">${totalCount}</div>
+                    </div>
+                </div>
+                
+                <div class="learning-card slide-in">
+                    <div class="word-display">
+                        <div class="word-value">${VOCABULARY_DATA[currentIndex].word}</div>
+                        <div class="word-phonetic">${VOCABULARY_DATA[currentIndex].phonetic}</div>
+                    </div>
+                    <div class="definition-section">
+                        <div class="definition-label">点击查看释义</div>
+                        <div class="definition-text" style="color: var(--color-text-tertiary); font-style: italic;">
+                            点击下方按钮查看详细释义
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染测验卡片
+        function renderQuizCard(container) {
+            const word = VOCABULARY_DATA[currentIndex];
+            
+            container.innerHTML = `
+                <div class="quiz-card slide-in">
+                    <div class="quiz-word">${word.word}</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, 'A')">
+                            A. ${word.definition.substring(0, 8)}...
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, 'B')">
+                            B. 一个完全不同的解释
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, 'C')">
+                            C. 另一个干扰选项
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, 'D')">
+                            D. 最后一个选项
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染学习操作按钮
+        function renderLearningActions(container) {
+            container.innerHTML = `
+                <button class="action-btn btn-secondary" onclick="previousWord()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>
+                    上一词
+                </button>
+                <button class="action-btn btn-primary" onclick="nextWord()">
+                    下一词
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                    </svg>
+                </button>
+            `;
+        }
+        
+        // 渲染复习操作按钮
+        function renderReviewActions(container) {
+            container.innerHTML = `
+                <button class="action-btn btn-secondary" onclick="markAsNeedReview()">
+                    需要复习
+                </button>
+                <button class="action-btn btn-accent" onclick="markAsMastered()">
+                    已掌握
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </button>
+            `;
+        }
+        
+        // 渲染测验操作按钮
+        function renderQuizActions(container) {
+            container.innerHTML = `
+                <button class="action-btn btn-secondary" onclick="skipQuiz()">
+                    跳过
+                </button>
+                <button class="action-btn btn-accent" onclick="nextQuiz()">
+                    下一题
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                    </svg>
+                </button>
+            `;
+        }
+        
+        // 播放发音
+        function playPronunciation() {
+            // 这里可以集成真实的发音API
+            console.log('播放发音');
+            
+            // 模拟发音反馈
+            const phoneticIcon = document.querySelector('.phonetic-icon');
+            phoneticIcon.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                phoneticIcon.style.transform = 'scale(1)';
+            }, 200);
+        }
+        
+        // 上一个单词
+        function previousWord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderContentByMode(currentMode);
+                updateProgress();
+            }
+        }
+        
+        // 下一个单词
+        function nextWord() {
+            if (currentIndex < VOCABULARY_DATA.length - 1) {
+                currentIndex++;
+                completedCount++;
+                renderContentByMode(currentMode);
+                updateProgress();
+            }
+        }
+        
+        // 标记为需要复习
+        function markAsNeedReview() {
+            learningStats.needReview++;
+            learningStats.reviewing--;
+            renderContentByMode('review');
+        }
+        
+        // 标记为已掌握
+        function markAsMastered() {
+            learningStats.mastered++;
+            learningStats.reviewing--;
+            renderContentByMode('review');
+        }
+        
+        // 检查答案
+        function checkAnswer(element, answer) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+            });
+            
+            if (answer === 'A') {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+            }
+        }
+        
+        // 跳过测验
+        function skipQuiz() {
+            nextQuiz();
+        }
+        
+        // 下一题
+        function nextQuiz() {
+            if (currentIndex < VOCABULARY_DATA.length - 1) {
+                currentIndex++;
+                renderContentByMode('quiz');
+            }
+        }
+        
+        // 更新进度
+        function updateProgress() {
+            document.getElementById('progress-count').textContent = `${completedCount}/${totalCount}`;
+            document.getElementById('progress-badge').textContent = `${completedCount}/${totalCount}`;
+            
+            const progressPercent = (completedCount / totalCount) * 100;
+            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+        }
+        
+        // 初始化
+        window.onload = function() {
+            renderContentByMode('learn');
+            updateProgress();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐饮点单 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+
+  .card {
+    width: 480px; min-height: 400px;
+    background: #1C1C1C; border: 2px solid #40FF5E; border-radius: 12px;
+    padding: 24px; display: flex; flex-direction: column; position: relative;
+  }
+
+  .state-panel { display: none; flex-direction: column; gap: 0; height: 100%; }
+  .state-panel.active { display: flex; }
+
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .text-dim     { color: rgba(64,255,94,0.55); }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+
+  /* 菜品列表 */
+  .dish-list { display: flex; flex-direction: column; gap: 8px; }
+  .dish-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px;
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 8px;
+  }
+  .dish-item.highlight {
+    background: rgba(64,255,94,0.1);
+    border-color: rgba(64,255,94,0.5);
+  }
+  .dish-name  { font-size: 16px; color: #40FF5E; font-weight: 500; }
+  .dish-price { font-size: 16px; color: #40FF5E; font-weight: 700; }
+  .dish-sub   { font-size: 13px; color: rgba(64,255,94,0.55); margin-top: 2px; }
+  .qty-badge  {
+    font-size: 13px; color: #000; background: #40FF5E;
+    border-radius: 50%; width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+
+  /* 分类标签 */
+  .cat-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .cat-tag {
+    font-size: 13px; color: rgba(64,255,94,0.6);
+    border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 20px; padding: 4px 12px; cursor: pointer;
+  }
+  .cat-tag.active { color: #40FF5E; border-color: #40FF5E; background: rgba(64,255,94,0.08); }
+
+  /* 热门推荐标签 */
+  .hot-tag {
+    font-size: 11px; color: #000; background: #40FF5E;
+    border-radius: 4px; padding: 1px 6px; font-weight: 600;
+  }
+
+  /* 等待进度 */
+  .wait-ring {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 4px solid rgba(64,255,94,0.15);
+    border-top-color: #40FF5E;
+    margin: 0 auto 16px;
+    position: relative;
+    animation: spin 3s linear infinite;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .wait-inner {
+    position: absolute; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    animation: spin 3s linear infinite reverse;
+  }
+
+  /* 总价区 */
+  .total-box {
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-primary {
+    background: #40FF5E; color: #000; font-weight: 700;
+  }
+  .btn-primary:hover { background: rgba(64,255,94,0.85); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+
+  /* 评分 */
+  .stars { display: flex; gap: 3px; }
+  .star {
+    width: 14px; height: 14px;
+    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    background: #40FF5E;
+  }
+  .star.empty { background: rgba(64,255,94,0.2); }
+</style>
+</head>
+<body>
+
+<p class="page-title">🍔 Dining — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 扫描菜单</button>
+  <button class="state-btn" onclick="showState(1)">② 菜品推荐</button>
+  <button class="state-btn" onclick="showState(2)">③ 已点列表</button>
+  <button class="state-btn" onclick="showState(3)">④ 等待出餐</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 取餐提醒</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：扫描菜单 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M9 9h2M13 9v2M9 13h4M13 13v-2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">识别菜单中…</span>
+      </div>
+      <span class="text-caption">12:04</span>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;">
+      <div style="width:80px;height:80px;border:2px dashed rgba(64,255,94,0.4);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M8 8h6M8 8v6M26 8h6M32 8v6M8 26v6M8 32h6M26 32h6M32 26v6" stroke="#40FF5E" stroke-width="2" stroke-linecap="round"/>
+          <rect x="15" y="15" width="10" height="10" rx="2" stroke="rgba(64,255,94,0.5)" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="text-body" style="margin-bottom:6px;">将菜单对准视野中央</div>
+      <div class="text-caption">AR视觉识别 · 自动提取菜品信息</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="text-caption" style="margin-bottom:10px;">附近热门餐厅</div>
+    <div class="dish-list">
+      <div class="dish-item">
+        <div class="col">
+          <div class="row"><div class="dish-name">McDonald's 麦当劳</div><span class="hot-tag">人气</span></div>
+          <div class="dish-sub">距离 120m · 4.6分 · 快餐</div>
+        </div>
+        <div class="stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div>
+          <div class="star"></div><div class="star empty"></div>
+        </div>
+      </div>
+      <div class="dish-item">
+        <div class="col">
+          <div class="dish-name">胖哥俩肉蟹煲</div>
+          <div class="dish-sub">距离 280m · 4.8分 · 海鲜</div>
+        </div>
+        <div class="stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div>
+          <div class="star"></div><div class="star"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">扫描菜单</button>
+      <button class="btn">手动搜索</button>
+    </div>
+  </div>
+
+  <!-- 状态2：菜品推荐 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M8 4v4l3 1.5" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">McDonald's 菜单</span>
+      </div>
+      <span class="text-caption">12:06</span>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-tag active">推荐</div>
+      <div class="cat-tag">汉堡</div>
+      <div class="cat-tag">套餐</div>
+      <div class="cat-tag">饮料</div>
+    </div>
+
+    <div class="dish-list" style="flex:1;">
+      <div class="dish-item highlight">
+        <div class="col" style="flex:1;">
+          <div class="row"><div class="dish-name">巨无霸套餐</div><span class="hot-tag">最热</span></div>
+          <div class="dish-sub">汉堡 + 薯条(大) + 可乐(大)</div>
+          <div style="display:flex;gap:3px;margin-top:4px;">
+            <div class="star"></div><div class="star"></div><div class="star"></div>
+            <div class="star"></div><div class="star"></div>
+          </div>
+        </div>
+        <div class="col" style="align-items:flex-end;gap:6px;">
+          <div class="dish-price">¥38</div>
+          <div style="font-size:13px;color:rgba(64,255,94,0.55);text-decoration:line-through;">¥45</div>
+        </div>
+      </div>
+      <div class="dish-item">
+        <div class="col" style="flex:1;">
+          <div class="dish-name">麦辣鸡腿堡</div>
+          <div class="dish-sub">香辣 · 含鸡腿肉 · 卡路里 518kcal</div>
+        </div>
+        <div class="dish-price">¥22</div>
+      </div>
+      <div class="dish-item">
+        <div class="col" style="flex:1;">
+          <div class="dish-name">板烧鸡腿堡套餐</div>
+          <div class="dish-sub">汉堡 + 薯条(中) + 饮料(中)</div>
+        </div>
+        <div class="dish-price">¥34</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">查看全部</button>
+      <button class="btn btn-primary">加入购物车</button>
+    </div>
+  </div>
+
+  <!-- 状态3：已点列表 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 3h12M5 3V2M11 3V2M4 7h2M7 7h2M10 7h2M4 10h2M7 10h2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="2" y="3" width="12" height="11" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+        </svg>
+        <span class="text-caption">购物车 · 3件</span>
+      </div>
+      <span class="text-caption">12:10</span>
+    </div>
+
+    <div class="dish-list" style="flex:1;">
+      <div class="dish-item">
+        <div class="col" style="flex:1;">
+          <div class="dish-name">巨无霸套餐</div>
+          <div class="dish-sub">汉堡 + 薯条(大) + 可乐(大)</div>
+        </div>
+        <div class="row" style="gap:10px;">
+          <div class="qty-badge">1</div>
+          <div class="dish-price">¥38</div>
+        </div>
+      </div>
+      <div class="dish-item">
+        <div class="col" style="flex:1;">
+          <div class="dish-name">麦辣鸡腿堡</div>
+          <div class="dish-sub">单品</div>
+        </div>
+        <div class="row" style="gap:10px;">
+          <div class="qty-badge">2</div>
+          <div class="dish-price">¥44</div>
+        </div>
+      </div>
+      <div class="dish-item">
+        <div class="col" style="flex:1;">
+          <div class="dish-name">麦咖啡拿铁</div>
+          <div class="dish-sub">热 · 中杯</div>
+        </div>
+        <div class="row" style="gap:10px;">
+          <div class="qty-badge">1</div>
+          <div class="dish-price">¥22</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="total-box">
+      <div class="row-between" style="margin-bottom:8px;">
+        <span class="text-caption">小计</span>
+        <span class="text-body">¥104</span>
+      </div>
+      <div class="row-between" style="margin-bottom:8px;">
+        <span class="text-caption">优惠</span>
+        <span class="text-body" style="color:#FF4040;">-¥7</span>
+      </div>
+      <div class="row-between">
+        <span class="text-subtitle" style="font-weight:700;">合计</span>
+        <span class="text-subtitle" style="font-weight:700;">¥97</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">继续点餐</button>
+      <button class="btn btn-primary">结账 ¥97</button>
+    </div>
+  </div>
+
+  <!-- 状态4：等待出餐 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pulse-dot 1s infinite;"></div>
+        <style>.pulse-dot{animation:pulse-dot 1s infinite;} @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption">制作中</span>
+      </div>
+      <span class="text-caption">12:13</span>
+    </div>
+
+    <div style="text-align:center;padding:8px 0 20px;">
+      <div class="wait-ring" style="position:relative;">
+        <div class="wait-inner">
+          <div class="text-display" style="font-size:36px;line-height:1;">08</div>
+          <div class="text-caption">分钟</div>
+        </div>
+      </div>
+      <div class="text-subtitle" style="margin-bottom:4px;">预计等待 8 分钟</div>
+      <div class="text-caption">取餐号：<span style="color:#40FF5E;font-size:20px;font-weight:700;">A47</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="text-caption" style="margin-bottom:10px;">订单详情</div>
+    <div class="dish-list">
+      <div class="row-between">
+        <span class="text-body">巨无霸套餐 ×1</span>
+        <span class="text-caption">制作中…</span>
+      </div>
+      <div class="row-between">
+        <span class="text-body">麦辣鸡腿堡 ×2</span>
+        <span class="text-caption">等待中</span>
+      </div>
+      <div class="row-between">
+        <span class="text-body">麦咖啡拿铁 ×1</span>
+        <span class="text-caption">等待中</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">查看订单</button>
+    </div>
+  </div>
+
+  <!-- 状态5：取餐提醒 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">餐已准备好！</span>
+      </div>
+      <span class="text-caption">12:20</span>
+    </div>
+
+    <div style="text-align:center;padding:12px 0 20px;">
+      <div style="font-size:48px;margin-bottom:8px;">🍟</div>
+      <div class="text-title" style="margin-bottom:8px;">请取餐</div>
+      <div style="font-size:36px;font-weight:700;color:#40FF5E;border:2px solid #40FF5E;border-radius:12px;padding:12px 32px;display:inline-block;margin-bottom:8px;">A47</div>
+      <div class="text-caption">请前往取餐台领取您的餐品</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="dish-list">
+      <div class="row-between">
+        <span class="text-body">巨无霸套餐 ×1</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="row-between">
+        <span class="text-body">麦辣鸡腿堡 ×2</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="row-between">
+        <span class="text-body">麦咖啡拿铁 ×1</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">评价餐厅</button>
+      <button class="btn btn-primary">确认取餐</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Dining · v1.0</p>
+
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

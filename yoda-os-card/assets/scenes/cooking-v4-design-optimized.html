@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多菜品烹饪助手 - 设计师优化版</title>
+    <style>
+        /* ====== 设计师视角：重新定义设计系统 ====== */
+        
+        /* 1. 完整的字体系统 */
+        :root {
+            /* 字号系统 */
+            --font-size-display: 20px;     /* 重要标题/大数字 */
+            --font-size-heading: 18px;     /* 标题/关键状态 */
+            --font-size-body: 16px;        /* 正文内容 */
+            --font-size-caption: 14px;     /* 说明/辅助信息 */
+            --font-size-tiny: 12px;        /* 微小标签 */
+            
+            /* 字重系统 */
+            --font-weight-bold: 600;       /* 强调内容 */
+            --font-weight-medium: 500;     /* 正文 */
+            --font-weight-regular: 400;    /* 次要内容 */
+            
+            /* 行高系统 */
+            --line-height-tight: 1.3;      /* 标题/短文本 */
+            --line-height-normal: 1.5;     /* 正文 */
+            --line-height-relaxed: 1.7;    /* 长段落 */
+            
+            /* 完整的颜色系统 */
+            --color-primary: #40FF5E;      /* 主色：主要操作/重要状态 */
+            --color-primary-soft: #40FF5E33; /* 主色浅背景 */
+            --color-primary-hover: #55FF6F; /* 主色悬停 */
+            
+            --color-success: #40FF5E;      /* 成功状态 */
+            --color-warning: #FFC107;      /* 警告状态 */
+            --color-error: #FF5C5C;        /* 错误/危险 */
+            --color-info: #5C8DFF;         /* 信息状态 */
+            
+            /* 灰度系统（更好的对比度） */
+            --color-surface-1: #000000;    /* 背景层1 */
+            --color-surface-2: #1C1C1C;    /* 背景层2 */
+            --color-surface-3: #2A2A2A;    /* 卡片背景 */
+            --color-surface-4: #3A3A3A;    /* 高亮背景 */
+            
+            --color-text-primary: #FFFFFF;   /* 主要文字 */
+            --color-text-secondary: #CCCCCC; /* 次要文字 */
+            --color-text-tertiary: #888888;  /* 辅助文字 */
+            --color-text-muted: #666666;     /* 禁用文字 */
+            
+            /* 间距系统（基于8px网格） */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            /* 圆角系统 */
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* 边框系统 */
+            --border-width-thin: 1px;
+            --border-width-medium: 2px;
+            --border-width-thick: 3px;
+        }
+        
+        /* 2. 重置与基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: var(--color-text-primary);
+            line-height: var(--line-height-normal);
+            overflow: hidden;
+        }
+        
+        /* 3. 显示区域容器（480×380px） */
+        .viewport-container {
+            width: 480px;
+            height: 380px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--color-surface-1);
+            position: relative;
+        }
+        
+        /* 4. 重新设计的头部区域 */
+        .header-section {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-bottom: var(--border-width-thin) solid var(--color-surface-4);
+            background: var(--color-surface-2);
+        }
+        
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .title {
+            font-size: var(--font-size-heading);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            letter-spacing: -0.3px;
+        }
+        
+        .badge {
+            font-size: var(--font-size-caption);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            background: var(--color-primary-soft);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 100px;
+            border: var(--border-width-thin) solid var(--color-primary);
+        }
+        
+        .subtitle {
+            font-size: var(--font-size-caption);
+            color: var(--color-text-tertiary);
+            opacity: 0.8;
+        }
+        
+        /* 5. 重新设计的导航区域 */
+        .navigation-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--color-surface-2);
+        }
+        
+        /* 菜品选择器 - 设计师优化 */
+        .dish-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            overflow-x: auto;
+            padding-bottom: 2px; /* 滚动条空间 */
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-primary) var(--color-surface-3);
+        }
+        
+        .dish-selector::-webkit-scrollbar {
+            height: 3px;
+        }
+        
+        .dish-selector::-webkit-scrollbar-track {
+            background: var(--color-surface-3);
+            border-radius: var(--radius-sm);
+        }
+        
+        .dish-selector::-webkit-scrollbar-thumb {
+            background: var(--color-primary);
+            border-radius: var(--radius-sm);
+        }
+        
+        .dish-btn {
+            flex-shrink: 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: var(--border-width-thin) solid var(--color-surface-4);
+            border-radius: var(--radius-md);
+            background: var(--color-surface-3);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-body);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+        
+        .dish-btn:hover {
+            border-color: var(--color-primary);
+            background: var(--color-surface-3);
+        }
+        
+        .dish-btn.active {
+            background: var(--color-primary);
+            color: #000000;
+            border-color: var(--color-primary);
+            font-weight: var(--font-weight-bold);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(64, 255, 94, 0.3);
+        }
+        
+        /* 状态选择器 - 设计师优化 */
+        .state-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        .state-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: var(--spacing-sm) var(--spacing-sm);
+            border: var(--border-width-thin) solid var(--color-surface-4);
+            border-radius: var(--radius-md);
+            background: var(--color-surface-3);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-caption);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .state-btn:hover {
+            border-color: var(--color-primary);
+        }
+        
+        .state-btn.active {
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        .state-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            opacity: 0.9;
+        }
+        
+        /* 6. 重新设计的内容区域 */
+        .content-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            background: var(--color-surface-2);
+        }
+        
+        /* 卡片容器 - 视觉焦点 */
+        .card-container {
+            background: var(--color-surface-3);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: var(--border-width-medium) solid var(--color-primary);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 菜品信息 - 视觉层次 */
+        .dish-info-section {
+            margin-bottom: var(--spacing-lg);
+            border-bottom: var(--border-width-thin) solid var(--color-surface-4);
+            padding-bottom: var(--spacing-md);
+        }
+        
+        .dish-name {
+            font-size: var(--font-size-display);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+            line-height: var(--line-height-tight);
+        }
+        
+        .dish-description {
+            font-size: var(--font-size-caption);
+            color: var(--color-text-secondary);
+            line-height: var(--line-height-normal);
+            opacity: 0.9;
+        }
+        
+        /* 状态内容 - 专业排版 */
+        .state-content-section {
+            min-height: 140px;
+        }
+        
+        .state-title {
+            font-size: var(--font-size-heading);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+            font-weight: var(--font-weight-bold);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .step-content {
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-relaxed);
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        /* 食材列表 - 视觉卡片 */
+        .ingredient-list {
+            display: grid;
+            gap: var(--spacing-sm);
+        }
+        
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(64, 255, 94, 0.05);
+            border-radius: var(--radius-md);
+            border-left: var(--border-width-thick) solid var(--color-primary);
+            transition: all 0.2s;
+        }
+        
+        .ingredient-item:hover {
+            background: rgba(64, 255, 94, 0.1);
+            transform: translateX(2px);
+        }
+        
+        .ingredient-name {
+            font-size: var(--font-size-body);
+            color: var(--color-text-primary);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .ingredient-amount {
+            font-size: var(--font-size-body);
+            color: var(--color-primary);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        /* 计时器 - 视觉焦点 */
+        .timer-section {
+            text-align: center;
+            margin: var(--spacing-xl) 0;
+        }
+        
+        .timer-value {
+            font-size: 32px;
+            color: var(--color-primary);
+            font-weight: var(--font-weight-bold);
+            font-variant-numeric: tabular-nums; /* 等宽数字 */
+            margin: var(--spacing-sm) 0;
+            text-shadow: 0 0 10px rgba(64, 255, 94, 0.3);
+        }
+        
+        .timer-label {
+            font-size: var(--font-size-caption);
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* 进度条 - 现代设计 */
+        .progress-section {
+            margin: var(--spacing-lg) 0;
+        }
+        
+        .progress-label {
+            font-size: var(--font-size-caption);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--color-surface-4);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), #55FF6F);
+            border-radius: 4px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 7. 重新设计的操作按钮 */
+        .action-section {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+        }
+        
+        .btn {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-body);
+            font-weight: var(--font-weight-bold);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .btn-primary {
+            background: var(--color-primary);
+            color: #000000;
+        }
+        
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(64, 255, 94, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-primary);
+            border: var(--border-width-medium) solid var(--color-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--color-primary-soft);
+            transform: translateY(-1px);
+        }
+        
+        /* 8. 工具提示 - 优雅设计 */
+        .tooltip {
+            font-size: var(--font-size-tiny);
+            color: var(--color-text-tertiary);
+            margin-top: var(--spacing-sm);
+            text-align: center;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        
+        /* 9. 加载状态动画 */
+        .loading-animation {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--color-primary-soft);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 10. 空状态设计 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 160px;
+            color: var(--color-text-tertiary);
+            gap: var(--spacing-md);
+        }
+        
+        .empty-state-icon {
+            width: 32px;
+            height: 32px;
+            fill: var(--color-text-tertiary);
+            opacity: 0.5;
+        }
+        
+        .empty-state-text {
+            font-size: var(--font-size-caption);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- 480×380px 设计师优化显示区域 -->
+    <div class="viewport-container">
+        <!-- 重新设计的头部 -->
+        <div class="header-section">
+            <div class="title-row">
+                <div class="title">多菜品烹饪助手</div>
+                <div class="badge" id="dish-count">3道菜</div>
+            </div>
+            <div class="subtitle">设计师优化版 - 专注视觉体验</div>
+        </div>
+        
+        <!-- 重新设计的导航区域 -->
+        <div class="navigation-section">
+            <!-- 菜品选择器 -->
+            <div class="dish-selector" id="dish-selector">
+                <!-- 菜品按钮通过JS动态生成 -->
+            </div>
+            
+            <!-- 状态选择器 -->
+            <div class="state-selector" id="state-selector">
+                <!-- 状态按钮通过JS动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 重新设计的内容区域 -->
+        <div class="content-section">
+            <div class="card-container">
+                <!-- 菜品信息区域 -->
+                <div class="dish-info-section">
+                    <div class="dish-name" id="current-dish-name">红烧肉</div>
+                    <div class="dish-description" id="current-dish-description">经典中餐，肥而不腻，入口即化</div>
+                </div>
+                
+                <!-- 状态内容区域 -->
+                <div class="state-content-section" id="state-content">
+                    <!-- 内容通过JS动态生成 -->
+                    <div class="step-content">
+                        请选择烹饪步骤查看详细内容...
+                    </div>
+                </div>
+                
+                <!-- 操作按钮区域 -->
+                <div class="action-section" id="action-section">
+                    <!-- 操作按钮通过JS动态生成 -->
+                </div>
+                
+                <!-- 工具提示 -->
+                <div class="tooltip" id="tooltip">
+                    点击菜品或状态按钮查看详细内容
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 菜品数据（扩展版）
+        const DISHES = [
+            {
+                id: 1,
+                name: "红烧肉",
+                description: "经典中餐，肥而不腻，入口即化",
+                states: [
+                    {
+                        id: "step1",
+                        name: "准备",
+                        icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+                        title: "食材准备",
+                        content: "将五花肉切成2厘米见方的块状，用冷水浸泡30分钟去除血水。准备葱段、姜片、冰糖、八角、桂皮等调料。",
+                        ingredients: [
+                            { name: "五花肉", amount: "500g" },
+                            { name: "冰糖", amount: "30g" },
+                            { name: "老抽", amount: "2汤匙" },
+                            { name: "料酒", amount: "1汤匙" },
+                            { name: "生姜", amount: "3片" },
+                            { name: "八角", amount: "2颗" }
+                        ],
+                        timer: null,
+                        progress: 10,
+                        actions: [{ label: "开始处理", type: "primary", action: "start_prep" }]
+                    },
+                    {
+                        id: "step2",
+                        name: "焯水",
+                        icon: "M19 14l-7 7m0 0l-7-7m7 7V3",
+                        title: "焯水处理",
+                        content: "冷水下锅，加入料酒和姜片，水开后煮5分钟，捞出用温水洗净浮沫。",
+                        ingredients: null,
+                        timer: 300,
+                        progress: 25,
+                        actions: [
+                            { label: "开始计时", type: "primary", action: "start_timer" },
+                            { label: "跳过", type: "secondary", action: "skip_step" }
+                        ]
+                    },
+                    {
+                        id: "step3",
+                        name: "煸炒",
+                        icon: "M9 5l7 7-7 7",
+                        title: "煸炒上色",
+                        content: "锅中放少量油，加入冰糖小火炒至枣红色，放入肉块快速翻炒上色。",
+                        ingredients: null,
+                        timer: 180,
+                        progress: 40,
+                        actions: [{ label: "翻炒监控", type: "primary", action: "monitor_fry" }]
+                    },
+                    {
+                        id: "step4",
+                        name: "炖煮",
+                        icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+                        title: "慢火炖煮",
+                        content: "加入热水没过肉块，放入所有调料，大火烧开后转小火慢炖60分钟。",
+                        ingredients: null,
+                        timer: 3600,
+                        progress: 70,
+                        actions: [{ label: "监控火候", type: "primary", action: "monitor_heat" }]
+                    },
+                    {
+                        id: "step5",
+                        name: "收汁",
+                        icon: "M13 10V3L4 14h7v7l9-11h-7z",
+                        title: "大火收汁",
+                        content: "开大火收浓汤汁，期间不断翻炒防止粘锅，待汤汁浓稠即可出锅。",
+                        ingredients: null,
+                        timer: 300,
+                        progress: 90,
+                        actions: [
+                            { label: "收汁监控", type: "primary", action: "monitor_reduce" },
+                            { label: "完成", type: "secondary", action: "complete" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: "蛋炒饭",
+                description: "简单快手，粒粒分明，营养均衡",
+                states: [
+                    {
+                        id: "step1",
+                        name: "准备",
+                        icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+                        title: "食材准备",
+                        content: "准备隔夜米饭、鸡蛋、胡萝卜丁、青豆、火腿丁、葱花等食材。",
+                        ingredients: [
+                            { name: "隔夜米饭", amount: "2碗" },
+                            { name: "鸡蛋", amount: "3个" },
+                            { name: "火腿丁", amount: "50g" },
+                            { name: "青豆", amount: "30g" },
+                            { name: "胡萝卜丁", amount: "30g" },
+                            { name: "葱花", amount: "适量" }
+                        ],
+                        timer: null,
+                        progress: 15,
+                        actions: [{ label: "开始准备", type: "primary", action: "start_prep" }]
+                    }
+                    // 其他状态...
+                ]
+            }
+        ];
+        
+        // 当前选择状态
+        let currentDishId = 0;
+        let currentStateId = 0;
+        
+        // 初始化函数
+        function init() {
+            renderDishButtons();
+            renderStateButtons(0);
+            updateDishCount();
+            renderStateContent(0, 0);
+        }
+        
+        // 渲染菜品按钮
+        function renderDishButtons() {
+            const container = document.getElementById('dish-selector');
+            container.innerHTML = '';
+            
+            DISHES.forEach((dish, index) => {
+                const btn = document.createElement('button');
+                btn.className = `dish-btn ${index === currentDishId ? 'active' : ''}`;
+                btn.textContent = dish.name;
+                btn.onclick = () => selectDish(index);
+                container.appendChild(btn);
+            });
+        }
+        
+        // 渲染状态按钮
+        function renderStateButtons(dishIndex) {
+            const container = document.getElementById('state-selector');
+            container.innerHTML = '';
+            
+            const dish = DISHES[dishIndex];
+            dish.states.forEach((state, index) => {
+                const btn = document.createElement('button');
+                btn.className = `state-btn ${index === currentStateId ? 'active' : ''}`;
+                
+                // 创建SVG图标
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.classList.add('state-icon');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', state.icon);
+                svg.appendChild(path);
+                
+                // 创建状态名称
+                const text = document.createElement('span');
+                text.textContent = state.name;
+                
+                btn.appendChild(svg);
+                btn.appendChild(text);
+                btn.onclick = () => selectState(index);
+                container.appendChild(btn);
+            });
+        }
+        
+        // 渲染状态内容
+        function renderStateContent(dishIndex, stateIndex) {
+            const dish = DISHES[dishIndex];
+            const state = dish.states[stateIndex];
+            const container = document.getElementById('state-content');
+            const actionContainer = document.getElementById('action-section');
+            
+            // 更新菜品信息
+            document.getElementById('current-dish-name').textContent = dish.name;
+            document.getElementById('current-dish-description').textContent = dish.description;
+            
+            // 构建状态内容
+            let contentHTML = `
+                <div class="state-title">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#40FF5E">
+                        <path d="${state.icon}"/>
+                    </svg>
+                    ${state.title}
+                </div>
+                <div class="step-content">${state.content}</div>
+            `;
+            
+            // 如果有食材信息
+            if (state.ingredients) {
+                contentHTML += `
+                    <div class="ingredient-list">
+                        ${state.ingredients.map(item => `
+                            <div class="ingredient-item">
+                                <span class="ingredient-name">${item.name}</span>
+                                <span class="ingredient-amount">${item.amount}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // 如果有计时器
+            if (state.timer) {
+                const minutes = Math.floor(state.timer / 60);
+                const seconds = state.timer % 60;
+                contentHTML += `
+                    <div class="timer-section">
+                        <div class="timer-value">${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</div>
+                        <div class="timer-label">倒计时</div>
+                    </div>
+                `;
+            }
+            
+            // 如果有进度
+            if (state.progress !== undefined) {
+                contentHTML += `
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>完成进度</span>
+                            <span>${state.progress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${state.progress}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = contentHTML;
+            
+            // 渲染操作按钮
+            if (state.actions && state.actions.length > 0) {
+                actionContainer.innerHTML = state.actions.map(action => `
+                    <button class="btn btn-${action.type}" onclick="handleAction('${action.action}')">
+                        ${action.label}
+                    </button>
+                `).join('');
+            } else {
+                actionContainer.innerHTML = '';
+            }
+        }
+        
+        // 选择菜品
+        function selectDish(index) {
+            currentDishId = index;
+            currentStateId = 0;
+            renderDishButtons();
+            renderStateButtons(index);
+            renderStateContent(index, 0);
+        }
+        
+        // 选择状态
+        function selectState(index) {
+            currentStateId = index;
+            renderStateButtons(currentDishId);
+            renderStateContent(currentDishId, index);
+        }
+        
+        // 更新菜品计数
+        function updateDishCount() {
+            document.getElementById('dish-count').textContent = `${DISHES.length}道菜`;
+        }
+        
+        // 处理操作
+        function handleAction(action) {
+            const tooltip = document.getElementById('tooltip');
+            switch(action) {
+                case 'start_prep':
+                    tooltip.textContent = "开始准备食材...";
+                    break;
+                case 'start_timer':
+                    tooltip.textContent = "计时器已启动";
+                    break;
+                case 'skip_step':
+                    tooltip.textContent = "已跳过当前步骤";
+                    break;
+                case 'complete':
+                    tooltip.textContent = "烹饪完成！";
+                    break;
+                default:
+                    tooltip.textContent = "操作已执行";
+            }
+        }
+        
+        // 页面加载时初始化
+        window.onload = init;
+    </script>
+</body>
+</html>

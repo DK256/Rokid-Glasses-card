@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YodaOS · 购物 / 比价场景</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --warn: #FFB800;
+    --good: #40FF5E;
+    --bad: #FF4444;
+    --neutral: #888;
+    --bg: #000000;
+    --card-bg: #1C1C1C;
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    --dim: rgba(64,255,94,0.55);
+    --dim-low: rgba(64,255,94,0.3);
+  }
+
+  body {
+    background: #111;
+    font-family: var(--font);
+    color: var(--primary);
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .back-link {
+    font-size: 12px;
+    color: var(--dim-low);
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--primary); }
+
+  .page-title-area { text-align: right; }
+  .page-title-en { font-size: 11px; letter-spacing: 2px; color: var(--dim-low); text-transform: uppercase; }
+  .page-title-zh { font-size: 20px; font-weight: 700; }
+
+  .state-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(64,255,94,0.2);
+    background: transparent;
+    color: var(--dim-low);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: rgba(64,255,94,0.5); color: var(--dim); }
+  .tab-btn.active { border-color: var(--primary); background: rgba(64,255,94,0.1); color: var(--primary); }
+
+  .card-stage {
+    display: flex;
+    justify-content: center;
+    min-height: 440px;
+  }
+
+  /* ── AR 卡片容器 ── */
+  .ar-card {
+    width: 480px;
+    background: var(--card-bg);
+    border: 2px solid rgba(64,255,94,0.25);
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .ar-card.active { display: flex; }
+  .ar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(64,255,94,0.4), transparent);
+  }
+
+  /* 推荐购买边框 */
+  .ar-card.buy-mode {
+    border-color: rgba(64,255,94,0.5);
+  }
+  .ar-card.buy-mode::before {
+    background: linear-gradient(90deg, transparent, rgba(64,255,94,0.7), transparent);
+  }
+
+  /* 顶栏 */
+  .card-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .badge-dot.scanning { background: var(--warn); animation: blink 0.6s step-end infinite; }
+  .badge-dot.idle { background: rgba(64,255,94,0.3); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .card-time { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 状态 1：待机扫描 ── */
+  .scan-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0 20px;
+    gap: 16px;
+  }
+
+  .scan-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px dashed rgba(64,255,94,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: spin 4s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .scan-inner-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(64,255,94,0.08);
+    border: 1.5px solid rgba(64,255,94,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: spin 4s linear infinite reverse;
+    font-size: 16px;
+  }
+
+  .scan-label { font-size: 16px; font-weight: 600; }
+  .scan-hint { font-size: 12px; color: var(--dim-low); text-align: center; line-height: 1.6; }
+
+  /* ── 状态 2：识别中 ── */
+  .recognizing-area {
+    padding: 8px 0 12px;
+  }
+
+  .recog-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .recog-label { font-size: 11px; color: var(--dim-low); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .recog-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(64,255,94,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .recog-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+    animation: scanProgress 1.5s ease-in-out infinite;
+  }
+  @keyframes scanProgress {
+    0% { width: 15%; opacity: 0.6; }
+    60% { width: 85%; opacity: 1; }
+    100% { width: 15%; opacity: 0.6; }
+  }
+
+  .recog-product {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(64,255,94,0.04);
+    border: 1px solid rgba(64,255,94,0.12);
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .product-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: rgba(64,255,94,0.06);
+    border: 1.5px dashed rgba(64,255,94,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .product-info-block { flex: 1; }
+  .product-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .product-sub { font-size: 12px; color: var(--dim-low); }
+
+  .recog-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .recog-tag {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    background: rgba(64,255,94,0.06);
+    border: 1px solid rgba(64,255,94,0.15);
+    color: var(--dim);
+  }
+
+  /* ── 状态 3：价格比对（核心状态）── */
+  .price-header {
+    margin-bottom: 16px;
+  }
+  .price-product-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .price-product-spec { font-size: 12px; color: var(--dim-low); }
+
+  .price-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(64,255,94,0.1);
+    background: rgba(64,255,94,0.03);
+    position: relative;
+  }
+  .price-row.best-deal {
+    border-color: rgba(64,255,94,0.45);
+    background: rgba(64,255,94,0.06);
+  }
+
+  .best-tag {
+    position: absolute;
+    top: -8px; right: 12px;
+    padding: 2px 8px;
+    background: var(--primary);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .platform-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .platform-info { flex: 1; }
+  .platform-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .platform-ship { font-size: 11px; color: var(--dim-low); }
+
+  .price-num {
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+  .price-num.price-high { color: var(--dim-low); font-size: 18px; }
+  .price-num.price-best { color: var(--primary); }
+
+  .price-saving {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(64,255,94,0.05);
+    border: 1px solid rgba(64,255,94,0.15);
+    border-radius: 8px;
+  }
+  .saving-label { font-size: 12px; color: var(--dim-low); }
+  .saving-amount { font-size: 20px; font-weight: 700; color: var(--primary); margin-left: auto; }
+
+  /* ── 状态 4：评价摘要 ── */
+  .review-header {
+    margin-bottom: 16px;
+  }
+  .review-product-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .review-source { font-size: 11px; color: var(--dim-low); }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 14px;
+    background: rgba(64,255,94,0.04);
+    border: 1px solid rgba(64,255,94,0.12);
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+
+  .score-big {
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary);
+  }
+  .score-divider { width: 1px; height: 50px; background: rgba(64,255,94,0.1); }
+  .score-detail { flex: 1; }
+  .score-stars { font-size: 18px; letter-spacing: 2px; margin-bottom: 4px; }
+  .score-count { font-size: 12px; color: var(--dim-low); }
+
+  .sentiment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  .sentiment-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sentiment-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .sentiment-pos { background: rgba(64,255,94,0.12); }
+  .sentiment-neg { background: rgba(255,68,68,0.12); }
+
+  .sentiment-bar-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sentiment-label { font-size: 12px; color: rgba(255,255,255,0.7); width: 60px; flex-shrink: 0; }
+  .sentiment-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .sentiment-fill-pos { height: 100%; background: var(--primary); border-radius: 3px; }
+  .sentiment-fill-neg { height: 100%; background: var(--bad); border-radius: 3px; }
+  .sentiment-pct { font-size: 12px; color: var(--dim-low); width: 32px; text-align: right; flex-shrink: 0; }
+
+  /* ── 状态 5：加购确认 ── */
+  .confirm-product {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 14px;
+    background: rgba(64,255,94,0.04);
+    border: 1px solid rgba(64,255,94,0.2);
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .confirm-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: rgba(64,255,94,0.06);
+    border: 1.5px solid rgba(64,255,94,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  .confirm-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .confirm-spec { font-size: 12px; color: var(--dim-low); margin-bottom: 6px; }
+
+  .confirm-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .confirm-price-main { font-size: 24px; font-weight: 700; }
+  .confirm-price-origin { font-size: 14px; color: var(--dim-low); text-decoration: line-through; }
+  .confirm-platform-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(64,255,94,0.08);
+    border: 1px solid rgba(64,255,94,0.2);
+    color: var(--dim);
+  }
+
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: rgba(64,255,94,0.08);
+    border: 1.5px solid rgba(64,255,94,0.25);
+    color: var(--dim);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #000;
+  }
+
+  /* ── 状态 6：收藏提醒 ── */
+  .saved-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0 8px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .saved-icon { font-size: 40px; }
+  .saved-title { font-size: 18px; font-weight: 700; }
+  .saved-sub { font-size: 13px; color: var(--dim-low); }
+
+  .watchlist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(64,255,94,0.03);
+    border: 1px solid rgba(64,255,94,0.1);
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .watchlist-thumb {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    background: rgba(64,255,94,0.05);
+    border: 1px solid rgba(64,255,94,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .watchlist-info { flex: 1; }
+  .watchlist-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .watchlist-current { font-size: 12px; color: var(--dim-low); }
+
+  .price-alert-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(255,184,0,0.05);
+    border: 1px solid rgba(255,184,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-text { font-size: 13px; color: rgba(255,255,255,0.7); flex: 1; }
+  .alert-price { font-size: 16px; font-weight: 700; color: var(--warn); flex-shrink: 0; }
+
+  /* ── 通用 ── */
+  .divider {
+    height: 1px;
+    background: rgba(64,255,94,0.08);
+    margin: 14px 0;
+  }
+
+  .tip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--dim-low);
+  }
+  .tip-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--dim-low); flex-shrink: 0; }
+
+  /* ── 说明 ── */
+  .state-desc {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: rgba(64,255,94,0.03);
+    border: 1px solid rgba(64,255,94,0.08);
+    border-radius: 8px;
+  }
+  .state-desc h3 { font-size: 12px; color: var(--dim-low); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+  .state-desc p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+  .state-desc em { color: var(--dim); font-style: normal; }
+</style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="../index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    返回卡片库
+  </a>
+  <div class="page-title-area">
+    <p class="page-title-en">Shopping / Compare</p>
+    <p class="page-title-zh">购物 / 比价</p>
+  </div>
+</nav>
+
+<div class="state-tabs">
+  <button class="tab-btn active" data-state="standby">① 待机扫描</button>
+  <button class="tab-btn" data-state="recognizing">② 商品识别</button>
+  <button class="tab-btn" data-state="compare">③ 价格比对</button>
+  <button class="tab-btn" data-state="reviews">④ 评价摘要</button>
+  <button class="tab-btn" data-state="confirm">⑤ 加购确认</button>
+  <button class="tab-btn" data-state="saved">⑥ 收藏追价</button>
+</div>
+
+<div class="card-stage">
+
+  <!-- 状态 1：待机扫描 -->
+  <div class="ar-card active" id="state-standby">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot idle"></span>
+        <span style="color:var(--dim-low)">SHOPPING</span>
+      </div>
+      <span class="card-time">11:47</span>
+    </div>
+
+    <div class="scan-hero">
+      <div class="scan-ring">
+        <div class="scan-inner-dot">🛍️</div>
+      </div>
+      <p class="scan-label">扫描商品</p>
+      <p class="scan-hint">将视线对准商品或条形码<br>自动识别并获取比价信息</p>
+    </div>
+
+    <div class="divider"></div>
+    <div class="tip-row">
+      <span class="tip-dot"></span>
+      <span>支持扫码 · 图像识别 · 语音搜索</span>
+    </div>
+  </div>
+
+  <!-- 状态 2：商品识别中 -->
+  <div class="ar-card" id="state-recognizing">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot scanning"></span>
+        <span style="color:var(--warn)">SCANNING</span>
+      </div>
+      <span class="card-time">11:48</span>
+    </div>
+
+    <div class="recognizing-area">
+      <div class="recog-bar-wrap">
+        <span class="recog-label">识别中</span>
+        <div class="recog-bar">
+          <div class="recog-bar-fill"></div>
+        </div>
+        <span style="font-size:11px;color:var(--dim-low)">商品数据库</span>
+      </div>
+
+      <div class="recog-product">
+        <div class="product-thumb">📦</div>
+        <div class="product-info-block">
+          <p class="product-name">戴森 V15 Detect</p>
+          <p class="product-sub">手持无线吸尘器 · 正在匹配规格...</p>
+        </div>
+      </div>
+
+      <div class="recog-tags">
+        <span class="recog-tag">家用电器</span>
+        <span class="recog-tag">吸尘器</span>
+        <span class="recog-tag">无线</span>
+        <span class="recog-tag">Dyson</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="tip-row">
+      <span class="tip-dot"></span>
+      <span>正在对比 京东 · 淘宝 · 拼多多 · 苏宁 实时价格</span>
+    </div>
+  </div>
+
+  <!-- 状态 3：价格比对（核心） -->
+  <div class="ar-card buy-mode" id="state-compare">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>比价结果</span>
+      </div>
+      <span class="card-time">11:48</span>
+    </div>
+
+    <div class="price-header">
+      <p class="price-product-name">戴森 V15 Detect 手持吸尘器</p>
+      <p class="price-product-spec">颜色：镍铁色 · 含配件套装</p>
+    </div>
+
+    <div class="price-list">
+      <!-- 最优 -->
+      <div class="price-row best-deal">
+        <span class="best-tag">最低价</span>
+        <div class="platform-logo">🛒</div>
+        <div class="platform-info">
+          <p class="platform-name">京东自营</p>
+          <p class="platform-ship">次日达 · 正品保障</p>
+        </div>
+        <span class="price-num price-best">¥3,199</span>
+      </div>
+      <!-- 次选 -->
+      <div class="price-row">
+        <div class="platform-logo">🧡</div>
+        <div class="platform-info">
+          <p class="platform-name">天猫旗舰店</p>
+          <p class="platform-ship">当日发 · 官方正品</p>
+        </div>
+        <span class="price-num price-high">¥3,390</span>
+      </div>
+      <!-- 第三 -->
+      <div class="price-row">
+        <div class="platform-logo">🏪</div>
+        <div class="platform-info">
+          <p class="platform-name">苏宁易购</p>
+          <p class="platform-ship">满 3000 减 300</p>
+        </div>
+        <span class="price-num price-high">¥3,450</span>
+      </div>
+    </div>
+
+    <div class="price-saving">
+      <span class="saving-label">📉 选最低价可省</span>
+      <span class="saving-amount">¥251</span>
+    </div>
+  </div>
+
+  <!-- 状态 4：评价摘要 -->
+  <div class="ar-card" id="state-reviews">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>用户评价</span>
+      </div>
+      <span class="card-time">11:48</span>
+    </div>
+
+    <div class="review-header">
+      <p class="review-product-name">戴森 V15 Detect · 京东自营</p>
+      <p class="review-source">基于 12,384 条评价的 AI 摘要</p>
+    </div>
+
+    <div class="score-row">
+      <span class="score-big">4.8</span>
+      <div class="score-divider"></div>
+      <div class="score-detail">
+        <div class="score-stars">★★★★★</div>
+        <p class="score-count">12,384 人评价</p>
+      </div>
+    </div>
+
+    <div class="sentiment-list">
+      <div class="sentiment-item">
+        <div class="sentiment-icon sentiment-pos">👍</div>
+        <div class="sentiment-bar-wrap">
+          <span class="sentiment-label">吸力强劲</span>
+          <div class="sentiment-bar">
+            <div class="sentiment-fill-pos" style="width:92%"></div>
+          </div>
+          <span class="sentiment-pct">92%</span>
+        </div>
+      </div>
+      <div class="sentiment-item">
+        <div class="sentiment-icon sentiment-pos">👍</div>
+        <div class="sentiment-bar-wrap">
+          <span class="sentiment-label">续航够用</span>
+          <div class="sentiment-bar">
+            <div class="sentiment-fill-pos" style="width:78%"></div>
+          </div>
+          <span class="sentiment-pct">78%</span>
+        </div>
+      </div>
+      <div class="sentiment-item">
+        <div class="sentiment-icon sentiment-neg">👎</div>
+        <div class="sentiment-bar-wrap">
+          <span class="sentiment-label">价格偏高</span>
+          <div class="sentiment-bar">
+            <div class="sentiment-fill-neg" style="width:34%"></div>
+          </div>
+          <span class="sentiment-pct">34%</span>
+        </div>
+      </div>
+      <div class="sentiment-item">
+        <div class="sentiment-icon sentiment-neg">👎</div>
+        <div class="sentiment-bar-wrap">
+          <span class="sentiment-label">噪音较大</span>
+          <div class="sentiment-bar">
+            <div class="sentiment-fill-neg" style="width:21%"></div>
+          </div>
+          <span class="sentiment-pct">21%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="tip-row">
+      <span class="tip-dot"></span>
+      <span>综合价格与评价 · 建议购买京东自营版本</span>
+    </div>
+  </div>
+
+  <!-- 状态 5：加购确认 -->
+  <div class="ar-card buy-mode" id="state-confirm">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>确认购买</span>
+      </div>
+      <span class="card-time">11:49</span>
+    </div>
+
+    <div class="confirm-product">
+      <div class="confirm-thumb">🌀</div>
+      <div style="flex:1">
+        <p class="confirm-name">戴森 V15 Detect</p>
+        <p class="confirm-spec">镍铁色 · 含配件套装 · 1件</p>
+        <div class="confirm-price-row">
+          <span class="confirm-price-main">¥3,199</span>
+          <span class="confirm-price-origin">¥3,990</span>
+          <span class="confirm-platform-badge">京东自营</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-secondary">收藏追价</button>
+      <button class="btn btn-primary">加入购物车 🛒</button>
+    </div>
+
+    <div class="tip-row">
+      <span class="tip-dot"></span>
+      <span>历史最低价 ¥2,999 出现于 2024年双11</span>
+    </div>
+  </div>
+
+  <!-- 状态 6：收藏追价 -->
+  <div class="ar-card" id="state-saved">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>追价监控</span>
+      </div>
+      <span class="card-time">14:32</span>
+    </div>
+
+    <div class="saved-hero">
+      <span class="saved-icon">🔔</span>
+      <p class="saved-title">已加入追价清单</p>
+      <p class="saved-sub">降价时自动提醒你</p>
+    </div>
+
+    <div class="watchlist-item">
+      <div class="watchlist-thumb">🌀</div>
+      <div class="watchlist-info">
+        <p class="watchlist-name">戴森 V15 Detect</p>
+        <p class="watchlist-current">当前 ¥3,199 · 京东自营</p>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <p style="font-size:12px;color:var(--dim-low)">目标价</p>
+        <p style="font-size:18px;font-weight:700;color:var(--warn)">¥2,999</p>
+      </div>
+    </div>
+
+    <div class="price-alert-row">
+      <span class="alert-icon">💡</span>
+      <span class="alert-text">历史最低 ¥2,999，双11 / 618 促销期间常见</span>
+      <span class="alert-price">省 ¥200</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="tip-row">
+      <span class="tip-dot"></span>
+      <span>已追踪 3 件商品 · 降价将通过语音提醒你</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="state-desc" id="state-note">
+  <h3>设计说明</h3>
+  <p id="desc-text">待机状态：<em>旋转扫描环</em>给用户"随时可用"的感知，而非空白等待。低存在感 + 仪式感并存。</p>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab-btn');
+  const cards = document.querySelectorAll('.ar-card');
+  const descText = document.getElementById('desc-text');
+
+  const descs = {
+    standby: '待机状态：<em>旋转扫描环</em>给用户"随时可用"的感知，而非空白等待。低存在感 + 仪式感并存。',
+    recognizing: '识别中：<em>进度条动画</em>+标签快速出现，告诉用户"我听到了、我在找"。避免黑屏等待焦虑。',
+    compare: '价格比对（核心状态）：<em>卡片整体边框加亮</em>，最低价高亮 + best-tag 标签直接锁定视线。省去用户自己对比的认知负荷。',
+    reviews: '评价摘要：<em>情感条形图</em>将 12000+ 条评价压缩成 4 个关键词 + 百分比。正负分开，避免"全都是好评"的信息欺骗。',
+    confirm: '加购确认：<em>历史最低价参考</em>防止冲动消费。两个操作按钮尺寸差异=2:1，暗示主次，不强制选择。',
+    saved: '收藏追价：<em>目标价 + 历史规律</em>让用户"知道值得等"而非盲目等待。降价后由音频层主动通知。'
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const state = tab.dataset.state;
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      cards.forEach(c => c.classList.remove('active'));
+      document.getElementById('state-' + state).classList.add('active');
+      descText.innerHTML = descs[state];
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>支付 / 收款 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* QR码模拟 */
+  .qr-box {
+    width: 160px; height: 160px; border: 2px solid rgba(64,255,94,0.4); border-radius: 12px;
+    margin: 0 auto; display: flex; align-items: center; justify-content: center;
+    background: rgba(64,255,94,0.03); flex-direction: column; gap: 8px;
+  }
+  /* 支付方式 */
+  .pay-method {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.2);
+    border-radius: 10px; cursor: pointer; transition: background 0.2s;
+  }
+  .pay-method.selected { border-color: #40FF5E; background: rgba(64,255,94,0.1); }
+  .pay-icon { font-size: 24px; }
+  .pay-amount-box {
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 14px;
+  }
+  /* 成功动画 */
+  .success-circle {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(64,255,94,0.1); border: 2px solid #40FF5E;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+  }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-primary { background: #40FF5E; color: #000; font-weight: 700; }
+  .btn-primary:hover { background: rgba(64,255,94,0.85); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+  .receipt-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(64,255,94,0.1); }
+  .receipt-row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<p class="page-title">💳 Payment — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 扫码收款</button>
+  <button class="state-btn" onclick="showState(1)">② 选择支付</button>
+  <button class="state-btn" onclick="showState(2)">③ 支付中</button>
+  <button class="state-btn" onclick="showState(3)">④ 支付成功</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 收款通知</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：扫码收款 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M9 9h2M13 9v2M9 13h4M13 13v-2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">收款码</span>
+      </div>
+      <span class="text-caption">支付宝 / 微信</span>
+    </div>
+    <div class="qr-box" style="margin-bottom:16px;">
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+        <rect x="5" y="5" width="35" height="35" rx="4" stroke="#40FF5E" stroke-width="2"/>
+        <rect x="15" y="15" width="15" height="15" fill="rgba(64,255,94,0.6)"/>
+        <rect x="60" y="5" width="35" height="35" rx="4" stroke="#40FF5E" stroke-width="2"/>
+        <rect x="70" y="15" width="15" height="15" fill="rgba(64,255,94,0.6)"/>
+        <rect x="5" y="60" width="35" height="35" rx="4" stroke="#40FF5E" stroke-width="2"/>
+        <rect x="15" y="70" width="15" height="15" fill="rgba(64,255,94,0.6)"/>
+        <rect x="55" y="50" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="67" y="50" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="79" y="50" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="55" y="62" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="79" y="62" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="55" y="74" width="32" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="55" y="86" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+        <rect x="79" y="86" width="8" height="8" fill="rgba(64,255,94,0.5)"/>
+      </svg>
+      <span class="text-caption">扫码付款给我</span>
+    </div>
+    <div class="text-body" style="text-align:center;margin-bottom:4px;font-weight:700;">¥ 128.00</div>
+    <div class="text-caption" style="text-align:center;margin-bottom:16px;">午餐 AA · 4人</div>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn">分享二维码</button>
+      <button class="btn">修改金额</button>
+    </div>
+  </div>
+
+  <!-- 状态2：选择支付方式 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="4" width="14" height="10" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M1 8h14" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M4 11h3" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">选择支付方式</span>
+      </div>
+      <span class="text-caption">14:22</span>
+    </div>
+    <div class="pay-amount-box">
+      <div class="text-caption" style="margin-bottom:4px;">需要支付</div>
+      <div class="text-display">¥ 128.00</div>
+      <div class="text-caption" style="margin-top:4px;">午餐 AA · 南锣鼓巷烤肉</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="pay-method selected">
+        <div class="pay-icon">💚</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">微信支付</div>
+          <div class="text-caption">余额 ¥2,340.00</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#40FF5E" stroke-width="1.5"/>
+          <circle cx="8" cy="8" r="3" fill="#40FF5E"/>
+        </svg>
+      </div>
+      <div class="pay-method">
+        <div class="pay-icon">💙</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">支付宝</div>
+          <div class="text-caption">花呗额度充足</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="rgba(64,255,94,0.3)" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">取消</button>
+      <button class="btn btn-primary">确认支付 ¥128</button>
+    </div>
+  </div>
+
+  <!-- 状态3：支付中 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption">支付中…</span>
+      </div>
+      <span class="text-caption">14:22</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+      <div style="width:80px;height:80px;border-radius:50%;border:3px solid rgba(64,255,94,0.15);border-top-color:#40FF5E;animation:spin 1.5s linear infinite;"></div>
+      <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+      <div class="text-subtitle">微信支付处理中</div>
+      <div class="text-caption">请稍候，不要关闭页面</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2v4M8 10v4M14 8h-4M6 8H2" stroke="rgba(64,255,94,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">¥ 128.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态4：支付成功 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" fill="rgba(64,255,94,0.15)" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">支付成功</span>
+      </div>
+      <span class="text-caption">14:22</span>
+    </div>
+    <div style="text-align:center;padding:8px 0 16px;">
+      <div class="success-circle">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M10 20l8 8 12-16" stroke="#40FF5E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="text-title" style="margin-bottom:6px;">¥ 128.00</div>
+      <div class="text-caption">支付成功 · 微信支付</div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;flex-direction:column;gap:0;flex:1;">
+      <div class="receipt-row">
+        <span class="text-caption">收款方</span>
+        <span class="text-body">南锣鼓巷烤肉</span>
+      </div>
+      <div class="receipt-row">
+        <span class="text-caption">备注</span>
+        <span class="text-body">午餐 AA</span>
+      </div>
+      <div class="receipt-row">
+        <span class="text-caption">交易单号</span>
+        <span style="font-size:13px;color:rgba(64,255,94,0.55);">2026033114220001</span>
+      </div>
+      <div class="receipt-row">
+        <span class="text-caption">支付时间</span>
+        <span style="font-size:13px;color:rgba(64,255,94,0.55);">2026-03-31 14:22:18</span>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn">查看账单</button>
+      <button class="btn">申请发票</button>
+    </div>
+  </div>
+
+  <!-- 状态5：收款通知 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <span class="text-caption" style="color:#40FF5E;">收到款项</span>
+      </div>
+      <span class="text-caption">14:25</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;">
+      <div style="font-size:48px;">💰</div>
+      <div class="text-caption" style="margin-bottom:4px;">收到新款项</div>
+      <div class="text-display">¥ 32.00</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(64,255,94,0.1);border:1.5px solid rgba(64,255,94,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;">👤</div>
+        <div class="col" style="text-align:left;">
+          <div class="text-body" style="font-weight:500;">李雨</div>
+          <div class="text-caption">午餐 AA · 微信支付</div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;flex-direction:column;gap:0;flex:1;">
+      <div class="receipt-row">
+        <span class="text-caption">已收 2/4 人</span>
+        <span class="text-body" style="color:#40FF5E;">¥ 64.00 / ¥ 128.00</span>
+      </div>
+      <div class="receipt-row">
+        <span class="text-caption">还差</span>
+        <span style="font-size:16px;color:#FF4040;font-weight:600;">¥ 64.00</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">催收剩余</button>
+      <button class="btn">查看明细</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Payment · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YodaOS · 导航场景</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --warn: #FFB800;
+    --danger: #FF4444;
+    --bg: #000000;
+    --card-bg: #1C1C1C;
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    --dim: rgba(64,255,94,0.55);
+    --dim-low: rgba(64,255,94,0.3);
+  }
+
+  body {
+    background: #111;
+    font-family: var(--font);
+    color: var(--primary);
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  /* ── 顶部导航 ── */
+  .page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .back-link {
+    font-size: 12px;
+    color: var(--dim-low);
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--primary); }
+
+  .page-title-area { text-align: right; }
+  .page-title-en { font-size: 11px; letter-spacing: 2px; color: var(--dim-low); text-transform: uppercase; }
+  .page-title-zh { font-size: 20px; font-weight: 700; }
+
+  /* ── 状态选择器 ── */
+  .state-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(64,255,94,0.2);
+    background: transparent;
+    color: var(--dim-low);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: rgba(64,255,94,0.5); color: var(--dim); }
+  .tab-btn.active { border-color: var(--primary); background: rgba(64,255,94,0.1); color: var(--primary); }
+
+  /* ── 卡片容器 ── */
+  .card-stage {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 440px;
+  }
+
+  /* ── AR 卡片 ── */
+  .ar-card {
+    width: 480px;
+    background: var(--card-bg);
+    border: 2px solid rgba(64,255,94,0.25);
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .ar-card.active { display: flex; }
+
+  /* 顶部光晕 */
+  .ar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(64,255,94,0.4), transparent);
+  }
+
+  /* ── 卡片顶栏 ── */
+  .card-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .badge-dot.warn { background: var(--warn); }
+  .badge-dot.danger { background: var(--danger); }
+  .badge-dot.idle { background: rgba(64,255,94,0.3); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .card-time {
+    font-size: 11px;
+    color: var(--dim-low);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── 主方向区块 ── */
+  .direction-block {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(64,255,94,0.08);
+    margin-bottom: 18px;
+  }
+
+  .direction-icon {
+    width: 72px;
+    height: 72px;
+    border: 2px solid rgba(64,255,94,0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(64,255,94,0.05);
+  }
+
+  .direction-info { flex: 1; }
+
+  .direction-label {
+    font-size: 12px;
+    color: var(--dim-low);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .direction-action {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+
+  .direction-road {
+    font-size: 14px;
+    color: var(--dim);
+  }
+
+  .direction-distance {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .dist-num {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .dist-unit {
+    font-size: 14px;
+    color: var(--dim-low);
+    display: block;
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* ── 进度条 ── */
+  .route-progress {
+    margin-bottom: 18px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label { font-size: 12px; color: var(--dim-low); }
+  .progress-value { font-size: 12px; color: var(--dim); }
+
+  .progress-track {
+    height: 4px;
+    background: rgba(64,255,94,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── 底部信息行 ── */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: rgba(64,255,94,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .info-cell {
+    background: rgba(64,255,94,0.03);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-label { font-size: 10px; color: var(--dim-low); text-transform: uppercase; letter-spacing: 1px; }
+  .info-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .info-sub { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 路线概览（路线规划状态） ── */
+  .route-overview {
+    margin-bottom: 18px;
+  }
+
+  .route-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .route-sub { font-size: 14px; color: var(--dim); margin-bottom: 14px; }
+
+  .route-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .route-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(64,255,94,0.15);
+    background: rgba(64,255,94,0.03);
+    gap: 12px;
+  }
+  .route-option.recommended {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.07);
+  }
+
+  .route-opt-label {
+    font-size: 11px;
+    color: var(--dim-low);
+    width: 60px;
+    flex-shrink: 0;
+  }
+  .route-opt-label.rec { color: var(--primary); }
+
+  .route-opt-time { font-size: 18px; font-weight: 700; flex: 1; }
+  .route-opt-detail { font-size: 12px; color: var(--dim-low); text-align: right; }
+
+  /* ── 警告横幅 ── */
+  .alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .alert-banner.warn {
+    background: rgba(255,184,0,0.1);
+    border: 1px solid rgba(255,184,0,0.3);
+  }
+  .alert-banner.danger {
+    background: rgba(255,68,68,0.1);
+    border: 1px solid rgba(255,68,68,0.3);
+  }
+
+  .alert-icon { font-size: 16px; flex-shrink: 0; }
+  .alert-text { font-size: 13px; flex: 1; }
+  .alert-banner.warn .alert-text { color: var(--warn); }
+  .alert-banner.danger .alert-text { color: var(--danger); }
+
+  /* ── 到达状态 ── */
+  .arrive-hero {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .arrive-icon { font-size: 52px; margin-bottom: 12px; display: block; }
+  .arrive-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .arrive-sub { font-size: 14px; color: var(--dim); margin-bottom: 20px; }
+
+  .trip-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: rgba(64,255,94,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* ── 说明区域 ── */
+  .state-desc {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: rgba(64,255,94,0.03);
+    border: 1px solid rgba(64,255,94,0.08);
+    border-radius: 8px;
+  }
+  .state-desc h3 { font-size: 12px; color: var(--dim-low); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+  .state-desc p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+  .state-desc em { color: var(--dim); font-style: normal; }
+</style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="../index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    返回卡片库
+  </a>
+  <div class="page-title-area">
+    <p class="page-title-en">Navigation</p>
+    <p class="page-title-zh">导航</p>
+  </div>
+</nav>
+
+<div class="state-tabs">
+  <button class="tab-btn active" data-state="planning">① 路线规划</button>
+  <button class="tab-btn" data-state="enroute">② 行进中</button>
+  <button class="tab-btn" data-state="turn">③ 转弯提醒</button>
+  <button class="tab-btn" data-state="reroute">④ 重新规划</button>
+  <button class="tab-btn" data-state="arrived">⑤ 到达</button>
+</div>
+
+<div class="card-stage">
+
+  <!-- 状态 1：路线规划 -->
+  <div class="ar-card active" id="state-planning">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot idle"></span>
+        <span style="color:var(--dim-low);">NAVIGATION</span>
+      </div>
+      <span class="card-time">9:24</span>
+    </div>
+
+    <div class="route-overview">
+      <p class="route-title">北京南站</p>
+      <p class="route-sub">当前位置 → 目的地</p>
+
+      <div class="route-options">
+        <div class="route-option recommended">
+          <span class="route-opt-label rec">推荐</span>
+          <span class="route-opt-time">28 分钟</span>
+          <span class="route-opt-detail">12.4 km · 高速优先</span>
+        </div>
+        <div class="route-option">
+          <span class="route-opt-label">备选 1</span>
+          <span class="route-opt-time">34 分钟</span>
+          <span class="route-opt-detail">9.8 km · 少收费</span>
+        </div>
+        <div class="route-option">
+          <span class="route-opt-label">备选 2</span>
+          <span class="route-opt-time">41 分钟</span>
+          <span class="route-opt-detail">8.1 km · 无收费</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">预计到达</span>
+        <span class="info-value" style="font-size:16px;">09:52</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">收费</span>
+        <span class="info-value" style="font-size:16px;">¥ 8</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">实时路况</span>
+        <span class="info-value" style="color:var(--primary);font-size:14px;">畅通</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 2：行进中 -->
+  <div class="ar-card" id="state-enroute">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>导航中</span>
+      </div>
+      <span class="card-time">9:31</span>
+    </div>
+
+    <div class="direction-block">
+      <div class="direction-icon">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M18 30V8M18 8L10 16M18 8L26 16" stroke="#40FF5E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="direction-info">
+        <p class="direction-label">继续前行</p>
+        <p class="direction-action">长安街</p>
+        <p class="direction-road">主干道 · 限速 80</p>
+      </div>
+      <div class="direction-distance">
+        <span class="dist-num">2.1</span>
+        <span class="dist-unit">公里</span>
+      </div>
+    </div>
+
+    <div class="route-progress">
+      <div class="progress-header">
+        <span class="progress-label">整体路程</span>
+        <span class="progress-value">已完成 3.2 / 12.4 km</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width: 26%;"></div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">当前速度</span>
+        <span class="info-value">72</span>
+        <span class="info-sub">km/h</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">剩余时间</span>
+        <span class="info-value">21</span>
+        <span class="info-sub">分钟</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">到达时间</span>
+        <span class="info-value" style="font-size:16px;">09:52</span>
+        <span class="info-sub">预计</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 3：转弯提醒 -->
+  <div class="ar-card" id="state-turn">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot warn"></span>
+        <span style="color:var(--warn);">即将转弯</span>
+      </div>
+      <span class="card-time">9:38</span>
+    </div>
+
+    <div class="direction-block">
+      <div class="direction-icon" style="border-color:rgba(255,184,0,0.5);background:rgba(255,184,0,0.07);">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M8 28V14C8 11.8 9.8 10 12 10H26M26 10L20 4M26 10L20 16" stroke="#FFB800" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="direction-info">
+        <p class="direction-label" style="color:rgba(255,184,0,0.6);">前方右转</p>
+        <p class="direction-action" style="color:var(--warn);">进入建国路</p>
+        <p class="direction-road" style="color:rgba(255,184,0,0.5);">城市快速路 · 限速 60</p>
+      </div>
+      <div class="direction-distance">
+        <span class="dist-num" style="color:var(--warn);">320</span>
+        <span class="dist-unit">米</span>
+      </div>
+    </div>
+
+    <div class="alert-banner warn">
+      <span class="alert-icon">↗</span>
+      <span class="alert-text">300 米后右转，进入建国路，保持右侧车道</span>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">当前速度</span>
+        <span class="info-value">58</span>
+        <span class="info-sub">km/h</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">剩余时间</span>
+        <span class="info-value">14</span>
+        <span class="info-sub">分钟</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">下一指令</span>
+        <span class="info-value" style="font-size:13px;">直行 1.2km</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 4：重新规划 -->
+  <div class="ar-card" id="state-reroute">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot danger"></span>
+        <span style="color:var(--danger);">重新规划</span>
+      </div>
+      <span class="card-time">9:44</span>
+    </div>
+
+    <div class="alert-banner danger">
+      <span class="alert-icon">⚠</span>
+      <span class="alert-text">前方路段拥堵，正在为您规划绕行路线</span>
+    </div>
+
+    <div class="route-overview" style="margin-bottom:14px;">
+      <p class="route-title" style="font-size:16px;margin-bottom:4px;">找到 2 条绕行路线</p>
+      <p class="route-sub" style="font-size:13px;">预计多用 5 分钟</p>
+
+      <div class="route-options" style="gap:6px;">
+        <div class="route-option recommended">
+          <span class="route-opt-label rec">最快</span>
+          <span class="route-opt-time">+5 分钟</span>
+          <span class="route-opt-detail">+2.3 km · 绕行东三环</span>
+        </div>
+        <div class="route-option">
+          <span class="route-opt-label">备选</span>
+          <span class="route-opt-time">+8 分钟</span>
+          <span class="route-opt-detail">+0.8 km · 走辅路</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">新到达</span>
+        <span class="info-value" style="font-size:16px;">09:57</span>
+        <span class="info-sub">延误 5 min</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">拥堵长度</span>
+        <span class="info-value">3.1</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">前方状态</span>
+        <span class="info-value" style="color:var(--danger);font-size:14px;">严重</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 5：到达 -->
+  <div class="ar-card" id="state-arrived">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot" style="animation:none;"></span>
+        <span>已到达</span>
+      </div>
+      <span class="card-time">09:54</span>
+    </div>
+
+    <div class="arrive-hero">
+      <span class="arrive-icon">📍</span>
+      <p class="arrive-title">北京南站</p>
+      <p class="arrive-sub">您已抵达目的地附近</p>
+    </div>
+
+    <div class="trip-summary">
+      <div class="info-cell">
+        <span class="info-label">总用时</span>
+        <span class="info-value">30</span>
+        <span class="info-sub">分钟</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">总里程</span>
+        <span class="info-value">12.4</span>
+        <span class="info-sub">公里</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">较预计</span>
+        <span class="info-value" style="color:var(--primary);">准时</span>
+        <span class="info-sub">±0 min</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- card-stage -->
+
+<div class="state-desc">
+  <h3>设计说明</h3>
+  <p id="desc-text">
+    <em>路线规划状态</em>：出发前决策辅助。音频播报"已为您规划最优路线"，卡片锚定三条路线对比——时间、距离、收费一目了然。用户不需要掏手机，眼镜侧瞥即可确认选择。
+  </p>
+</div>
+
+<script>
+  const descs = {
+    planning: '🗺️ <em>路线规划状态</em>：出发前决策辅助。音频播报"已为您规划最优路线"，卡片锚定三条路线对比——时间、距离、收费一目了然。用户不需要掏手机，眼镜侧瞥即可确认选择。',
+    enroute:  '🚗 <em>行进中状态</em>：持续信息面板，低干扰原则。主视觉是当前道路名 + 下一个路口距离。速度、剩余时间、到达时间三格辅助信息，驾驶时眼睛永远回到路上。',
+    turn:     '↗️ <em>转弯提醒状态</em>：高优先级信息爆发。图标、文字、颜色全部切换为黄色警戒系统。距离倒计时放大到最显眼位置——<em>300米</em>的数字必须在 1 秒内读取完毕。',
+    reroute:  '⚠️ <em>重新规划状态</em>：异常处理场景。红色系视觉提示拥堵，但不制造恐慌——立刻给出"最快绕行方案"和新到达时间，把焦虑转为行动。用户知道"多 5 分钟"就够了。',
+    arrived:  '📍 <em>到达状态</em>：任务完成确认。大图标 + 目的地名称做情绪终结。行程摘要三格数据（用时/里程/准时度）满足用户的完成感。自动 15 秒后消退。'
+  };
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.state;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.ar-card').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('state-' + s).classList.add('active');
+      document.getElementById('desc-text').innerHTML = descs[s];
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>停车 / 交通工具 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* 停车信息 */
+  .parking-spot {
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 12px; padding: 16px; text-align: center;
+  }
+  /* 地铁时刻 */
+  .metro-item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+  }
+  .metro-time { font-size: 20px; font-weight: 700; color: #40FF5E; width: 48px; text-align: center; }
+  /* 出租车/网约车 */
+  .ride-option {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px; cursor: pointer;
+  }
+  .ride-option.selected { border-color: #40FF5E; background: rgba(64,255,94,0.1); }
+  /* 进度条 */
+  .progress-track { height: 6px; background: rgba(64,255,94,0.15); border-radius: 3px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: #40FF5E; border-radius: 3px; }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-primary { background: #40FF5E; color: #000; font-weight: 700; }
+  .btn-primary:hover { background: rgba(64,255,94,0.85); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">🚇 Transit — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 寻找停车</button>
+  <button class="state-btn" onclick="showState(1)">② 已停车</button>
+  <button class="state-btn" onclick="showState(2)">③ 地铁时刻</button>
+  <button class="state-btn" onclick="showState(3)">④ 打车出行</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 行程中</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：寻找停车位 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="5" width="12" height="8" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 5V4a3 3 0 016 0v1" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M6 10h4" stroke="#40FF5E" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M8 8v4" stroke="#40FF5E" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">附近停车场</span>
+      </div>
+      <span class="text-caption">望京 SOHO 附近</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div style="padding:10px 14px;background:rgba(64,255,94,0.1);border:1.5px solid #40FF5E;border-radius:10px;display:flex;align-items:center;gap:12px;">
+        <div class="col">
+          <div class="row"><div class="text-body" style="font-weight:600;">望京 SOHO 地下停车场</div><span style="font-size:11px;color:#000;background:#40FF5E;border-radius:4px;padding:1px 6px;font-weight:600;margin-left:6px;">最近</span></div>
+          <div class="text-caption">剩余 <span style="color:#40FF5E;font-weight:700;">23</span> 个车位 · 120m</div>
+          <div class="text-caption">¥5/小时 · 24小时</div>
+        </div>
+        <div style="font-size:28px;">🅿️</div>
+      </div>
+      <div style="padding:10px 14px;background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.2);border-radius:10px;display:flex;align-items:center;gap:12px;">
+        <div class="col" style="flex:1;">
+          <div class="text-body">方恒国际中心停车场</div>
+          <div class="text-caption">剩余 <span style="color:#40FF5E;font-weight:700;">8</span> 个车位 · 350m</div>
+          <div class="text-caption">¥8/小时</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px;background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.2);border-radius:10px;display:flex;align-items:center;gap:12px;">
+        <div class="col" style="flex:1;">
+          <div class="text-body">朝阳公园停车场</div>
+          <div class="text-caption">剩余 <span style="color:#FF4040;font-weight:700;">2</span> 个车位 · 800m</div>
+          <div class="text-caption">¥3/小时 · 紧张</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">查看地图</button>
+      <button class="btn btn-primary">导航前往</button>
+    </div>
+  </div>
+
+  <!-- 状态2：已停车 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 2s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption">已停车 · 计时中</span>
+      </div>
+      <span class="text-caption">14:30 开始</span>
+    </div>
+    <div class="parking-spot" style="margin-bottom:16px;">
+      <div class="text-caption" style="margin-bottom:4px;">停车位置</div>
+      <div class="text-title" style="margin-bottom:2px;">B2-045</div>
+      <div class="text-caption">望京SOHO地下二层 · B区</div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px;">
+      <div style="flex:1;text-align:center;">
+        <div style="font-size:32px;font-weight:700;color:#40FF5E;line-height:40px;">01:24</div>
+        <div class="text-caption">已停时长</div>
+      </div>
+      <div style="width:1.5px;background:rgba(64,255,94,0.2);"></div>
+      <div style="flex:1;text-align:center;">
+        <div style="font-size:32px;font-weight:700;color:#40FF5E;line-height:40px;">¥7.0</div>
+        <div class="text-caption">当前费用</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+      <div class="row-between">
+        <span class="text-caption">车牌号</span>
+        <span class="text-body" style="font-weight:600;">京 A12345</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">停车场</span>
+        <span class="text-body">望京SOHO地下</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">费率</span>
+        <span class="text-body">¥5/小时</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">找到我的车</button>
+      <button class="btn">提前缴费</button>
+    </div>
+  </div>
+
+  <!-- 状态3：地铁时刻表 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="3" width="12" height="10" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+          <circle cx="5" cy="11" r="1" fill="#40FF5E"/>
+          <circle cx="11" cy="11" r="1" fill="#40FF5E"/>
+          <path d="M5 3V2M11 3V2M2 7h12" stroke="#40FF5E" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">地铁 · 14号线</span>
+      </div>
+      <span class="text-caption">望京南站 → 东大桥</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="metro-item" style="border-color:rgba(64,255,94,0.5);background:rgba(64,255,94,0.1);">
+        <div class="metro-time">2分</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">14:32 · 即将到站</div>
+          <div class="text-caption">东大桥方向 · 6节车厢</div>
+        </div>
+        <span style="font-size:13px;color:#000;background:#40FF5E;border-radius:4px;padding:2px 8px;font-weight:600;">乘坐</span>
+      </div>
+      <div class="metro-item">
+        <div class="metro-time">12分</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body">14:42</div>
+          <div class="text-caption">东大桥方向 · 6节车厢</div>
+        </div>
+        <span style="font-size:13px;color:rgba(64,255,94,0.55);">较空</span>
+      </div>
+      <div class="metro-item">
+        <div class="metro-time">22分</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body">14:52</div>
+          <div class="text-caption">东大桥方向 · 6节车厢</div>
+        </div>
+        <span style="font-size:13px;color:rgba(64,255,94,0.55);">空</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="row-between">
+      <span class="text-caption">全程 <span style="color:#40FF5E;">5站 · 约18分钟</span></span>
+      <span class="text-caption">¥4.0</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn">设置提醒</button>
+      <button class="btn">换乘方案</button>
+    </div>
+  </div>
+
+  <!-- 状态4：打车出行 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <span style="font-size:16px;">🚕</span>
+        <span class="text-caption">打车出行</span>
+      </div>
+      <span class="text-caption">望京 → 三里屯</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="ride-option selected">
+        <span style="font-size:20px;">🚗</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">滴滴快车</div>
+          <div class="text-caption">约4分钟到达 · 预计18分钟</div>
+        </div>
+        <div class="col" style="align-items:flex-end;gap:2px;">
+          <div class="text-body" style="font-weight:700;">¥23</div>
+          <div class="text-caption">预估</div>
+        </div>
+      </div>
+      <div class="ride-option">
+        <span style="font-size:20px;">🚙</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">滴滴优享</div>
+          <div class="text-caption">约6分钟到达 · 预计18分钟</div>
+        </div>
+        <div class="col" style="align-items:flex-end;gap:2px;">
+          <div class="text-body" style="font-weight:700;">¥31</div>
+          <div class="text-caption">预估</div>
+        </div>
+      </div>
+      <div class="ride-option">
+        <span style="font-size:20px;">🚌</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body" style="font-weight:500;">公交 · 415路</div>
+          <div class="text-caption">3分钟后发车 · 约40分钟</div>
+        </div>
+        <div class="col" style="align-items:flex-end;gap:2px;">
+          <div class="text-body" style="font-weight:700;">¥2</div>
+          <div class="text-caption">公交</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">取消</button>
+      <button class="btn btn-primary">叫车 ¥23</button>
+    </div>
+  </div>
+
+  <!-- 状态5：行程中 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <span class="text-caption" style="color:#40FF5E;">行程中</span>
+      </div>
+      <span class="text-caption">14:36</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="row-between" style="margin-bottom:4px;">
+        <span class="text-caption">出发地</span>
+        <span class="text-caption">目的地</span>
+      </div>
+      <div class="row-between" style="margin-bottom:8px;">
+        <span class="text-body" style="font-weight:600;">望京SOHO</span>
+        <span class="text-body" style="font-weight:600;">三里屯</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:35%;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;text-align:center;background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.15);border-radius:10px;padding:12px;">
+        <div style="font-size:32px;font-weight:700;color:#40FF5E;line-height:40px;">12</div>
+        <div class="text-caption">剩余分钟</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.15);border-radius:10px;padding:12px;">
+        <div style="font-size:32px;font-weight:700;color:#40FF5E;line-height:40px;">3.2</div>
+        <div class="text-caption">剩余公里</div>
+      </div>
+    </div>
+    <div style="background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.2);border-radius:10px;padding:14px 16px;flex:1;display:flex;align-items:center;gap:14px;">
+      <span style="font-size:28px;">🚗</span>
+      <div class="col" style="flex:1;">
+        <div class="text-body" style="font-weight:500;">李师傅 · 京B · 大众帕萨特</div>
+        <div class="text-caption">白色 · 车牌 B · 56789</div>
+        <div class="row" style="gap:6px;margin-top:4px;">
+          <div style="display:flex;gap:2px;">
+            <div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:#40FF5E;"></div>
+            <div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:#40FF5E;"></div>
+            <div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:#40FF5E;"></div>
+            <div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:#40FF5E;"></div>
+            <div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:rgba(64,255,94,0.3);"></div>
+          </div>
+          <span class="text-caption">4.8分</span>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">联系司机</button>
+      <button class="btn">紧急求助</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Transit · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

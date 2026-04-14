@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YodaOS · 实时翻译场景</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --warn: #FFB800;
+    --bg: #000000;
+    --card-bg: #1C1C1C;
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    --dim: rgba(64,255,94,0.55);
+    --dim-low: rgba(64,255,94,0.3);
+  }
+
+  body {
+    background: #111;
+    font-family: var(--font);
+    color: var(--primary);
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .back-link {
+    font-size: 12px;
+    color: var(--dim-low);
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--primary); }
+
+  .page-title-area { text-align: right; }
+  .page-title-en { font-size: 11px; letter-spacing: 2px; color: var(--dim-low); text-transform: uppercase; }
+  .page-title-zh { font-size: 20px; font-weight: 700; }
+
+  .state-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(64,255,94,0.2);
+    background: transparent;
+    color: var(--dim-low);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: rgba(64,255,94,0.5); color: var(--dim); }
+  .tab-btn.active { border-color: var(--primary); background: rgba(64,255,94,0.1); color: var(--primary); }
+
+  .card-stage {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 440px;
+  }
+
+  .ar-card {
+    width: 480px;
+    background: var(--card-bg);
+    border: 2px solid rgba(64,255,94,0.25);
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .ar-card.active { display: flex; }
+  .ar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(64,255,94,0.4), transparent);
+  }
+
+  .card-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  .badge-dot.idle { background: rgba(64,255,94,0.3); animation: none; }
+  .badge-dot.listening { background: #4AF; animation: pulse 0.8s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .card-time { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 语言对标签 ── */
+  .lang-pair {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .lang-tag {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .lang-tag.src {
+    background: rgba(64,255,94,0.08);
+    border: 1px solid rgba(64,255,94,0.2);
+    color: var(--dim);
+  }
+  .lang-tag.dst {
+    background: rgba(64,255,94,0.15);
+    border: 1px solid rgba(64,255,94,0.4);
+    color: var(--primary);
+  }
+
+  .lang-arrow {
+    font-size: 14px;
+    color: var(--dim-low);
+  }
+
+  /* ── 待机状态 ── */
+  .standby-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0;
+    gap: 14px;
+  }
+
+  .standby-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(64,255,94,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .standby-ring::after {
+    content: '';
+    position: absolute;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    border: 1px solid rgba(64,255,94,0.08);
+  }
+
+  .standby-label { font-size: 14px; color: var(--dim-low); text-align: center; }
+  .standby-hint { font-size: 12px; color: rgba(64,255,94,0.2); text-align: center; }
+
+  /* ── 识别中 ── */
+  .listening-block {
+    margin-bottom: 18px;
+  }
+
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 40px;
+    padding: 0 4px;
+    margin-bottom: 14px;
+  }
+
+  .wave-bar {
+    flex: 1;
+    border-radius: 2px;
+    background: rgba(64,255,94,0.3);
+    animation: wave 1.2s ease-in-out infinite;
+    min-height: 4px;
+  }
+
+  .wave-bar:nth-child(1) { animation-delay: 0s; height: 40%; }
+  .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 70%; }
+  .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 100%; }
+  .wave-bar:nth-child(4) { animation-delay: 0.15s; height: 80%; }
+  .wave-bar:nth-child(5) { animation-delay: 0.05s; height: 55%; }
+  .wave-bar:nth-child(6) { animation-delay: 0.25s; height: 90%; }
+  .wave-bar:nth-child(7) { animation-delay: 0.1s; height: 65%; }
+  .wave-bar:nth-child(8) { animation-delay: 0.2s; height: 45%; }
+  .wave-bar:nth-child(9) { animation-delay: 0s; height: 75%; }
+  .wave-bar:nth-child(10) { animation-delay: 0.15s; height: 50%; }
+  .wave-bar:nth-child(11) { animation-delay: 0.3s; height: 85%; }
+  .wave-bar:nth-child(12) { animation-delay: 0.05s; height: 60%; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(1); opacity: 0.4; }
+    50% { transform: scaleY(1.5); opacity: 1; }
+  }
+
+  .listening-text {
+    font-size: 15px;
+    color: var(--dim);
+    font-style: italic;
+    line-height: 1.6;
+    padding: 0 4px;
+  }
+
+  .listening-note {
+    font-size: 11px;
+    color: var(--dim-low);
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── 译文区块 ── */
+  .translation-block {
+    margin-bottom: 16px;
+  }
+
+  .original-text {
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border-left: 2px solid rgba(64,255,94,0.15);
+  }
+
+  .original-label {
+    font-size: 10px;
+    color: var(--dim-low);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .original-content {
+    font-size: 14px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .translated-text {
+    padding: 14px 16px;
+    background: rgba(64,255,94,0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(64,255,94,0.15);
+  }
+
+  .translated-label {
+    font-size: 10px;
+    color: var(--dim-low);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .translated-content {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.4;
+  }
+
+  .confidence-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .confidence-label { font-size: 11px; color: var(--dim-low); }
+  .confidence-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(64,255,94,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    background: var(--primary);
+  }
+  .confidence-pct { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 语言切换 ── */
+  .lang-switch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .lang-option {
+    padding: 12px 8px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(64,255,94,0.15);
+    background: rgba(64,255,94,0.03);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lang-option.current {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.1);
+  }
+  .lang-option-flag { font-size: 20px; display: block; margin-bottom: 4px; }
+  .lang-option-name { font-size: 12px; font-weight: 600; }
+  .lang-option-sub { font-size: 10px; color: var(--dim-low); }
+  .lang-option.current .lang-option-name { color: var(--primary); }
+
+  /* ── 历史记录 ── */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+
+  .history-item {
+    padding: 10px 14px;
+    background: rgba(64,255,94,0.03);
+    border-radius: 8px;
+    border-left: 2px solid rgba(64,255,94,0.15);
+  }
+  .history-item:first-child {
+    border-left-color: rgba(64,255,94,0.4);
+    background: rgba(64,255,94,0.05);
+  }
+
+  .history-original { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 3px; font-style: italic; }
+  .history-translated { font-size: 15px; font-weight: 600; color: var(--dim); }
+  .history-time { font-size: 10px; color: rgba(64,255,94,0.2); float: right; }
+
+  /* ── 信息行 ── */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: rgba(64,255,94,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .info-cell {
+    background: rgba(64,255,94,0.03);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-label { font-size: 10px; color: var(--dim-low); text-transform: uppercase; letter-spacing: 1px; }
+  .info-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .info-sub { font-size: 11px; color: var(--dim-low); }
+
+  /* ── 说明 ── */
+  .state-desc {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: rgba(64,255,94,0.03);
+    border: 1px solid rgba(64,255,94,0.08);
+    border-radius: 8px;
+  }
+  .state-desc h3 { font-size: 12px; color: var(--dim-low); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+  .state-desc p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+  .state-desc em { color: var(--dim); font-style: normal; }
+</style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="../index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    返回卡片库
+  </a>
+  <div class="page-title-area">
+    <p class="page-title-en">Live Translation</p>
+    <p class="page-title-zh">实时翻译</p>
+  </div>
+</nav>
+
+<div class="state-tabs">
+  <button class="tab-btn active" data-state="standby">① 待机</button>
+  <button class="tab-btn" data-state="listening">② 识别中</button>
+  <button class="tab-btn" data-state="result">③ 译文显示</button>
+  <button class="tab-btn" data-state="langswitch">④ 语言切换</button>
+  <button class="tab-btn" data-state="history">⑤ 历史回顾</button>
+</div>
+
+<div class="card-stage">
+
+  <!-- 状态 1：待机 -->
+  <div class="ar-card active" id="state-standby">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot idle"></span>
+        <span style="color:var(--dim-low);">TRANSLATOR</span>
+      </div>
+      <span class="card-time">14:22</span>
+    </div>
+
+    <div class="lang-pair">
+      <span class="lang-tag src">🇺🇸 English</span>
+      <span class="lang-arrow">→</span>
+      <span class="lang-tag dst">🇨🇳 中文</span>
+    </div>
+
+    <div class="standby-block">
+      <div class="standby-ring">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="10" stroke="rgba(64,255,94,0.3)" stroke-width="2"/>
+          <path d="M12 16C12 13.8 13.8 12 16 12C18.2 12 20 13.8 20 16" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="16" y1="20" x2="16" y2="24" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="24" x2="19" y2="24" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="standby-label">等待语音输入</p>
+      <p class="standby-hint">检测到对方说话时自动启动</p>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">翻译对</span>
+        <span class="info-value" style="font-size:13px;">EN→中</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">今日翻译</span>
+        <span class="info-value">23</span>
+        <span class="info-sub">条</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">模式</span>
+        <span class="info-value" style="font-size:13px;">对话</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 2：识别中 -->
+  <div class="ar-card" id="state-listening">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot listening"></span>
+        <span style="color:#4AF;">识别中</span>
+      </div>
+      <span class="card-time">14:23</span>
+    </div>
+
+    <div class="lang-pair">
+      <span class="lang-tag src">🇺🇸 English</span>
+      <span class="lang-arrow">→</span>
+      <span class="lang-tag dst">🇨🇳 中文</span>
+    </div>
+
+    <div class="listening-block">
+      <div class="waveform">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+
+      <p class="listening-text">"Could you tell me where the nearest subway station is..."</p>
+      <p class="listening-note">正在处理 · 英语 · 置信度检测中</p>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">音频质量</span>
+        <span class="info-value" style="color:var(--primary);">清晰</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">说话人</span>
+        <span class="info-value" style="font-size:13px;">对方</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">语言检测</span>
+        <span class="info-value" style="font-size:13px;">英语</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 3：译文显示 -->
+  <div class="ar-card" id="state-result">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot"></span>
+        <span>翻译完成</span>
+      </div>
+      <span class="card-time">14:23</span>
+    </div>
+
+    <div class="lang-pair">
+      <span class="lang-tag src">🇺🇸 English</span>
+      <span class="lang-arrow">→</span>
+      <span class="lang-tag dst">🇨🇳 中文</span>
+    </div>
+
+    <div class="translation-block">
+      <div class="original-text">
+        <p class="original-label">原文</p>
+        <p class="original-content">"Could you tell me where the nearest subway station is?"</p>
+      </div>
+
+      <div class="translated-text">
+        <p class="translated-label">译文</p>
+        <p class="translated-content">最近的地铁站在哪里？</p>
+        <div class="confidence-row">
+          <span class="confidence-label">置信度</span>
+          <div class="confidence-bar">
+            <div class="confidence-fill" style="width:94%;"></div>
+          </div>
+          <span class="confidence-pct">94%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-cell">
+        <span class="info-label">识别耗时</span>
+        <span class="info-value">0.8</span>
+        <span class="info-sub">秒</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">字词数</span>
+        <span class="info-value">12</span>
+        <span class="info-sub">词</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">自动消退</span>
+        <span class="info-value" style="font-size:14px;">8s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 4：语言切换 -->
+  <div class="ar-card" id="state-langswitch">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot idle"></span>
+        <span style="color:var(--dim-low);">LANGUAGE</span>
+      </div>
+      <span class="card-time">14:25</span>
+    </div>
+
+    <p style="font-size:13px;color:var(--dim-low);margin-bottom:14px;letter-spacing:0.5px;">选择目标语言</p>
+
+    <div class="lang-switch-grid">
+      <div class="lang-option current">
+        <span class="lang-option-flag">🇨🇳</span>
+        <p class="lang-option-name">中文</p>
+        <p class="lang-option-sub">使用中</p>
+      </div>
+      <div class="lang-option">
+        <span class="lang-option-flag">🇯🇵</span>
+        <p class="lang-option-name">日语</p>
+        <p class="lang-option-sub">Japanese</p>
+      </div>
+      <div class="lang-option">
+        <span class="lang-option-flag">🇰🇷</span>
+        <p class="lang-option-name">韩语</p>
+        <p class="lang-option-sub">Korean</p>
+      </div>
+      <div class="lang-option">
+        <span class="lang-option-flag">🇫🇷</span>
+        <p class="lang-option-name">法语</p>
+        <p class="lang-option-sub">French</p>
+      </div>
+      <div class="lang-option">
+        <span class="lang-option-flag">🇩🇪</span>
+        <p class="lang-option-name">德语</p>
+        <p class="lang-option-sub">German</p>
+      </div>
+      <div class="lang-option">
+        <span class="lang-option-flag">🇪🇸</span>
+        <p class="lang-option-name">西班牙语</p>
+        <p class="lang-option-sub">Spanish</p>
+      </div>
+    </div>
+
+    <div class="info-row" style="margin-top:4px;">
+      <div class="info-cell">
+        <span class="info-label">当前翻译对</span>
+        <span class="info-value" style="font-size:13px;">EN → 中</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">支持语言</span>
+        <span class="info-value">40+</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">离线语言包</span>
+        <span class="info-value" style="font-size:13px;color:var(--primary);">已载入</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态 5：历史回顾 -->
+  <div class="ar-card" id="state-history">
+    <div class="card-topbar">
+      <div class="card-badge">
+        <span class="badge-dot idle"></span>
+        <span style="color:var(--dim-low);">HISTORY</span>
+      </div>
+      <span class="card-time">14:28</span>
+    </div>
+
+    <p style="font-size:13px;color:var(--dim-low);margin-bottom:14px;">本次对话记录</p>
+
+    <div class="history-list">
+      <div class="history-item">
+        <span class="history-time">14:23</span>
+        <p class="history-original">"Could you tell me where the nearest subway station is?"</p>
+        <p class="history-translated">最近的地铁站在哪里？</p>
+      </div>
+      <div class="history-item">
+        <span class="history-time">14:25</span>
+        <p class="history-original">"It's about 500 meters, turn left at the intersection."</p>
+        <p class="history-translated">大约 500 米，在路口左转。</p>
+      </div>
+      <div class="history-item">
+        <span class="history-time">14:26</span>
+        <p class="history-original">"Thank you so much, have a nice day!"</p>
+        <p class="history-translated">非常感谢，祝你有美好的一天！</p>
+      </div>
+    </div>
+
+    <div class="info-row" style="margin-top:16px;">
+      <div class="info-cell">
+        <span class="info-label">本次翻译</span>
+        <span class="info-value">3</span>
+        <span class="info-sub">条</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">对话时长</span>
+        <span class="info-value">5</span>
+        <span class="info-sub">分钟</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">场景识别</span>
+        <span class="info-value" style="font-size:12px;color:var(--primary);">问路</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="state-desc">
+  <h3>设计说明</h3>
+  <p id="desc-text">
+    <em>待机状态</em>：低干扰存在感。用户知道翻译随时可用，但眼镜里不是一个让人焦虑的空白框——麦克风图标 + "等待语音输入"给出明确的就绪信号，不打扰当前对话。
+  </p>
+</div>
+
+<script>
+  const descs = {
+    standby:    '🎙️ <em>待机状态</em>：低干扰存在感。用户知道翻译随时可用，麦克风图标 + "等待语音输入"给出明确的就绪信号，不打扰当前对话进行。',
+    listening:  '📡 <em>识别中状态</em>：音频波形的存在是给用户的信号——"我听到了，我在处理"。比空白加载框更有安全感。原文用斜体淡色实时显示，区别于最终译文。',
+    result:     '💡 <em>译文显示状态</em>：这是最核心的状态——<em>大字译文</em>是绝对视觉主角（22px），原文缩小为参考背景。置信度条帮助用户判断是否需要确认。8秒自动消退，不遮挡视野。',
+    langswitch: '🌐 <em>语言切换状态</em>：6宫格布局，国旗+语言名，一眼扫完。"使用中"标签明确当前状态。当用户换了一个语种对话场景时，两声指令切换，不需要掏手机进设置。',
+    history:    '📜 <em>历史回顾状态</em>：对话结束后，三条记录保留在卡片上。原文淡灰，译文醒目——用户可以对照确认关键信息。"场景识别：问路"是 AI 对本次对话语境的判断，辅助记忆。'
+  };
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.state;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.ar-card').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('state-' + s).classList.add('active');
+      document.getElementById('desc-text').innerHTML = descs[s];
+    });
+  });
+</script>
+</body>
+</html>

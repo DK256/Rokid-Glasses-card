@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社交识别 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* 人脸识别框 */
+  .face-box {
+    width: 100px; height: 100px; border-radius: 50%;
+    border: 2px solid #40FF5E; background: rgba(64,255,94,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; position: relative; margin: 0 auto;
+  }
+  .face-scan-line {
+    position: absolute; width: 100%; height: 2px; background: rgba(64,255,94,0.6);
+    animation: scan 2s ease-in-out infinite;
+    left: 0;
+  }
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+  /* 置信度 */
+  .confidence-bar { height: 8px; background: rgba(64,255,94,0.15); border-radius: 4px; overflow: hidden; }
+  .confidence-fill { height: 100%; background: #40FF5E; border-radius: 4px; }
+  /* 信息行 */
+  .info-row {
+    display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+  }
+  /* 名片样式 */
+  .business-card {
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 12px; padding: 20px;
+  }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">👤 Social Recognition — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 扫描识别</button>
+  <button class="state-btn" onclick="showState(1)">② 识别成功</button>
+  <button class="state-btn" onclick="showState(2)">③ 陌生人</button>
+  <button class="state-btn" onclick="showState(3)">④ 关系提示</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 名片模式</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：扫描识别中 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption">人脸识别中…</span>
+      </div>
+      <span class="text-caption">14:32</span>
+    </div>
+    <div style="text-align:center;padding:16px 0 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+      <div class="face-box">
+        👤
+        <div class="face-scan-line"></div>
+      </div>
+      <div class="text-body">正在识别面部特征…</div>
+      <div class="text-caption">匹配通讯录 · 人脸数据库</div>
+      <div style="display:flex;gap:4px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:#40FF5E;animation:dot1 1.2s infinite;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#40FF5E;animation:dot1 1.2s 0.2s infinite;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#40FF5E;animation:dot1 1.2s 0.4s infinite;"></div>
+      </div>
+      <style>@keyframes dot1{0%,80%,100%{opacity:0.2;}40%{opacity:1;}}</style>
+    </div>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn">取消识别</button>
+    </div>
+  </div>
+
+  <!-- 状态2：识别成功——熟人 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" fill="rgba(64,255,94,0.1)" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">识别成功</span>
+      </div>
+      <span class="text-caption" style="color:#40FF5E;">置信度 96%</span>
+    </div>
+    <div class="row" style="align-items:flex-start;gap:16px;margin-bottom:14px;">
+      <div class="face-box" style="width:72px;height:72px;font-size:28px;flex-shrink:0;animation:none;">👨‍💼</div>
+      <div class="col" style="flex:1;gap:6px;">
+        <div class="text-title">张明</div>
+        <div class="text-body">产品总监 · Rokid Inc.</div>
+        <div class="text-caption">📞 130 **** 8888 · 同事</div>
+        <div style="display:flex;gap:6px;margin-top:4px;">
+          <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:2px 8px;">通讯录</span>
+          <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:2px 8px;">微信好友</span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="text-caption" style="margin-bottom:8px;">上次互动</div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:2px;"><path d="M2 3h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V3z" stroke="#40FF5E" stroke-width="1.5"/></svg>
+        <div class="col">
+          <div class="text-body">发送了消息 "Q2 PRD 文档已更新"</div>
+          <div class="text-caption">30分钟前 · 微信</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:2px;"><path d="M4 2C4 2 3 5 5 7C7 9 10 8 10 8L12 10" stroke="#40FF5E" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <div class="col">
+          <div class="text-body">通话 3分42秒</div>
+          <div class="text-caption">今天 10:24 · 微信</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">发消息</button>
+      <button class="btn">拨打电话</button>
+    </div>
+  </div>
+
+  <!-- 状态3：陌生人 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="rgba(64,255,94,0.4)" stroke-width="1.5"/>
+          <path d="M8 5v3M8 11v.5" stroke="rgba(64,255,94,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">陌生人</span>
+      </div>
+      <span class="text-caption">置信度 -</span>
+    </div>
+    <div style="text-align:center;padding:16px 0 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+      <div class="face-box" style="border-color:rgba(64,255,94,0.3);border-style:dashed;animation:none;">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="16" r="8" stroke="rgba(64,255,94,0.4)" stroke-width="2"/>
+          <path d="M5 36c0-8.3 6.7-15 15-15s15 6.7 15 15" stroke="rgba(64,255,94,0.4)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="text-subtitle" style="color:rgba(64,255,94,0.6);">未识别</div>
+      <div class="text-caption">不在通讯录中，无历史互动记录</div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="row-between">
+        <span class="text-caption">特征辅助</span>
+        <span class="text-caption">男性 · 约 35 岁</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">社交账号匹配</span>
+        <span class="text-caption">未找到</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">添加联系人</button>
+      <button class="btn">分享名片</button>
+    </div>
+  </div>
+
+  <!-- 状态4：关系提示 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="5" cy="8" r="3" stroke="#40FF5E" stroke-width="1.5"/>
+          <circle cx="11" cy="8" r="3" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M8 6v4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">共同联系人</span>
+      </div>
+      <span class="text-caption">关系网络</span>
+    </div>
+    <div class="row" style="align-items:flex-start;gap:14px;margin-bottom:14px;">
+      <div class="face-box" style="width:60px;height:60px;font-size:24px;flex-shrink:0;animation:none;">👩‍💼</div>
+      <div class="col" style="flex:1;gap:6px;">
+        <div class="text-subtitle">李雨</div>
+        <div class="text-body">前端工程师 · Startup X</div>
+      </div>
+    </div>
+    <div class="text-caption" style="margin-bottom:8px;">你们的关系</div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+      <div class="info-row">
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(64,255,94,0.1);border:1.5px solid rgba(64,255,94,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">👨</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body">通过 张明 认识</div>
+          <div class="text-caption">3位共同联系人</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div style="width:32px;height:32px;border-radius:50%;background:rgba(64,255,94,0.1);border:1.5px solid rgba(64,255,94,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🏢</div>
+        <div class="col" style="flex:1;">
+          <div class="text-body">同在产品圈子</div>
+          <div class="text-caption">互联网产品人 群成员</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">添加好友</button>
+      <button class="btn">查看主页</button>
+    </div>
+  </div>
+
+  <!-- 状态5：名片模式 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="4" width="14" height="9" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M4 8h4M4 10.5h2" stroke="#40FF5E" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="12" cy="8.5" r="2" stroke="#40FF5E" stroke-width="1.2"/>
+        </svg>
+        <span class="text-caption">我的名片</span>
+      </div>
+      <span class="text-caption">分享给对方</span>
+    </div>
+    <div class="business-card" style="margin-bottom:14px;">
+      <div class="row" style="align-items:flex-start;gap:16px;margin-bottom:12px;">
+        <div style="width:60px;height:60px;border-radius:50%;background:rgba(64,255,94,0.1);border:2px solid rgba(64,255,94,0.4);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">😊</div>
+        <div class="col" style="flex:1;">
+          <div class="text-title">王小明</div>
+          <div class="text-body">产品经理</div>
+          <div class="text-caption">Rokid Inc. · AR事业部</div>
+        </div>
+      </div>
+      <div style="height:1.5px;background:rgba(64,255,94,0.2);margin-bottom:12px;"></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row" style="gap:8px;"><span style="font-size:13px;">📱</span><span class="text-caption">138 **** 8888</span></div>
+        <div class="row" style="gap:8px;"><span style="font-size:13px;">📧</span><span class="text-caption">wang@rokid.com</span></div>
+        <div class="row" style="gap:8px;"><span style="font-size:13px;">🌐</span><span class="text-caption">rokid.com/ar</span></div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+      <div style="text-align:center;">
+        <div style="font-size:13px;color:rgba(64,255,94,0.55);margin-bottom:8px;">扫码添加</div>
+        <div style="width:80px;height:80px;border:1.5px solid rgba(64,255,94,0.3);border-radius:8px;margin:0 auto;display:flex;align-items:center;justify-content:center;">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <rect x="4" y="4" width="20" height="20" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+            <rect x="9" y="9" width="10" height="10" fill="rgba(64,255,94,0.6)"/>
+            <rect x="36" y="4" width="20" height="20" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+            <rect x="41" y="9" width="10" height="10" fill="rgba(64,255,94,0.6)"/>
+            <rect x="4" y="36" width="20" height="20" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+            <rect x="9" y="41" width="10" height="10" fill="rgba(64,255,94,0.6)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">分享名片</button>
+      <button class="btn">编辑名片</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Social Recognition · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

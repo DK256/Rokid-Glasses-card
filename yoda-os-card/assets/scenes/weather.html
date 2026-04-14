@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天气 / 出行准备 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    padding: 20px; gap: 16px;
+  }
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+  .card {
+    width: 480px; min-height: 400px; background: #1C1C1C;
+    border: 2px solid #40FF5E; border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .card-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left  { display: flex; align-items: center; gap: 10px; }
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+  /* 温度大字 */
+  .temp-big { font-size: 72px; font-weight: 700; color: #40FF5E; line-height: 80px; }
+  /* 天气图标 */
+  .weather-icon { font-size: 48px; }
+  /* 逐小时 */
+  .hourly-row { display: flex; gap: 8px; overflow-x: hidden; }
+  .hour-cell {
+    flex: 1; background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 8px; padding: 10px 6px; text-align: center; display: flex;
+    flex-direction: column; gap: 4px; align-items: center;
+  }
+  .hour-cell.current { border-color: rgba(64,255,94,0.5); background: rgba(64,255,94,0.1); }
+  /* 出行建议 */
+  .advice-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+  }
+  /* 穿衣建议 */
+  .outfit-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; color: #40FF5E; padding: 8px 0;
+  }
+  /* 进度条（UV/AQI）*/
+  .index-bar { display: flex; flex-direction: column; gap: 4px; }
+  .index-track { height: 8px; background: rgba(64,255,94,0.15); border-radius: 4px; overflow: hidden; }
+  .index-fill  { height: 100%; background: #40FF5E; border-radius: 4px; }
+  .index-fill.moderate { background: #FFB340; }
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">🌤️ Weather — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 当前天气</button>
+  <button class="state-btn" onclick="showState(1)">② 逐小时预报</button>
+  <button class="state-btn" onclick="showState(2)">③ 出行建议</button>
+  <button class="state-btn" onclick="showState(3)">④ 降雨提醒</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 穿衣建议</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：当前天气 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 2a5 5 0 100 10A5 5 0 007 2z" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M7 0v1M7 13v1M0 7h1M13 7h1M2 2l.7.7M11.3 11.3l.7.7M2 12l.7-.7M11.3 2.7L12 2" stroke="#40FF5E" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">北京 · 朝阳区</span>
+      </div>
+      <span class="text-caption">03月31日</span>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-bottom:16px;align-items:flex-start;">
+      <div class="col">
+        <div class="row" style="align-items:flex-start;gap:0;">
+          <div class="temp-big">18</div>
+          <div style="font-size:24px;font-weight:400;color:#40FF5E;margin-top:12px;">°C</div>
+        </div>
+        <div class="text-body" style="font-weight:500;">晴</div>
+        <div class="text-caption">体感 16°C · 湿度 45%</div>
+      </div>
+      <div class="weather-icon">☀️</div>
+    </div>
+    <div class="row-between" style="margin-bottom:16px;">
+      <span class="text-caption">↑ 最高 22°C</span>
+      <span class="text-caption">↓ 最低 8°C</span>
+      <span class="text-caption">风力 N 3级</span>
+    </div>
+    <div class="divider"></div>
+    <div class="text-caption" style="margin-bottom:10px;">近7天预报</div>
+    <div style="display:flex;justify-content:space-between;flex:1;align-items:flex-end;">
+      <div class="col" style="align-items:center;gap:4px;" v-for="d in forecast">
+        <span class="text-caption">今天</span><span>☀️</span>
+        <span style="font-size:13px;color:#40FF5E;">22°</span>
+        <span class="text-caption">8°</span>
+      </div>
+      <div class="col" style="align-items:center;gap:4px;">
+        <span class="text-caption">明</span><span>⛅</span>
+        <span style="font-size:13px;color:#40FF5E;">19°</span>
+        <span class="text-caption">10°</span>
+      </div>
+      <div class="col" style="align-items:center;gap:4px;">
+        <span class="text-caption">后天</span><span>🌧️</span>
+        <span style="font-size:13px;color:#40FF5E;">14°</span>
+        <span class="text-caption">9°</span>
+      </div>
+      <div class="col" style="align-items:center;gap:4px;">
+        <span class="text-caption">周四</span><span>☀️</span>
+        <span style="font-size:13px;color:#40FF5E;">20°</span>
+        <span class="text-caption">7°</span>
+      </div>
+      <div class="col" style="align-items:center;gap:4px;">
+        <span class="text-caption">周五</span><span>⛅</span>
+        <span style="font-size:13px;color:#40FF5E;">17°</span>
+        <span class="text-caption">11°</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">详细预报</button>
+      <button class="btn">出行建议</button>
+    </div>
+  </div>
+
+  <!-- 状态2：逐小时预报 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M8 4v4l3 2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">逐小时预报</span>
+      </div>
+      <span class="text-caption">北京 · 今天</span>
+    </div>
+    <div class="hourly-row" style="margin-bottom:16px;">
+      <div class="hour-cell current">
+        <span class="text-caption">现在</span>
+        <span style="font-size:20px;">☀️</span>
+        <span class="text-body" style="font-weight:600;">18°</span>
+      </div>
+      <div class="hour-cell">
+        <span class="text-caption">16:00</span>
+        <span style="font-size:20px;">☀️</span>
+        <span class="text-body">20°</span>
+      </div>
+      <div class="hour-cell">
+        <span class="text-caption">17:00</span>
+        <span style="font-size:20px;">⛅</span>
+        <span class="text-body">19°</span>
+      </div>
+      <div class="hour-cell">
+        <span class="text-caption">18:00</span>
+        <span style="font-size:20px;">⛅</span>
+        <span class="text-body">17°</span>
+      </div>
+      <div class="hour-cell">
+        <span class="text-caption">19:00</span>
+        <span style="font-size:20px;">🌙</span>
+        <span class="text-body">14°</span>
+      </div>
+    </div>
+    <div class="text-caption" style="margin-bottom:10px;">气温趋势</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-bottom:10px;">
+      <div style="flex:1;background:rgba(64,255,94,0.3);height:65%;border-radius:3px 3px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.4);height:80%;border-radius:3px 3px 0 0;"></div>
+      <div style="flex:1;background:#40FF5E;height:90%;border-radius:3px 3px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.7);height:75%;border-radius:3px 3px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.5);height:60%;border-radius:3px 3px 0 0;"></div>
+      <div style="flex:1;background:rgba(64,255,94,0.35);height:45%;border-radius:3px 3px 0 0;"></div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="index-bar">
+        <div class="row-between">
+          <span class="text-caption">空气质量 AQI</span>
+          <span class="text-caption" style="color:#40FF5E;">优 · 35</span>
+        </div>
+        <div class="index-track"><div class="index-fill" style="width:25%;"></div></div>
+      </div>
+      <div class="index-bar">
+        <div class="row-between">
+          <span class="text-caption">紫外线指数</span>
+          <span class="text-caption" style="color:#FFB340;">中等 · 5</span>
+        </div>
+        <div class="index-track"><div class="index-fill moderate" style="width:50%;"></div></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">7日预报</button>
+    </div>
+  </div>
+
+  <!-- 状态3：出行建议 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2a4 4 0 100 8A4 4 0 008 2z" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M8 10v4M5 14h6" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">今日出行建议</span>
+      </div>
+      <span class="text-caption">☀️ 晴 18°C</span>
+    </div>
+    <div style="font-size:36px;font-weight:700;color:#40FF5E;text-align:center;margin-bottom:6px;">适合出行 ✓</div>
+    <div class="text-caption" style="text-align:center;margin-bottom:16px;">天气晴好，户外活动绝佳时机</div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+      <div class="advice-item">
+        <span style="font-size:20px;">🌂</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body">无需携带雨伞</div>
+          <div class="text-caption">今日降雨概率 3%</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" fill="rgba(64,255,94,0.1)" stroke="#40FF5E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="advice-item">
+        <span style="font-size:20px;">🕶️</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body">建议佩戴墨镜</div>
+          <div class="text-caption">紫外线中等，注意防晒</div>
+        </div>
+      </div>
+      <div class="advice-item">
+        <span style="font-size:20px;">💨</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body">微风，适合骑行</div>
+          <div class="text-caption">北风 3级，体感舒适</div>
+        </div>
+      </div>
+      <div class="advice-item">
+        <span style="font-size:20px;">🌡️</span>
+        <div class="col" style="flex:1;">
+          <div class="text-body">早晚温差 14°C</div>
+          <div class="text-caption">傍晚出行建议加一件外套</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">查看穿衣建议</button>
+    </div>
+  </div>
+
+  <!-- 状态4：降雨提醒 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption" style="color:#40FF5E;">降雨提醒</span>
+      </div>
+      <span class="text-caption">后天 · 周三</span>
+    </div>
+    <div style="text-align:center;padding:10px 0 16px;">
+      <div style="font-size:56px;margin-bottom:8px;">🌧️</div>
+      <div class="text-title" style="margin-bottom:4px;">明天下午有雨</div>
+      <div class="text-caption">预计 14:00 — 20:00 降雨</div>
+    </div>
+    <div style="background:rgba(64,255,94,0.05);border:1.5px solid rgba(64,255,94,0.25);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div class="row-between" style="margin-bottom:8px;">
+        <span class="text-caption">降雨概率</span>
+        <span class="text-body" style="font-weight:700;">85%</span>
+      </div>
+      <div class="row-between" style="margin-bottom:8px;">
+        <span class="text-caption">预期降雨量</span>
+        <span class="text-body">中雨 15-25mm</span>
+      </div>
+      <div class="row-between">
+        <span class="text-caption">气温</span>
+        <span class="text-body">14°C / 9°C</span>
+      </div>
+    </div>
+    <div class="text-caption" style="margin-bottom:8px;">出行建议</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;align-content:flex-start;">
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:4px 12px;">🌂 带伞出门</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:4px 12px;">🚗 避免骑行</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.3);border-radius:6px;padding:4px 12px;">⏰ 早出发</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn">设置提醒</button>
+      <button class="btn">查看详情</button>
+    </div>
+  </div>
+
+  <!-- 状态5：穿衣建议 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <span style="font-size:16px;">👗</span>
+        <span class="text-caption">穿衣建议</span>
+      </div>
+      <span class="text-caption">☀️ 晴 8-22°C</span>
+    </div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="text-subtitle" style="margin-bottom:4px;">早春过渡穿法</div>
+      <div class="text-caption">早晚凉，白天暖，温差 14°C</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+      <div class="outfit-item">
+        <span style="font-size:20px;">🧥</span>
+        <span>轻薄外套（可脱）</span>
+        <span class="text-caption" style="margin-left:auto;">早晚必备</span>
+      </div>
+      <div class="outfit-item">
+        <span style="font-size:20px;">👕</span>
+        <span>长袖衬衫或薄T恤</span>
+        <span class="text-caption" style="margin-left:auto;">内搭</span>
+      </div>
+      <div class="outfit-item">
+        <span style="font-size:20px;">👖</span>
+        <span>轻薄长裤</span>
+        <span class="text-caption" style="margin-left:auto;">首选</span>
+      </div>
+      <div class="outfit-item">
+        <span style="font-size:20px;">👟</span>
+        <span>运动鞋或休闲鞋</span>
+        <span class="text-caption" style="margin-left:auto;">舒适</span>
+      </div>
+      <div style="height:1.5px;background:rgba(64,255,94,0.15);margin:4px 0;"></div>
+      <div class="outfit-item" style="opacity:0.6;">
+        <span style="font-size:20px;">🌂</span>
+        <span>不需要雨伞</span>
+        <span class="text-caption" style="margin-left:auto;">降雨 3%</span>
+      </div>
+      <div class="outfit-item">
+        <span style="font-size:20px;">🕶️</span>
+        <span>可带防晒 SPF 30+</span>
+        <span style="font-size:13px;color:#FFB340;margin-left:auto;">紫外线中</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn">保存建议</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Weather · v1.0</p>
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

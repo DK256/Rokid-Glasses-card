@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烹饪 / 食谱辅助 V5 · YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --primary-dim: rgba(64,255,94,0.55);
+    --primary-low: rgba(64,255,94,0.15);
+    --primary-faint: rgba(64,255,94,0.06);
+    --negative: #FF4040;
+    --moderate: #FFB340;
+    --bg-page: #0a0a0a;
+    --bg-card: #1C1C1C;
+    --bg-surface: #252525;
+    --border: rgba(64,255,94,0.3);
+    --text-primary: #40FF5E;
+    --text-dim: rgba(64,255,94,0.55);
+    --text-low: rgba(64,255,94,0.35);
+    --font: 'HarmonyOS Sans SC','Noto Sans SC','PingFang SC',sans-serif;
+    /* 字体层次 */
+    --fs-display: 52px;
+    --fs-title: 24px;
+    --fs-subtitle: 20px;
+    --fs-body: 16px;
+    --fs-caption: 13px;
+    --fs-button: 15px;
+  }
+
+  body {
+    background: var(--bg-page);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    font-family: var(--font);
+    color: var(--text-primary);
+  }
+
+  /* 页面标题 */
+  .page-title {
+    font-size: 13px;
+    color: var(--text-low);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  /* 菜品选择器 */
+  .dish-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    width: 480px;
+  }
+  .dish-btn {
+    flex: 1;
+    padding: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .dish-btn.active {
+    background: var(--primary-low);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  /* 状态导航 */
+  .state-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    width: 480px;
+    flex-wrap: wrap;
+  }
+  .s-btn {
+    padding: 6px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .s-btn.active {
+    background: var(--primary-low);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  /* 卡片容器 */
+  .card {
+    width: 480px;
+    height: 400px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* 状态面板 */
+  .state-panel {
+    display: none;
+    width: 480px;
+    height: 400px;
+    position: absolute;
+    top: 0; left: 0;
+    padding: 20px;
+    flex-direction: column;
+  }
+  .state-panel.active { display: flex; }
+
+  /* 卡片头部 */
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: var(--fs-subtitle);
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .card-badge {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    background: var(--primary-faint);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* 步骤卡片 */
+  .step-card {
+    background: var(--bg-surface);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--primary);
+    flex: 1;
+  }
+  .step-number {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .step-text {
+    font-size: var(--fs-body);
+    color: var(--primary);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .step-tip {
+    font-size: var(--fs-caption);
+    color: var(--text-low);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* 进度条 */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    width: 48px;
+    flex-shrink: 0;
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--primary-faint);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .progress-val {
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    width: 32px;
+    text-align: right;
+  }
+
+  /* 计时器 */
+  .timer-display {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .timer-num {
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .timer-unit {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+  }
+  .timer-label {
+    font-size: var(--fs-caption);
+    color: var(--text-low);
+  }
+
+  /* 用量表 */
+  .ingredient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+  .ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-surface);
+    border-radius: 8px;
+  }
+  .ingredient-name {
+    font-size: var(--fs-body);
+    color: var(--primary);
+  }
+  .ingredient-amount {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .ingredient-tip {
+    font-size: var(--fs-caption);
+    color: var(--text-low);
+    text-align: right;
+  }
+
+  /* 火候显示 */
+  .heat-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 8px;
+  }
+  .heat-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-faint);
+  }
+  .heat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .heat-unit {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .heat-tips {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .heat-tip-item {
+    padding: 6px 12px;
+    background: var(--bg-surface);
+    border-radius: 8px;
+    font-size: var(--fs-caption);
+    color: var(--text-dim);
+    text-align: center;
+  }
+  .heat-tip-item span {
+    display: block;
+    font-size: var(--fs-body);
+    font-weight: 600;
+    color: var(--primary);
+    margin-top: 2px;
+  }
+
+  /* 完成状态 */
+  .complete-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 12px;
+  }
+  .check-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-low);
+  }
+  .check-circle svg { width: 36px; height: 36px; }
+  .complete-title {
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .complete-sub {
+    font-size: var(--fs-body);
+    color: var(--text-dim);
+    text-align: center;
+  }
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .stat-chip {
+    padding: 6px 14px;
+    background: var(--bg-surface);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .stat-chip .val {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .stat-chip .lbl {
+    font-size: 11px;
+    color: var(--text-low);
+    margin-top: 2px;
+  }
+
+  /* 分隔线 */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 10px 0;
+  }
+
+  /* 底部进度 */
+  .bottom-progress {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .bottom-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bottom-bar-track {
+    flex: 1;
+    height: 4px;
+    background: var(--primary-faint);
+    border-radius: 2px;
+  }
+  .bottom-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+  .bottom-bar-label {
+    font-size: 11px;
+    color: var(--text-low);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">YODAOS SPRITE · 烹饪 / 食谱辅助 V5</div>
+
+<!-- 菜品选择 -->
+<div class="dish-selector">
+  <button class="dish-btn active" onclick="selectDish(0)">红烧肉</button>
+  <button class="dish-btn" onclick="selectDish(1)">蛋炒饭</button>
+  <button class="dish-btn" onclick="selectDish(2)">清蒸鱼</button>
+</div>
+
+<!-- 状态导航 -->
+<div class="state-nav">
+  <button class="s-btn active" onclick="showState(1)">步骤</button>
+  <button class="s-btn" onclick="showState(2)">计时</button>
+  <button class="s-btn" onclick="showState(3)">用量</button>
+  <button class="s-btn" onclick="showState(4)">火候</button>
+  <button class="s-btn" onclick="showState(5)">完成</button>
+</div>
+
+<!-- 卡片 -->
+<div class="card">
+
+  <!-- 状态1：步骤 -->
+  <div class="state-panel active" id="state-1">
+    <div class="card-header">
+      <div class="card-title" id="dish-title-1">红烧肉</div>
+      <div class="card-badge" id="step-badge-1">步骤 2 / 5</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number" id="step-num-1">STEP 02</div>
+      <div class="step-text" id="step-text-1">五花肉切3cm方块，冷水下锅焯水，加料酒去腥</div>
+      <div class="step-tip" id="step-tip-1">💡 焯水时撇去浮沫，肉质更干净</div>
+    </div>
+    <div class="bottom-progress">
+      <div class="bottom-bar-row">
+        <div class="bottom-bar-label" id="step-prog-label-1">2 / 5</div>
+        <div class="bottom-bar-track">
+          <div class="bottom-bar-fill" id="step-prog-fill-1" style="width:40%"></div>
+        </div>
+        <div class="bottom-bar-label">完成</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态2：计时 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="card-title" id="dish-title-2">红烧肉</div>
+      <div class="card-badge" style="color:var(--moderate);">炖煮中</div>
+    </div>
+    <div style="display:flex;gap:16px;flex:1;align-items:center;">
+      <div style="flex:1;">
+        <div class="timer-label" id="timer-label-2">收汁阶段</div>
+        <div class="timer-display">
+          <div class="timer-num" id="timer-num-2">18</div>
+          <div class="timer-unit">分钟</div>
+        </div>
+        <div style="font-size:13px;color:var(--text-low);" id="timer-sub-2">共需 45 分钟 · 剩余 27 分钟</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:80px;height:80px;border-radius:50%;border:3px solid var(--moderate);display:flex;align-items:center;justify-content:center;background:rgba(255,179,64,0.08);">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="14" stroke="rgba(255,179,64,0.3)" stroke-width="2.5"/>
+            <path d="M18 10v8l5 3" stroke="#FFB340" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="progress-row">
+      <div class="progress-label">总进度</div>
+      <div class="progress-track"><div class="progress-fill" id="total-prog-2" style="width:60%"></div></div>
+      <div class="progress-val">60%</div>
+    </div>
+  </div>
+
+  <!-- 状态3：用量 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="card-title" id="dish-title-3">红烧肉</div>
+      <div class="card-badge">2人份</div>
+    </div>
+    <div class="ingredient-list" id="ingredient-list-3">
+      <div class="ingredient-item">
+        <div class="ingredient-name">五花肉</div>
+        <div>
+          <div class="ingredient-amount">500g</div>
+          <div class="ingredient-tip">肥瘦相间佳</div>
+        </div>
+      </div>
+      <div class="ingredient-item">
+        <div class="ingredient-name">生抽</div>
+        <div>
+          <div class="ingredient-amount">3 汤匙</div>
+          <div class="ingredient-tip">约 45ml</div>
+        </div>
+      </div>
+      <div class="ingredient-item">
+        <div class="ingredient-name">冰糖</div>
+        <div>
+          <div class="ingredient-amount">30g</div>
+          <div class="ingredient-tip">炒糖色用</div>
+        </div>
+      </div>
+      <div class="ingredient-item">
+        <div class="ingredient-name">料酒</div>
+        <div>
+          <div class="ingredient-amount">2 汤匙</div>
+          <div class="ingredient-tip">约 30ml</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态4：火候 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="card-title" id="dish-title-4">红烧肉</div>
+      <div class="card-badge" style="color:var(--moderate);">当前：中火</div>
+    </div>
+    <div class="heat-display">
+      <div class="heat-ring">
+        <div class="heat-value">中</div>
+        <div class="heat-unit">火</div>
+      </div>
+      <div style="font-size:var(--fs-caption);color:var(--text-dim);text-align:center;" id="heat-desc-4">
+        炒糖色阶段保持中火，糖溶化后<br>转大火让肉上色均匀
+      </div>
+      <div class="heat-tips" id="heat-tips-4">
+        <div class="heat-tip-item">
+          焯水<span>大火</span>
+        </div>
+        <div class="heat-tip-item" style="border:1px solid var(--primary);">
+          收汁<span>中火</span>
+        </div>
+        <div class="heat-tip-item">
+          炖煮<span>小火</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态5：完成 -->
+  <div class="state-panel" id="state-5">
+    <div class="card-header">
+      <div class="card-title" id="dish-title-5">红烧肉</div>
+      <div class="card-badge" style="color:var(--primary);">✓ 完成</div>
+    </div>
+    <div class="complete-area">
+      <div class="check-circle">
+        <svg viewBox="0 0 36 36" fill="none">
+          <polyline points="8,18 15,25 28,12" stroke="#40FF5E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="complete-title" id="complete-title-5">烹饪完成！</div>
+      <div class="complete-sub" id="complete-sub-5">红烧肉 · 色泽红亮，软糯入味<br>趁热装盘，撒葱花点缀</div>
+      <div class="stats-row">
+        <div class="stat-chip">
+          <div class="val">45</div>
+          <div class="lbl">总时长(分)</div>
+        </div>
+        <div class="stat-chip">
+          <div class="val">5</div>
+          <div class="lbl">步骤</div>
+        </div>
+        <div class="stat-chip">
+          <div class="val">680</div>
+          <div class="lbl">卡路里</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// 菜品数据
+const DISHES = [
+  {
+    name: "红烧肉",
+    steps: [
+      { num: "01", text: "准备食材：五花肉500g切3cm方块，葱姜备用", tip: "💡 选肥瘦相间的五花肉口感最佳" },
+      { num: "02", text: "五花肉切3cm方块，冷水下锅焯水，加料酒去腥", tip: "💡 焯水时撇去浮沫，肉质更干净" },
+      { num: "03", text: "热锅加冰糖30g，中火炒至焦糖色，下肉翻炒上色", tip: "💡 糖色炒至棕红色即可，过深会苦" },
+      { num: "04", text: "加生抽、老抽、料酒，热水没过肉面，大火烧开转小火", tip: "💡 一定要加热水，不能加冷水" },
+      { num: "05", text: "小火慢炖40分钟后，转大火收汁至浓稠即可", tip: "💡 收汁时不断翻炒防止粘锅" }
+    ],
+    currentStep: 1,
+    timerStage: "收汁阶段",
+    timerCurrent: 18,
+    timerTotal: 45,
+    timerRemaining: 27,
+    ingredients: [
+      { name: "五花肉", amount: "500g", tip: "肥瘦相间佳" },
+      { name: "生抽", amount: "3 汤匙", tip: "约 45ml" },
+      { name: "冰糖", amount: "30g", tip: "炒糖色用" },
+      { name: "料酒", amount: "2 汤匙", tip: "约 30ml" }
+    ],
+    heatDesc: "炒糖色阶段保持中火，糖溶化后<br>转大火让肉上色均匀",
+    heatStages: [
+      { label: "焯水", level: "大火" },
+      { label: "收汁", level: "中火", active: true },
+      { label: "炖煮", level: "小火" }
+    ],
+    currentHeat: "中",
+    completeTitle: "烹饪完成！",
+    completeSub: "红烧肉 · 色泽红亮，软糯入味<br>趁热装盘，撒葱花点缀",
+    stats: { time: "45", steps: "5", cal: "680" }
+  },
+  {
+    name: "蛋炒饭",
+    steps: [
+      { num: "01", text: "隔夜米饭1碗，鸡蛋2个打散，葱花备用", tip: "💡 隔夜饭粒分散，炒出来更香" },
+      { num: "02", text: "热锅倒油，油温七成热倒入蛋液，半凝固时翻炒", tip: "💡 蛋液半熟时下饭，口感更嫩滑" },
+      { num: "03", text: "下米饭大火翻炒，用锅铲将饭粒打散至均匀", tip: "💡 全程大火，快速翻炒让饭粒受热均匀" },
+      { num: "04", text: "加生抽1汤匙、盐适量调味，继续翻炒均匀", tip: "💡 生抽不要太多，以免颜色过深" },
+      { num: "05", text: "撒葱花，淋几滴香油，出锅前快速翻匀即可", tip: "💡 香油要最后放，高温会失去香味" }
+    ],
+    currentStep: 0,
+    timerStage: "大火翻炒",
+    timerCurrent: 4,
+    timerTotal: 8,
+    timerRemaining: 4,
+    ingredients: [
+      { name: "米饭", amount: "1 碗", tip: "隔夜饭最佳" },
+      { name: "鸡蛋", amount: "2 个", tip: "打散备用" },
+      { name: "生抽", amount: "1 汤匙", tip: "约 15ml" },
+      { name: "葱花", amount: "适量", tip: "出锅时放" }
+    ],
+    heatDesc: "全程大火快炒，油温要足够热<br>锅铲不停翻动，防止粘底",
+    heatStages: [
+      { label: "炒蛋", level: "中火" },
+      { label: "炒饭", level: "大火", active: true },
+      { label: "调味", level: "中火" }
+    ],
+    currentHeat: "大",
+    completeTitle: "出锅！",
+    completeSub: "蛋炒饭 · 粒粒分明，色泽金黄<br>趁热享用，风味最佳",
+    stats: { time: "8", steps: "5", cal: "420" }
+  },
+  {
+    name: "清蒸鱼",
+    steps: [
+      { num: "01", text: "鱼处理干净，两侧斜切几刀，用盐和料酒腌制15分钟", tip: "💡 切刀是为了更好入味和受热均匀" },
+      { num: "02", text: "鱼腹塞入葱段姜片，盘中放筷子垫起鱼身", tip: "💡 垫起鱼身让蒸汽均匀流通" },
+      { num: "03", text: "蒸锅水沸后放入鱼，大火蒸8分钟（1斤鱼）", tip: "💡 一定要水开再放鱼，计时准确" },
+      { num: "04", text: "取出倒掉蒸出的水，淋上蒸鱼豉油", tip: "💡 蒸出的水有腥味，一定要倒掉" },
+      { num: "05", text: "铺上葱姜丝，浇上烧至冒烟的热油激香", tip: "💡 油温要足够高，激出葱香味" }
+    ],
+    currentStep: 2,
+    timerStage: "大火蒸制",
+    timerCurrent: 5,
+    timerTotal: 8,
+    timerRemaining: 3,
+    ingredients: [
+      { name: "鲈鱼", amount: "1条约500g", tip: "新鲜为要" },
+      { name: "蒸鱼豉油", amount: "3 汤匙", tip: "提鲜关键" },
+      { name: "葱姜", amount: "各适量", tip: "去腥增香" },
+      { name: "花生油", amount: "3 汤匙", tip: "最后热油用" }
+    ],
+    heatDesc: "全程大火蒸制，保持蒸汽充足<br>时间精准，避免鱼肉过老",
+    heatStages: [
+      { label: "腌制", level: "不开火" },
+      { label: "蒸鱼", level: "大火", active: true },
+      { label: "激油", level: "大火" }
+    ],
+    currentHeat: "大",
+    completeTitle: "清蒸完成！",
+    completeSub: "清蒸鱼 · 嫩滑鲜美，原汁原味<br>佐以蒸鱼豉油，鲜香四溢",
+    stats: { time: "25", steps: "5", cal: "180" }
+  }
+];
+
+let currentDish = 0;
+let currentState = 1;
+
+function selectDish(idx) {
+  currentDish = idx;
+  document.querySelectorAll('.dish-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  updateDishContent();
+}
+
+function updateDishContent() {
+  const d = DISHES[currentDish];
+
+  // 状态1：步骤
+  const stepIdx = d.currentStep;
+  const step = d.steps[stepIdx];
+  document.getElementById('dish-title-1').textContent = d.name;
+  document.getElementById('step-badge-1').textContent = `步骤 ${stepIdx + 1} / ${d.steps.length}`;
+  document.getElementById('step-num-1').textContent = `STEP ${step.num}`;
+  document.getElementById('step-text-1').textContent = step.text;
+  document.getElementById('step-tip-1').textContent = step.tip;
+  document.getElementById('step-prog-label-1').textContent = `${stepIdx + 1} / ${d.steps.length}`;
+  document.getElementById('step-prog-fill-1').style.width = `${((stepIdx + 1) / d.steps.length) * 100}%`;
+
+  // 状态2：计时
+  document.getElementById('dish-title-2').textContent = d.name;
+  document.getElementById('timer-label-2').textContent = d.timerStage;
+  document.getElementById('timer-num-2').textContent = d.timerCurrent;
+  document.getElementById('timer-sub-2').textContent = `共需 ${d.timerTotal} 分钟 · 剩余 ${d.timerRemaining} 分钟`;
+  const p = Math.round((d.timerCurrent / d.timerTotal) * 100);
+  document.getElementById('total-prog-2').style.width = p + '%';
+  document.getElementById('total-prog-2').parentElement.nextElementSibling.textContent = p + '%';
+
+  // 状态3：用量
+  document.getElementById('dish-title-3').textContent = d.name;
+  const ingList = document.getElementById('ingredient-list-3');
+  ingList.innerHTML = d.ingredients.map(i => `
+    <div class="ingredient-item">
+      <div class="ingredient-name">${i.name}</div>
+      <div>
+        <div class="ingredient-amount">${i.amount}</div>
+        <div class="ingredient-tip">${i.tip}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // 状态4：火候
+  document.getElementById('dish-title-4').textContent = d.name;
+  document.getElementById('heat-desc-4').innerHTML = d.heatDesc;
+  document.getElementById('heat-tips-4').innerHTML = d.heatStages.map(s => `
+    <div class="heat-tip-item" ${s.active ? 'style="border:1px solid var(--primary);"' : ''}>
+      ${s.label}<span>${s.level}</span>
+    </div>
+  `).join('');
+  document.querySelector('#state-4 .card-badge').textContent = `当前：${d.currentHeat}火`;
+  document.querySelector('.heat-value').textContent = d.currentHeat;
+
+  // 状态5：完成
+  document.getElementById('dish-title-5').textContent = d.name;
+  document.getElementById('complete-title-5').textContent = d.completeTitle;
+  document.getElementById('complete-sub-5').innerHTML = d.completeSub;
+  const statChips = document.querySelectorAll('.stat-chip');
+  statChips[0].querySelector('.val').textContent = d.stats.time;
+  statChips[1].querySelector('.val').textContent = d.stats.steps;
+  statChips[2].querySelector('.val').textContent = d.stats.cal;
+}
+
+function showState(n) {
+  currentState = n;
+  document.querySelectorAll('.state-panel').forEach((p, i) => p.classList.toggle('active', i + 1 === n));
+  document.querySelectorAll('.s-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === n));
+}
+
+// 初始化
+updateDishContent();
+</script>
+
+</body>
+</html>

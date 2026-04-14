@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YodaOS Sprite · 场景卡片库</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --bg-dark: #000000;
+    --bg-card: #1C1C1C;
+    --dim: rgba(64, 255, 94, 0.55);
+    --dim-low: rgba(64, 255, 94, 0.25);
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+  }
+
+  body {
+    background: var(--bg-dark);
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--primary);
+    padding: 48px 40px 80px;
+  }
+
+  /* ── 顶部 Header ── */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(64,255,94,0.12);
+  }
+
+  .logo-area {}
+
+  .logo-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--dim-low);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .logo-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 13px;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+
+  .header-meta {
+    text-align: right;
+  }
+
+  .meta-line {
+    font-size: 12px;
+    color: var(--dim-low);
+    line-height: 1.8;
+  }
+
+  .meta-line span {
+    color: var(--dim);
+  }
+
+  /* ── 分类标题 ── */
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--dim-low);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(64,255,94,0.1);
+  }
+
+  /* ── 场景卡片网格 ── */
+  .scene-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── 单个场景入口卡片 ── */
+  .scene-card {
+    background: var(--bg-card);
+    border: 2px solid rgba(64,255,94,0.2);
+    border-radius: 12px;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--primary);
+    display: block;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scene-card:hover {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.05);
+  }
+
+  .scene-card.coming-soon {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .scene-card.coming-soon:hover {
+    border-color: rgba(64,255,94,0.2);
+    background: var(--bg-card);
+  }
+
+  .scene-emoji {
+    font-size: 28px;
+    margin-bottom: 14px;
+    display: block;
+    line-height: 1;
+  }
+
+  .scene-name-en {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--dim-low);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .scene-name-zh {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .scene-desc {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .scene-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .state-count {
+    font-size: 12px;
+    color: var(--dim-low);
+    background: rgba(64,255,94,0.07);
+    border: 1px solid rgba(64,255,94,0.15);
+    border-radius: 6px;
+    padding: 3px 10px;
+  }
+
+  .scene-arrow {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(64,255,94,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s;
+  }
+
+  .scene-card:hover .scene-arrow {
+    border-color: var(--primary);
+  }
+
+  .coming-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--dim-low);
+    border: 1px solid rgba(64,255,94,0.15);
+    border-radius: 4px;
+    padding: 2px 7px;
+    text-transform: uppercase;
+  }
+
+  /* ── 统计栏 ── */
+  .stats-bar {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 48px;
+    padding: 20px 24px;
+    background: rgba(64,255,94,0.04);
+    border: 1px solid rgba(64,255,94,0.1);
+    border-radius: 12px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--dim-low);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(64,255,94,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left {
+    font-size: 11px;
+    color: rgba(64,255,94,0.2);
+    letter-spacing: 1px;
+  }
+
+  .footer-right {
+    font-size: 11px;
+    color: rgba(64,255,94,0.2);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo-area">
+    <p class="logo-eyebrow">Rokid · YodaOS Sprite</p>
+    <h1 class="logo-title">场景卡片库</h1>
+    <p class="logo-sub">AI 眼镜 · 音视分离体验设计系统</p>
+  </div>
+  <div class="header-meta">
+    <p class="meta-line">协议 <span>A2UI v0.8</span></p>
+    <p class="meta-line">规范 <span>YodaOS Sprite v1</span></p>
+    <p class="meta-line">画布 <span>480 × 400px</span></p>
+  </div>
+</div>
+
+<!-- 统计 -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-num">22</span>
+    <span class="stat-label">已规划场景</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">28</span>
+    <span class="stat-label">已完成原型</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">148</span>
+    <span class="stat-label">已设计状态</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">3s</span>
+    <span class="stat-label">信息获取原则</span>
+  </div>
+</div>
+
+<!-- A 类场景：用户在做另一件事，卡片是副屏 -->
+<p class="section-title">A 类 · 副屏辅助 — 用户主注意力在别处</p>
+<div class="scene-grid">
+
+  <a href="scenes/cooking.html" class="scene-card">
+    <span class="scene-emoji">🍳</span>
+    <p class="scene-name-en">Cooking Guide <span style="font-size:9px;opacity:0.5;">v1</span></p>
+    <p class="scene-name-zh">烹饪 / 食谱辅助</p>
+    <p class="scene-desc">双手占用，眼睛偶尔瞥一眼。步骤、计时、用量、火候极简呈现。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/cooking-v2.html" class="scene-card">
+    <span class="scene-emoji">🍳</span>
+    <p class="scene-name-en">Cooking Guide <span style="font-size:9px;color:rgba(64,255,94,0.8);border:1px solid rgba(64,255,94,0.4);border-radius:4px;padding:1px 5px;margin-left:4px;">v2</span></p>
+    <p class="scene-name-zh">烹饪辅助 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">多菜品版</span></p>
+    <p class="scene-desc">数据驱动架构。红烧肉 / 蛋炒饭 / 清蒸鱼三种模式——慢炖、快手、精准计时全覆盖。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 状态 × 3 菜品</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/fitness.html" class="scene-card">
+    <span class="scene-emoji">🏃</span>
+    <p class="scene-name-en">Fitness</p>
+    <p class="scene-name-zh">健康运动</p>
+    <p class="scene-desc">心率区间 + 配速 + 里程数。警告、里程碑、冷却全流程覆盖。狗命要紧。</p>
+    <div class="scene-meta">
+      <span class="state-count">6 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/driving.html" class="scene-card">
+    <span class="scene-emoji">🚗</span>
+    <p class="scene-name-en">Driving Assist</p>
+    <p class="scene-name-zh">驾驶辅助</p>
+    <p class="scene-desc">大号速度数字极简面板。超速警告 / 疲劳提醒 / 路况预警，0.5秒内读取完毕。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- B 类场景：用户在处理信息本身，卡片是主屏辅助 -->
+<p class="section-title">B 类 · 主屏辅助 — 用户正在处理信息</p>
+<div class="scene-grid">
+
+  <a href="scenes/navigation.html" class="scene-card">
+    <span class="scene-emoji">🗺️</span>
+    <p class="scene-name-en">Navigation</p>
+    <p class="scene-name-zh">导航</p>
+    <p class="scene-desc">路线规划 / 行进 / 转弯 / 重规划 / 到达全流程。距离 + 方向一眼锁定，不抢驾驶注意力。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/translation.html" class="scene-card">
+    <span class="scene-emoji">🌐</span>
+    <p class="scene-name-en">Live Translation</p>
+    <p class="scene-name-zh">实时翻译</p>
+    <p class="scene-desc">待机 / 识别中 / 大字译文 / 语言切换 / 历史回顾。译文是唯一主角，原文缩为背景。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/meeting.html" class="scene-card">
+    <span class="scene-emoji">💼</span>
+    <p class="scene-name-en">Meeting</p>
+    <p class="scene-name-zh">会议 / 沟通</p>
+    <p class="scene-desc">等待开始 + 会议中发言人 + AI摘要 + 决策确认 + 会议结束统计。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/learning-design-optimized.html" class="scene-card">
+    <span class="coming-tag" style="display:none;">待制作</span>
+    <span class="scene-emoji">📖</span>
+    <p class="scene-name-en">Learning</p>
+    <p class="scene-name-zh">学习 / 阅读辅助</p>
+    <p class="scene-desc">生词卡、知识关联、进度、测验。设计师优化版。</p>
+    <div class="scene-meta">
+      <span class="state-count">3 个模式</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- C 类场景：用户在等待/过渡，卡片主动填充 -->
+<p class="section-title">C 类 · 主动填充 — 用户正在等待或过渡</p>
+<div class="scene-grid">
+
+  <a href="scenes/dining.html" class="scene-card">
+    <span class="scene-emoji">🍔</span>
+    <p class="scene-name-en">Dining</p>
+    <p class="scene-name-zh">餐饮点单</p>
+    <p class="scene-desc">扫描菜单 + 菜品推荐 + 已点列表 + 等待出餐 + 取餐提醒。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/shopping.html" class="scene-card">
+    <span class="scene-emoji">🛍️</span>
+    <p class="scene-name-en">Shopping</p>
+    <p class="scene-name-zh">购物 / 比价</p>
+    <p class="scene-desc">扫描识别 → 多平台比价 → 评价摘要 → 加购/追价。买之前3秒知道值不值。</p>
+    <div class="scene-meta">
+      <span class="state-count">6 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/delivery.html" class="scene-card">
+    <span class="scene-emoji">📦</span>
+    <p class="scene-name-en">Delivery</p>
+    <p class="scene-name-zh">快递 / 外卖追踪</p>
+    <p class="scene-desc">已下单 + 运输中 + 派送中 + 即将到达 + 已签收全流程追踪。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- 日常生活类 -->
+<p class="section-title">日常高频 · 贯穿全天的基础服务</p>
+<div class="scene-grid">
+
+  <a href="scenes/calls.html" class="scene-card">
+    <span class="scene-emoji">📞</span>
+    <p class="scene-name-en">Calls & Messages</p>
+    <p class="scene-name-zh">通话 / 消息提醒</p>
+    <p class="scene-desc">来电提醒 + 通话中 + 消息列表 + 新消息快捷回复 + 未接来电。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/payment.html" class="scene-card">
+    <span class="scene-emoji">💳</span>
+    <p class="scene-name-en">Payment</p>
+    <p class="scene-name-zh">支付 / 收款</p>
+    <p class="scene-desc">扫码收款 + 选择支付 + 支付中 + 支付成功 + 收款通知。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/calendar.html" class="scene-card">
+    <span class="scene-emoji">📅</span>
+    <p class="scene-name-en">Calendar</p>
+    <p class="scene-name-zh">日程 / 提醒</p>
+    <p class="scene-desc">今日概览 + 即将开始 + 出发提醒 + 进行中 + 明日预告。重要事项不被遗忘。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/media.html" class="scene-card">
+    <span class="scene-emoji">🎵</span>
+    <p class="scene-name-en">Media</p>
+    <p class="scene-name-zh">音乐 / 播客</p>
+    <p class="scene-desc">播放中 + 暂停 + 歌词模式 + 播放列表 + 播客摘要。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/health-monitor.html" class="scene-card">
+    <span class="scene-emoji">❤️</span>
+    <p class="scene-name-en">Health Monitor</p>
+    <p class="scene-name-zh">健康监测</p>
+    <p class="scene-desc">正常监测 + 心率异常 + 血氧监测 + 睡眠报告 + 每日健康概览。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/weather.html" class="scene-card">
+    <span class="scene-emoji">🌤️</span>
+    <p class="scene-name-en">Weather</p>
+    <p class="scene-name-zh">天气 / 出行准备</p>
+    <p class="scene-desc">当前天气 + 逐小时预报 + 出行建议 + 降雨提醒 + 穿衣建议。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/smart-home.html" class="scene-card">
+    <span class="scene-emoji">🏠</span>
+    <p class="scene-name-en">Smart Home</p>
+    <p class="scene-name-zh">智能家居</p>
+    <p class="scene-desc">设备总览 + 温控调节 + 场景模式 + 安全监控 + 能耗报告。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/social.html" class="scene-card">
+    <span class="scene-emoji">👤</span>
+    <p class="scene-name-en">Social Recognition</p>
+    <p class="scene-name-zh">社交识别</p>
+    <p class="scene-desc">扫描识别 + 熟人信息 + 陌生人模式 + 关系网络 + 名片分享。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/transit.html" class="scene-card">
+    <span class="scene-emoji">🚇</span>
+    <p class="scene-name-en">Transit</p>
+    <p class="scene-name-zh">停车 / 交通工具</p>
+    <p class="scene-desc">寻找停车 + 已停车计时 + 地铁时刻 + 打车出行 + 行程中。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/tickets.html" class="scene-card">
+    <span class="scene-emoji">✈️</span>
+    <p class="scene-name-en">Tickets</p>
+    <p class="scene-name-zh">购票 / 出行核验</p>
+    <p class="scene-desc">出行提醒 + 电子登机牌 + 核验中 + 核验成功 + 登机候车。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="rgba(64,255,94,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- 趣味休闲场景 -->
+<p class="section-title" style="margin-top:48px;">🎮 趣味休闲 · 娱乐与社交场景</p>
+<div class="scene-grid">
+
+  <a href="scenes/mahjong.html" class="scene-card">
+    <span class="scene-emoji">🀄</span>
+    <p class="scene-name-en">Mahjong</p>
+    <p class="scene-name-zh">麻将辅助</p>
+    <p class="scene-desc">牌面识别 + 手牌分析 + 出牌建议 + 听牌模式 + 危险警告 + 局势总结。AI 辅助决策，胡牌不再靠运气。</p>
+    <div class="scene-meta">
+      <span class="state-count">6 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/poker.html" class="scene-card">
+    <span class="scene-emoji">🃏</span>
+    <p class="scene-name-en">Poker Assistant <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">JSUI</span></p>
+    <p class="scene-name-zh">扑克牌辅助</p>
+    <p class="scene-desc">扫描识别 + 手牌展示 + 胜率分析 + 出牌建议 + 对手推测 + 局势总结。基于 JSUI .ink 规范构建。</p>
+    <div class="scene-meta">
+      <span class="state-count">6 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- V2 重制版本 -->
+<p class="section-title" style="margin-top:48px;">🆕 V2 重制版 · 480×400px 统一规范</p>
+<div class="scene-grid">
+
+  <a href="scenes/cooking-v5.html" class="scene-card">
+    <span class="scene-emoji">🍳</span>
+    <p class="scene-name-en">Cooking Guide <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">v5</span></p>
+    <p class="scene-name-zh">烹饪辅助 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">多菜品 · 新规范</span></p>
+    <p class="scene-desc">数据驱动架构，480×400px 完整设计系统，5 个状态全覆盖。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/fitness-v2.html" class="scene-card">
+    <span class="scene-emoji">🏃</span>
+    <p class="scene-name-en">Fitness <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">v2</span></p>
+    <p class="scene-name-zh">健康运动 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">新规范</span></p>
+    <p class="scene-desc">心率区间条 + 警告边框 + 里程碑 + 冷却放松 + 总结，6 个状态。</p>
+    <div class="scene-meta">
+      <span class="state-count">6 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/navigation-v2.html" class="scene-card">
+    <span class="scene-emoji">🗺️</span>
+    <p class="scene-name-en">Navigation <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">v2</span></p>
+    <p class="scene-name-zh">导航 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">新规范</span></p>
+    <p class="scene-desc">方向大图标 + 转弯颜色联动 + 重新规划警告 + 到达总结，5 个状态。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/translation-v2.html" class="scene-card">
+    <span class="scene-emoji">🌐</span>
+    <p class="scene-name-en">Live Translation <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">v2</span></p>
+    <p class="scene-name-zh">实时翻译 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">新规范</span></p>
+    <p class="scene-desc">波形动画 + 大字译文 + 置信度条 + 6语言切换 + 历史回顾，5 个状态。</p>
+    <div class="scene-meta">
+      <span class="state-count">5 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/shopping-v2.html" class="scene-card">
+    <span class="scene-emoji">🛍️</span>
+    <p class="scene-name-en">Shopping <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">v2</span></p>
+    <p class="scene-name-zh">购物比价 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">新规范</span></p>
+    <p class="scene-desc">扫码 + 识别 + 4平台比价 + 情感评价条 + 加购确认 + 追价，6 个状态。</p>
+    <div class="scene-meta">
+      <span class="state-count">6 个状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <a href="scenes/learning-v2.html" class="scene-card">
+    <span class="scene-emoji">📖</span>
+    <p class="scene-name-en">Learning <span style="font-size:9px;color:rgba(64,255,94,0.9);border:1px solid rgba(64,255,94,0.5);border-radius:4px;padding:1px 5px;margin-left:4px;">v2</span></p>
+    <p class="scene-name-zh">学习辅助 <span style="font-size:13px;font-weight:400;color:rgba(64,255,94,0.6);">新规范</span></p>
+    <p class="scene-desc">学习 / 复习 / 测验三模式，单词 + 助记 + 翻转卡片 + 选择测验 + 统计。</p>
+    <div class="scene-meta">
+      <span class="state-count">3 模式 · 9 状态</span>
+      <div class="scene-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6H10M7 3L10 6L7 9" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-left">YODAOS SPRITE · CARD LIBRARY · UX ARCHITECT</div>
+  <div class="footer-right" style="text-align:right;line-height:1.8;">
+    <span style="display:block;">新增场景：scenes/ 新建文件 + 首页追加入口（原有待制作占位直接改为可进入）</span>
+    <span style="display:block;color:rgba(64,255,94,0.15);">迭代已有场景：新建 scenes/xxx-v2.html，首页追加新卡片，旧版本卡片保留</span>
+  </div>
+</div>
+
+</body>
+</html>

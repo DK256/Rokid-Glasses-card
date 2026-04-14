@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快递 / 外卖追踪 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    padding: 20px; gap: 16px;
+  }
+
+  .page-title { color: rgba(64,255,94,0.6); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .state-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .state-btn {
+    background: #1C1C1C; border: 1.5px solid rgba(64,255,94,0.3); border-radius: 8px;
+    color: rgba(64,255,94,0.6); font-size: 13px; padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .state-btn.active { border-color: #40FF5E; color: #40FF5E; background: rgba(64,255,94,0.08); }
+
+  .card {
+    width: 480px; min-height: 400px;
+    background: #1C1C1C; border: 2px solid #40FF5E; border-radius: 12px;
+    padding: 24px; display: flex; flex-direction: column; position: relative;
+  }
+
+  .state-panel { display: none; flex-direction: column; height: 100%; }
+  .state-panel.active { display: flex; }
+
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+
+  .divider { height: 1.5px; background: rgba(64,255,94,0.2); margin: 14px 0; }
+  .row   { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col   { display: flex; flex-direction: column; gap: 4px; }
+
+  /* 进度条 */
+  .progress-track {
+    height: 6px; background: rgba(64,255,94,0.15); border-radius: 3px; overflow: hidden; margin-bottom: 8px;
+  }
+  .progress-fill { height: 100%; background: #40FF5E; border-radius: 3px; transition: width 0.5s; }
+
+  /* 步骤指示器 */
+  .steps-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .step-dot {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid rgba(64,255,94,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: rgba(64,255,94,0.4);
+    flex-shrink: 0;
+  }
+  .step-dot.done { background: rgba(64,255,94,0.2); border-color: #40FF5E; color: #40FF5E; }
+  .step-dot.current { background: rgba(64,255,94,0.15); border-color: #40FF5E; color: #40FF5E; box-shadow: 0 0 8px rgba(64,255,94,0.3); }
+  .step-line { flex: 1; height: 2px; background: rgba(64,255,94,0.2); margin: 0 4px; }
+  .step-line.done { background: #40FF5E; }
+
+  /* 时间线 */
+  .timeline { display: flex; flex-direction: column; gap: 0; flex: 1; }
+  .timeline-item { display: flex; gap: 14px; padding-bottom: 14px; position: relative; }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid rgba(64,255,94,0.4); flex-shrink: 0; margin-top: 4px;
+  }
+  .tl-dot.latest { background: #40FF5E; border-color: #40FF5E; box-shadow: 0 0 6px rgba(64,255,94,0.4); }
+  .tl-line { flex: 1; width: 1.5px; background: rgba(64,255,94,0.2); margin: 4px 0; min-height: 14px; }
+  .tl-content { flex: 1; }
+  .tl-desc { font-size: 16px; color: #40FF5E; line-height: 22px; }
+  .tl-desc.dim { color: rgba(64,255,94,0.55); font-size: 13px; }
+  .tl-time { font-size: 13px; color: rgba(64,255,94,0.4); margin-top: 2px; }
+
+  /* ETA 大字 */
+  .eta-box {
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  /* 按钮 */
+  .btn {
+    height: 40px; border: 2px solid #40FF5E; border-radius: 12px;
+    background: transparent; color: #40FF5E; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; flex: 1; transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+
+  /* 骑手信息 */
+  .rider-box {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(64,255,94,0.05); border: 1.5px solid rgba(64,255,94,0.2);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
+  }
+  .rider-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(64,255,94,0.1); border: 2px solid rgba(64,255,94,0.4);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+</style>
+</head>
+<body>
+
+<p class="page-title">📦 Delivery — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 已下单</button>
+  <button class="state-btn" onclick="showState(1)">② 运输中</button>
+  <button class="state-btn" onclick="showState(2)">③ 派送中</button>
+  <button class="state-btn" onclick="showState(3)">④ 即将到达</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 已签收</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：已下单 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="4" width="12" height="10" rx="2" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 4V3a3 3 0 016 0v1" stroke="#40FF5E" stroke-width="1.5"/>
+        </svg>
+        <span class="text-caption">顺丰速运 · 已下单</span>
+      </div>
+      <span class="text-caption">今天 14:30</span>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-dot current">揽</div>
+      <div class="step-line"></div>
+      <div class="step-dot">运</div>
+      <div class="step-line"></div>
+      <div class="step-dot">站</div>
+      <div class="step-line"></div>
+      <div class="step-dot">派</div>
+      <div class="step-line"></div>
+      <div class="step-dot">签</div>
+    </div>
+
+    <div class="eta-box">
+      <div class="text-caption" style="margin-bottom:4px;">预计送达</div>
+      <div class="text-title">明天 18:00 前</div>
+      <div class="text-caption" style="margin-top:4px;">SF1234567890123</div>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:10px;">物流动态</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot latest"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-desc">已揽收，快件已交给顺丰</div>
+          <div class="tl-time">今天 14:28</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-desc dim">等待运输…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">查看详情</button>
+      <button class="btn">联系寄件方</button>
+    </div>
+  </div>
+
+  <!-- 状态2：运输中 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M1 11V6l4-4h6l4 4v5" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="4.5" cy="11.5" r="1.5" stroke="#40FF5E" stroke-width="1.5"/>
+          <circle cx="11.5" cy="11.5" r="1.5" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M6 11h3" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">运输中</span>
+      </div>
+      <span class="text-caption">今天 20:15</span>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot current">运</div>
+      <div class="step-line"></div>
+      <div class="step-dot">站</div>
+      <div class="step-line"></div>
+      <div class="step-dot">派</div>
+      <div class="step-line"></div>
+      <div class="step-dot">签</div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" style="width:40%;"></div>
+    </div>
+    <div class="row-between" style="margin-bottom:16px;">
+      <span class="text-caption">上海浦东分拨中心</span>
+      <span class="text-caption">北京朝阳营业部</span>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:10px;">物流动态</div>
+    <div class="timeline" style="flex:1;">
+      <div class="timeline-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot latest"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-desc">到达上海浦东分拨中心，正在分拣</div>
+          <div class="tl-time">今天 19:42</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-desc dim">已揽收</div>
+          <div class="tl-time">今天 14:28</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">查看地图</button>
+      <button class="btn">修改收货地址</button>
+    </div>
+  </div>
+
+  <!-- 状态3：派送中 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <div style="width:8px;height:8px;border-radius:50%;background:#40FF5E;animation:pls 1s infinite;"></div>
+        <style>@keyframes pls{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+        <span class="text-caption" style="color:#40FF5E;">派送中</span>
+      </div>
+      <span class="text-caption">明天 15:22</span>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot current">派</div>
+      <div class="step-line"></div>
+      <div class="step-dot">签</div>
+    </div>
+
+    <div class="rider-box">
+      <div class="rider-avatar">🛵</div>
+      <div class="col" style="flex:1;">
+        <div class="text-body" style="font-weight:500;">王师傅 · 快递员</div>
+        <div class="text-caption">正在派送，请保持手机畅通</div>
+      </div>
+      <div class="col" style="align-items:flex-end;">
+        <div style="font-size:22px;font-weight:700;color:#40FF5E;">📞</div>
+        <div class="text-caption">联系</div>
+      </div>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:10px;">最新动态</div>
+    <div class="timeline" style="flex:1;">
+      <div class="timeline-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot latest"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-desc">快递员王师傅正在派送</div>
+          <div class="tl-time">今天 15:18</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-desc dim">到达北京朝阳营业部</div>
+          <div class="tl-time">今天 09:15</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">拨打电话</button>
+      <button class="btn">修改签收方式</button>
+    </div>
+  </div>
+
+  <!-- 状态4：即将到达 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M8 5v3l2 2" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">即将送达！</span>
+      </div>
+      <span class="text-caption">今天 16:40</span>
+    </div>
+
+    <div style="text-align:center;padding:8px 0 18px;">
+      <div class="text-display" style="font-size:64px;line-height:72px;">5</div>
+      <div class="text-subtitle" style="margin-bottom:4px;">分钟后送到</div>
+      <div class="text-caption">快递员距您约 500 米</div>
+    </div>
+
+    <div class="eta-box" style="margin-bottom:14px;text-align:left;">
+      <div class="row-between">
+        <div class="col">
+          <div class="text-body" style="font-weight:500;">王师傅 · 快递员</div>
+          <div class="text-caption">已完成 23 件，本件约5分钟</div>
+        </div>
+        <div style="font-size:28px;">🛵</div>
+      </div>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:8px;">收货地址</div>
+    <div class="row" style="gap:8px;flex:1;align-items:flex-start;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-top:2px;flex-shrink:0;">
+        <path d="M8 2a4 4 0 100 8A4 4 0 008 2z" stroke="#40FF5E" stroke-width="1.5"/>
+        <path d="M8 10v4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M5 14h6" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div class="text-body">北京市朝阳区望京SOHO T1 18层</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">拨打电话</button>
+      <button class="btn">我不在家</button>
+    </div>
+  </div>
+
+  <!-- 状态5：已签收 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" fill="rgba(64,255,94,0.15)" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption" style="color:#40FF5E;">已签收</span>
+      </div>
+      <span class="text-caption">今天 16:45</span>
+    </div>
+
+    <div style="text-align:center;padding:12px 0 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">📦</div>
+      <div class="text-title" style="margin-bottom:6px;">包裹已签收</div>
+      <div class="text-caption">本人签收 · 今天 16:45</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row-between" style="margin-bottom:10px;">
+      <span class="text-caption">运单号</span>
+      <span class="text-body">SF1234567890123</span>
+    </div>
+    <div class="row-between" style="margin-bottom:10px;">
+      <span class="text-caption">总时长</span>
+      <span class="text-body" style="color:#40FF5E;font-weight:700;">26小时15分</span>
+    </div>
+    <div class="row-between">
+      <span class="text-caption">承运方</span>
+      <span class="text-body">顺丰速运</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">评价快递员</button>
+      <button class="btn">申请发票</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Delivery · v1.0</p>
+
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.state-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>

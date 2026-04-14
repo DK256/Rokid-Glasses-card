@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烹饪 / 食谱辅助 · YodaOS Sprite 场景卡片库</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #40FF5E;
+    --bg-dark: #000000;
+    --bg-card: #1C1C1C;
+    --dim: rgba(64, 255, 94, 0.55);
+    --negative: #FF4040;
+    --warn: #FFB340;
+    --font: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+  }
+
+  body {
+    background: #111;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: var(--font);
+    color: var(--primary);
+  }
+
+  h1 {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(64,255,94,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: rgba(64,255,94,0.3);
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+  }
+
+  /* 状态切换 Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .tab-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(64,255,94,0.3);
+    background: transparent;
+    color: var(--dim);
+    font-family: var(--font);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .tab-btn.active {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.1);
+    color: var(--primary);
+  }
+
+  /* 卡片容器 */
+  .card-stage {
+    width: 480px;
+    position: relative;
+  }
+
+  /* 状态面板 */
+  .state-panel {
+    display: none;
+  }
+  .state-panel.active {
+    display: block;
+  }
+
+  /* 基础卡片样式 */
+  .yoda-card {
+    width: 480px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 卡片头部 */
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .card-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--dim);
+    letter-spacing: 0.5px;
+  }
+
+  .card-badge {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--dim);
+    border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 8px;
+    padding: 2px 8px;
+  }
+
+  /* 分割线 */
+  .divider {
+    height: 1px;
+    background: rgba(64,255,94,0.15);
+    margin: 16px 0;
+  }
+
+  /* ─── STATE 1: 步骤卡 ─── */
+  .step-number {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .step-action {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .step-tip {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.6;
+    background: rgba(64,255,94,0.05);
+    border-left: 2px solid rgba(64,255,94,0.3);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+  }
+
+  .step-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .step-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(64,255,94,0.25);
+  }
+
+  .dot.active {
+    width: 18px;
+    border-radius: 3px;
+    background: var(--primary);
+  }
+
+  .nav-hint {
+    font-size: 12px;
+    color: rgba(64,255,94,0.3);
+  }
+
+  /* ─── STATE 2: 计时卡 ─── */
+  .timer-context {
+    font-size: 15px;
+    color: var(--dim);
+    margin-bottom: 12px;
+  }
+
+  .timer-display {
+    font-size: 88px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timer-display.urgent {
+    color: var(--negative);
+    animation: pulse 0.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .timer-unit {
+    font-size: 18px;
+    font-weight: 400;
+    margin-left: 6px;
+    vertical-align: baseline;
+    color: var(--dim);
+  }
+
+  .timer-progress-bar {
+    height: 4px;
+    background: rgba(64,255,94,0.15);
+    border-radius: 2px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+
+  .timer-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+
+  .timer-action-hint {
+    font-size: 12px;
+    color: rgba(64,255,94,0.3);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* ─── STATE 3: 用量卡 ─── */
+  .ingredient-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--primary);
+    margin-bottom: 16px;
+  }
+
+  .ingredient-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ingredient-item {
+    background: rgba(64,255,94,0.06);
+    border: 1.5px solid rgba(64,255,94,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ingredient-item.highlight {
+    border-color: var(--primary);
+    background: rgba(64,255,94,0.1);
+  }
+
+  .ing-label {
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  .ing-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .ing-unit {
+    font-size: 14px;
+    font-weight: 400;
+    margin-left: 3px;
+    color: var(--dim);
+  }
+
+  /* ─── STATE 4: 火候卡 ─── */
+  .heat-label {
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .heat-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .heat-icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .heat-name {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .heat-bars {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .heat-bar {
+    width: 28px;
+    border-radius: 3px 3px 0 0;
+    background: rgba(64,255,94,0.2);
+  }
+
+  .heat-bar.active {
+    background: var(--primary);
+  }
+
+  .heat-desc {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.7;
+  }
+
+  .heat-time-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--dim);
+    background: rgba(64,255,94,0.07);
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(64,255,94,0.15);
+  }
+
+  /* ─── STATE 5: 完成卡 ─── */
+  .done-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    margin-bottom: 16px;
+  }
+
+  .done-dish {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+  }
+
+  .done-subtitle {
+    font-size: 15px;
+    color: var(--dim);
+    margin-bottom: 20px;
+  }
+
+  .done-stats {
+    display: flex;
+    gap: 12px;
+  }
+
+  .stat-item {
+    flex: 1;
+    background: rgba(64,255,94,0.07);
+    border: 1.5px solid rgba(64,255,94,0.2);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  /* 场景说明 */
+  .scene-note {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(64,255,94,0.04);
+    border: 1px solid rgba(64,255,94,0.12);
+    border-radius: 10px;
+    font-size: 12px;
+    color: rgba(64,255,94,0.4);
+    line-height: 1.7;
+  }
+
+  .scene-note strong {
+    color: rgba(64,255,94,0.6);
+  }
+
+  /* 顶部导航栏 */
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(64,255,94,0.12);
+    width: 480px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--dim);
+    text-decoration: none;
+    border: 1.5px solid rgba(64,255,94,0.25);
+    border-radius: 8px;
+    padding: 5px 12px;
+    transition: all 0.2s ease;
+  }
+
+  .back-btn:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .nav-scene-name {
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .nav-scene-en {
+    font-size: 11px;
+    color: var(--dim-low, rgba(64,255,94,0.25));
+    letter-spacing: 1px;
+    margin-left: auto;
+  }
+
+  /* 底部标识 */
+  .footer {
+    margin-top: 48px;
+    font-size: 11px;
+    color: rgba(64,255,94,0.2);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部返回导航 -->
+<div class="top-nav">
+  <a href="../index.html" class="back-btn">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M8 2L4 6L8 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    场景库
+  </a>
+  <span class="nav-scene-name">🍳 烹饪 / 食谱辅助</span>
+  <span class="nav-scene-en">COOKING GUIDE</span>
+</div>
+
+<h1>YodaOS Sprite · 场景卡片</h1>
+<p class="subtitle">烹饪 / 食谱辅助 · Cooking Guide · 5 States</p>
+
+<!-- 状态切换 -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchState(0)">📋 步骤</button>
+  <button class="tab-btn" onclick="switchState(1)">⏱ 计时</button>
+  <button class="tab-btn" onclick="switchState(2)">🥄 用量</button>
+  <button class="tab-btn" onclick="switchState(3)">🔥 火候</button>
+  <button class="tab-btn" onclick="switchState(4)">🍽 完成</button>
+</div>
+
+<div class="card-stage">
+
+  <!-- ─── STATE 1: 步骤卡 ─── -->
+  <div class="state-panel active" id="state-0">
+    <div class="yoda-card">
+      <div class="card-header">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect x="6" y="8" width="14" height="2" rx="1" fill="#40FF5E" opacity="0.6"/>
+          <rect x="6" y="13" width="20" height="2" rx="1" fill="#40FF5E" opacity="0.6"/>
+          <rect x="6" y="18" width="16" height="2" rx="1" fill="#40FF5E" opacity="0.6"/>
+          <circle cx="25" cy="9" r="5" stroke="#40FF5E" stroke-width="2"/>
+          <text x="25" y="13" text-anchor="middle" font-size="8" fill="#40FF5E" font-weight="700">2</text>
+        </svg>
+        <span class="card-title">红烧肉 · 食谱辅助</span>
+        <span class="card-badge">步骤 2 / 6</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="step-number">STEP 02 · 焯水处理</p>
+      <p class="step-action">冷水下锅<br>大火煮沸</p>
+
+      <div class="step-tip">
+        加入姜片 3 片、料酒 2 勺，撇去浮沫后捞出冲洗干净
+      </div>
+
+      <div class="step-nav">
+        <div class="step-dots">
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <span class="nav-hint">说「下一步」继续</span>
+      </div>
+    </div>
+    <div class="scene-note">
+      <strong>设计说明</strong>：双手沾水时，一眼抓住"冷水下锅·大火煮沸"这 8 个字就够了。辅助说明用较暗的颜色呈现，不争抢视觉注意力。步骤进度用小点表示，不占面积。
+    </div>
+  </div>
+
+  <!-- ─── STATE 2: 计时卡 ─── -->
+  <div class="state-panel" id="state-1">
+    <div class="yoda-card">
+      <div class="card-header">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="17" r="10" stroke="#40FF5E" stroke-width="2"/>
+          <line x1="16" y1="17" x2="16" y2="10" stroke="#40FF5E" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="17" x2="20" y2="20" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="5" x2="19" y2="5" stroke="#40FF5E" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="card-title">红烧肉 · 计时提醒</span>
+        <span class="card-badge">步骤 4 / 6</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="timer-context">小火慢炖中 · 别离开太远</p>
+      <div class="timer-display" id="timer-val">
+        32<span class="timer-unit">分钟</span>
+      </div>
+
+      <div class="timer-progress-bar">
+        <div class="timer-progress-fill" id="timer-fill" style="width: 36%"></div>
+      </div>
+      <p class="timer-action-hint">已过 18 分钟 · 还剩 32 分钟</p>
+    </div>
+    <div class="scene-note">
+      <strong>设计说明</strong>：计时卡是烹饪场景中<strong>最高频</strong>的状态。数字要大到在 2 米外也能看清。进度条给出直观的"还剩多少"感知，避免频繁偷看。
+    </div>
+  </div>
+
+  <!-- ─── STATE 3: 用量卡 ─── -->
+  <div class="state-panel" id="state-2">
+    <div class="yoda-card">
+      <div class="card-header">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M8 26 L12 8 L20 8 L24 26" stroke="#40FF5E" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="9" y1="20" x2="23" y2="20" stroke="#40FF5E" stroke-width="1.5"/>
+          <line x1="10" y1="14" x2="22" y2="14" stroke="#40FF5E" stroke-width="1.5" opacity="0.5"/>
+          <line x1="7" y1="26" x2="25" y2="26" stroke="#40FF5E" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="card-title">红烧肉 · 现在下料</span>
+        <span class="card-badge">步骤 3 / 6</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="ingredient-title">炒糖色 · 用料</p>
+
+      <div class="ingredient-grid">
+        <div class="ingredient-item highlight">
+          <span class="ing-label">冰糖</span>
+          <div><span class="ing-value">50</span><span class="ing-unit">克</span></div>
+        </div>
+        <div class="ingredient-item highlight">
+          <span class="ing-label">食用油</span>
+          <div><span class="ing-value">2</span><span class="ing-unit">勺</span></div>
+        </div>
+        <div class="ingredient-item">
+          <span class="ing-label">生抽</span>
+          <div><span class="ing-value">3</span><span class="ing-unit">勺</span></div>
+        </div>
+        <div class="ingredient-item">
+          <span class="ing-label">老抽</span>
+          <div><span class="ing-value">1</span><span class="ing-unit">勺</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="scene-note">
+      <strong>设计说明</strong>：用 2×2 格子排列食材用量，当前步骤需要的食材高亮边框突出显示。数字够大，单位清晰，一眼看完，不需要思考。
+    </div>
+  </div>
+
+  <!-- ─── STATE 4: 火候卡 ─── -->
+  <div class="state-panel" id="state-3">
+    <div class="yoda-card">
+      <div class="card-header">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M16 28 C16 28 8 22 8 15 C8 11 11 8 14 9 C12 12 13 14 16 14 C19 14 20 12 18 9 C21 8 24 11 24 15 C24 22 16 28 16 28Z" stroke="#40FF5E" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <span class="card-title">红烧肉 · 火候调整</span>
+        <span class="card-badge">步骤 4 / 6</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="heat-label">当前火力</p>
+      <div class="heat-display">
+        <div class="heat-icon-wrap">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <path d="M20 36 C20 36 8 28 8 18 C8 13 12 9 16 10 C13 14 14 17 18 17 C22 17 23 14 20 10 C24 9 28 13 28 18 C28 28 20 36 20 36Z" fill="rgba(64,255,94,0.15)" stroke="#40FF5E" stroke-width="1.5"/>
+            <path d="M20 30 C20 30 15 26 15 22 C15 20 17 18 18.5 19 C17.5 21 18 22 20 22 C22 22 22.5 21 21.5 19 C23 18 25 20 25 22 C25 26 20 30 20 30Z" fill="#40FF5E" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="heat-name">小火</div>
+      </div>
+
+      <div class="heat-bars">
+        <div class="heat-bar active" style="height:20px"></div>
+        <div class="heat-bar active" style="height:32px"></div>
+        <div class="heat-bar" style="height:48px"></div>
+        <div class="heat-bar" style="height:60px"></div>
+        <div class="heat-bar" style="height:68px"></div>
+      </div>
+
+      <p class="heat-desc">保持锅内微微冒泡的状态<br>不要翻动，让汤汁慢慢渗入</p>
+
+      <div class="heat-time-hint">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="rgba(64,255,94,0.55)" stroke-width="1.2"/>
+          <line x1="7" y1="7" x2="7" y2="3.5" stroke="rgba(64,255,94,0.55)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="7" y1="7" x2="9.5" y2="9" stroke="rgba(64,255,94,0.55)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        保持此状态约 35 分钟
+      </div>
+    </div>
+    <div class="scene-note">
+      <strong>设计说明</strong>：火候卡最关键的是"大字火力名称"——小火/中火/大火，3 个字，在 2 米外也清晰可辨。柱状图直观表达火力等级，避免使用数字刻度带来的认知负担。
+    </div>
+  </div>
+
+  <!-- ─── STATE 5: 完成卡 ─── -->
+  <div class="state-panel" id="state-4">
+    <div class="yoda-card">
+      <div class="card-header">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="11" stroke="#40FF5E" stroke-width="2"/>
+          <path d="M10 16 L14 20 L22 12" stroke="#40FF5E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="card-title">红烧肉 · 大功告成</span>
+        <span class="card-badge">全部完成</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="done-dish">红烧肉</p>
+      <p class="done-subtitle">总用时 68 分钟 · 6 步骤全部完成</p>
+
+      <div class="done-stats">
+        <div class="stat-item">
+          <div class="stat-value">520</div>
+          <div class="stat-label">千卡 / 份</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">4</div>
+          <div class="stat-label">人份量</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">68</div>
+          <div class="stat-label">分钟用时</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <p style="font-size:13px; color: var(--dim); text-align:center; margin-top: 4px;">
+        说「保存食谱」可收藏到你的菜谱本
+      </p>
+    </div>
+    <div class="scene-note">
+      <strong>设计说明</strong>：完成卡给用户一个正向的"收尾感"。用时、份量、热量三格数据让人有成就感。底部引导语极轻量——语音交互的入口，不喧宾夺主。
+    </div>
+  </div>
+
+</div><!-- /card-stage -->
+
+<!-- 协议标注 -->
+<div style="margin-top: 40px; padding: 16px 24px; background: rgba(64,255,94,0.04); border: 1px solid rgba(64,255,94,0.1); border-radius: 10px; width: 480px;">
+  <p style="font-size: 11px; color: rgba(64,255,94,0.3); letter-spacing: 0.5px; margin-bottom: 8px;">A2UI v0.8 PROTOCOL · JSONL PIPELINE</p>
+  <p style="font-size: 12px; color: rgba(64,255,94,0.4); line-height: 1.8;">
+    surfaceUpdate → dataModelUpdate → beginRendering<br>
+    catalog: <code style="color: var(--dim);">yoda-os-sprite-v1</code> · canvas: <code style="color: var(--dim);">480 × 400px</code>
+  </p>
+</div>
+
+<p class="footer">YODAOS SPRITE · COOKING GUIDE CARD · UX ARCHITECT</p>
+
+<script>
+  function switchState(index) {
+    // 切换面板
+    document.querySelectorAll('.state-panel').forEach((p, i) => {
+      p.classList.toggle('active', i === index);
+    });
+    // 切换按钮
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', i === index);
+    });
+  }
+
+  // 计时器动画（仅在 state-1 时运行）
+  let timerInterval = null;
+  let seconds = 32 * 60;
+  const totalSeconds = 50 * 60;
+
+  function startTimerAnimation() {
+    if (timerInterval) return;
+    timerInterval = setInterval(() => {
+      const panel = document.getElementById('state-1');
+      if (!panel.classList.contains('active')) return;
+
+      if (seconds > 0) seconds--;
+
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      const timerEl = document.getElementById('timer-val');
+      const fillEl = document.getElementById('timer-fill');
+
+      if (seconds < 60) {
+        timerEl.innerHTML = `${String(secs).padStart(2,'0')}<span class="timer-unit">秒</span>`;
+        timerEl.classList.add('urgent');
+      } else {
+        timerEl.innerHTML = `${mins}<span class="timer-unit">分钟</span>`;
+        timerEl.classList.remove('urgent');
+      }
+
+      const progress = ((totalSeconds - seconds) / totalSeconds) * 100;
+      fillEl.style.width = `${Math.min(100, progress)}%`;
+    }, 100); // 加速演示：100ms = 1s
+  }
+
+  startTimerAnimation();
+</script>
+
+</body>
+</html>

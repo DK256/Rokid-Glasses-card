@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会议 / 沟通 — YodaOS Sprite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .page-title {
+    color: rgba(64,255,94,0.6);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* 状态切换导航 */
+  .state-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .state-btn {
+    background: #1C1C1C;
+    border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 8px;
+    color: rgba(64,255,94,0.6);
+    font-size: 13px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .state-btn.active {
+    border-color: #40FF5E;
+    color: #40FF5E;
+    background: rgba(64,255,94,0.08);
+  }
+
+  /* 卡片容器 */
+  .card {
+    width: 480px;
+    min-height: 400px;
+    background: #1C1C1C;
+    border: 2px solid #40FF5E;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  /* 状态面板 */
+  .state-panel { display: none; flex-direction: column; gap: 0; height: 100%; }
+  .state-panel.active { display: flex; }
+
+  /* 通用文字 */
+  .text-display { font-size: 52px; font-weight: 700; line-height: 60px; color: #40FF5E; }
+  .text-title   { font-size: 24px; font-weight: 700; line-height: 30px; color: #40FF5E; }
+  .text-subtitle{ font-size: 20px; font-weight: 500; line-height: 26px; color: #40FF5E; }
+  .text-body    { font-size: 16px; font-weight: 400; line-height: 22px; color: #40FF5E; }
+  .text-caption { font-size: 13px; font-weight: 400; line-height: 18px; color: rgba(64,255,94,0.55); }
+  .text-dim     { color: rgba(64,255,94,0.55); }
+
+  /* 头部 */
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #40FF5E;
+  }
+  .status-dot.recording { animation: pulse-dot 1s infinite; }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* 分割线 */
+  .divider {
+    height: 1.5px;
+    background: rgba(64,255,94,0.2);
+    margin: 16px 0;
+  }
+
+  /* Row 布局 */
+  .row { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .col { display: flex; flex-direction: column; gap: 4px; }
+
+  /* 议程列表 */
+  .agenda-list { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .agenda-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(64,255,94,0.05);
+    border-radius: 8px;
+    border: 1.5px solid rgba(64,255,94,0.15);
+  }
+  .agenda-item.current {
+    background: rgba(64,255,94,0.1);
+    border-color: rgba(64,255,94,0.4);
+  }
+  .agenda-time { font-size: 13px; color: rgba(64,255,94,0.55); min-width: 44px; }
+  .agenda-title { font-size: 16px; color: #40FF5E; font-weight: 500; }
+  .agenda-sub { font-size: 13px; color: rgba(64,255,94,0.55); margin-top: 2px; }
+
+  /* 参与者头像行 */
+  .avatars { display: flex; gap: -4px; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #1C1C1C;
+    border: 2px solid rgba(64,255,94,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #40FF5E;
+    margin-right: -8px;
+  }
+
+  /* 说话人 */
+  .speaker-box {
+    background: rgba(64,255,94,0.08);
+    border: 1.5px solid rgba(64,255,94,0.3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* 音频波形 */
+  .waveform { display: flex; align-items: center; gap: 3px; height: 32px; }
+  .wave-bar {
+    width: 4px;
+    background: #40FF5E;
+    border-radius: 2px;
+    animation: wave-anim var(--dur, 0.8s) ease-in-out infinite alternate;
+  }
+  @keyframes wave-anim {
+    from { height: 4px; opacity: 0.4; }
+    to   { height: var(--h, 24px); opacity: 1; }
+  }
+
+  /* 进度条 */
+  .progress-track {
+    height: 4px;
+    background: rgba(64,255,94,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #40FF5E;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* AI 摘要区 */
+  .summary-box {
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    flex: 1;
+  }
+  .summary-line {
+    font-size: 16px;
+    color: #40FF5E;
+    line-height: 24px;
+    margin-bottom: 6px;
+  }
+
+  /* 按钮 */
+  .btn {
+    height: 40px;
+    border: 2px solid #40FF5E;
+    border-radius: 12px;
+    background: transparent;
+    color: #40FF5E;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    flex: 1;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(64,255,94,0.1); }
+  .btn-row { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+
+  /* 统计数字 */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex: 1;
+  }
+  .stat-cell {
+    background: rgba(64,255,94,0.05);
+    border: 1.5px solid rgba(64,255,94,0.15);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-num { font-size: 28px; font-weight: 700; color: #40FF5E; line-height: 34px; }
+  .stat-label { font-size: 13px; color: rgba(64,255,94,0.55); }
+
+  /* 决策列表 */
+  .decision-list { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .decision-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 16px;
+    color: #40FF5E;
+    line-height: 22px;
+  }
+  .decision-icon { margin-top: 2px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<p class="page-title">💼 Meeting — YodaOS Sprite</p>
+
+<div class="state-nav">
+  <button class="state-btn active" onclick="showState(0)">① 等待开始</button>
+  <button class="state-btn" onclick="showState(1)">② 会议中</button>
+  <button class="state-btn" onclick="showState(2)">③ AI摘要</button>
+  <button class="state-btn" onclick="showState(3)">④ 决策确认</button>
+  <button class="state-btn" onclick="showState(4)">⑤ 会议结束</button>
+</div>
+
+<div class="card">
+
+  <!-- 状态1：等待开始 -->
+  <div class="state-panel active" id="state-0">
+    <div class="card-header">
+      <div class="header-left">
+        <div class="status-dot"></div>
+        <span class="text-caption">会议即将开始</span>
+      </div>
+      <span class="text-caption">09:58</span>
+    </div>
+
+    <div class="text-subtitle" style="margin-bottom:6px;">产品周会</div>
+    <div class="text-caption" style="margin-bottom:20px;">📍 3号会议室 · 10:00 开始</div>
+
+    <div class="row-between" style="margin-bottom:16px;">
+      <span class="text-caption">参与者 (6人)</span>
+      <div class="avatars">
+        <div class="avatar">张</div>
+        <div class="avatar">李</div>
+        <div class="avatar">王</div>
+        <div class="avatar">+3</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="text-caption" style="margin-bottom:10px;">今日议程</div>
+    <div class="agenda-list">
+      <div class="agenda-item">
+        <div class="col" style="flex:1;">
+          <div class="agenda-title">Q2 产品路线图评审</div>
+          <div class="agenda-sub">10:00 — 10:30 · 30分钟</div>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="col" style="flex:1;">
+          <div class="agenda-title">用户增长数据分析</div>
+          <div class="agenda-sub">10:30 — 10:50 · 20分钟</div>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="col" style="flex:1;">
+          <div class="agenda-title">下周迭代计划</div>
+          <div class="agenda-sub">10:50 — 11:00 · 10分钟</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">稍后提醒</button>
+      <button class="btn">进入会议</button>
+    </div>
+  </div>
+
+  <!-- 状态2：会议中 -->
+  <div class="state-panel" id="state-1">
+    <div class="card-header">
+      <div class="header-left">
+        <div class="status-dot recording"></div>
+        <span class="text-caption" style="color:#40FF5E;">● REC 00:18:32</span>
+      </div>
+      <span class="text-caption">10:18</span>
+    </div>
+
+    <div class="row-between" style="margin-bottom:16px;">
+      <div class="col">
+        <div class="text-subtitle">产品周会</div>
+        <div class="text-caption">当前：Q2 路线图评审</div>
+      </div>
+      <div class="col" style="align-items:flex-end;">
+        <div class="text-body">剩余 <span style="color:#40FF5E;font-weight:700;">12分钟</span></div>
+        <div class="text-caption">议程 1/3</div>
+      </div>
+    </div>
+
+    <!-- 进度 -->
+    <div class="progress-track" style="margin-bottom:16px;">
+      <div class="progress-fill" style="width:60%;"></div>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:8px;">当前发言人</div>
+    <div class="speaker-box" style="margin-bottom:16px;">
+      <div class="avatar" style="width:40px;height:40px;font-size:16px;margin:0;">张</div>
+      <div class="col" style="flex:1;">
+        <div class="text-body" style="font-weight:500;">张明 · 产品总监</div>
+        <div class="text-caption">发言中 00:02:15</div>
+      </div>
+      <div class="waveform">
+        <div class="wave-bar" style="--h:8px;--dur:0.6s;"></div>
+        <div class="wave-bar" style="--h:20px;--dur:0.8s;"></div>
+        <div class="wave-bar" style="--h:28px;--dur:0.5s;"></div>
+        <div class="wave-bar" style="--h:16px;--dur:0.9s;"></div>
+        <div class="wave-bar" style="--h:24px;--dur:0.7s;"></div>
+      </div>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:8px;">实时关键词</div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;flex:1;">
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.4);border-radius:6px;padding:3px 10px;">DAU增长</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.4);border-radius:6px;padding:3px 10px;">留存率</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.4);border-radius:6px;padding:3px 10px;">Q2 OKR</span>
+      <span style="font-size:13px;color:#40FF5E;border:1.5px solid rgba(64,255,94,0.4);border-radius:6px;padding:3px 10px;">AR体验</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">记录待办</button>
+      <button class="btn">生成摘要</button>
+    </div>
+  </div>
+
+  <!-- 状态3：AI实时摘要 -->
+  <div class="state-panel" id="state-2">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">AI 实时摘要</span>
+      </div>
+      <span class="text-caption">10:28</span>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:12px;">Q2 路线图评审 · 已进行 28分钟</div>
+
+    <div class="summary-box">
+      <div class="summary-line">• Q2 重点：AR眼镜用户破 <strong>100万</strong> DAU</div>
+      <div class="summary-line">• 留存率目标从 42% 提升至 <strong>55%</strong></div>
+      <div class="summary-line">• 新增 <strong>场景卡片库</strong> 作为核心增长抓手</div>
+      <div class="summary-line">• 技术债务 Sprint 插入 Q2 第3周</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="text-caption" style="margin-bottom:8px;">待确认行动项</div>
+    <div class="agenda-list">
+      <div class="agenda-item current">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-top:2px;flex-shrink:0;">
+          <rect x="2" y="2" width="12" height="12" rx="3" stroke="#40FF5E" stroke-width="1.5"/>
+        </svg>
+        <div class="col">
+          <div class="agenda-title">张明：整理 Q2 PRD 草稿</div>
+          <div class="agenda-sub">截止 周五</div>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-top:2px;flex-shrink:0;">
+          <rect x="2" y="2" width="12" height="12" rx="3" stroke="#40FF5E" stroke-width="1.5"/>
+        </svg>
+        <div class="col">
+          <div class="agenda-title">王芳：输出留存分析报告</div>
+          <div class="agenda-sub">截止 下周一</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">编辑摘要</button>
+      <button class="btn">确认同步</button>
+    </div>
+  </div>
+
+  <!-- 状态4：决策确认 -->
+  <div class="state-panel" id="state-3">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8l3 3 7-7" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">决策记录</span>
+      </div>
+      <span class="text-caption">10:55</span>
+    </div>
+
+    <div class="text-subtitle" style="margin-bottom:4px;">本次会议决策</div>
+    <div class="text-caption" style="margin-bottom:16px;">产品周会 · 共 3 项</div>
+
+    <div class="decision-list">
+      <div class="decision-item">
+        <div class="decision-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" stroke="#40FF5E" stroke-width="1.5"/>
+            <path d="M6 9l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span>Q2 目标：DAU 100万，留存 55%，全体对齐</span>
+      </div>
+      <div class="decision-item">
+        <div class="decision-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" stroke="#40FF5E" stroke-width="1.5"/>
+            <path d="M6 9l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span>场景卡片库 列入 Q2 S1 迭代范围</span>
+      </div>
+      <div class="decision-item">
+        <div class="decision-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" stroke="#40FF5E" stroke-width="1.5"/>
+            <path d="M6 9l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span>技术债务 Sprint 插入 Q2 第3周，由研发评估</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row-between">
+      <span class="text-caption">同步到 · 飞书文档</span>
+      <span class="text-caption" style="color:#40FF5E;">待同步</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">修改</button>
+      <button class="btn">确认并同步</button>
+    </div>
+  </div>
+
+  <!-- 状态5：会议结束 -->
+  <div class="state-panel" id="state-4">
+    <div class="card-header">
+      <div class="header-left">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#40FF5E" stroke-width="1.5"/>
+          <path d="M5 8l2 2 4-4" stroke="#40FF5E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-caption">会议已结束</span>
+      </div>
+      <span class="text-caption">11:02</span>
+    </div>
+
+    <div class="text-subtitle" style="margin-bottom:16px;">产品周会 · 结束</div>
+
+    <div class="stat-grid" style="margin-bottom:16px;">
+      <div class="stat-cell">
+        <div class="stat-num">62<span style="font-size:16px;font-weight:400;">分钟</span></div>
+        <div class="stat-label">会议时长</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">6</div>
+        <div class="stat-label">参与人数</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">3</div>
+        <div class="stat-label">决策事项</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">5</div>
+        <div class="stat-label">行动项</div>
+      </div>
+    </div>
+
+    <div class="text-caption" style="margin-bottom:8px;">已同步</div>
+    <div class="row" style="gap:8px;flex:1;align-items:flex-start;">
+      <span style="font-size:13px;color:rgba(64,255,94,0.55);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;">飞书文档</span>
+      <span style="font-size:13px;color:rgba(64,255,94,0.55);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;">日历</span>
+      <span style="font-size:13px;color:rgba(64,255,94,0.55);border:1.5px solid rgba(64,255,94,0.2);border-radius:6px;padding:3px 10px;">待办</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn">查看完整记录</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-caption" style="color:rgba(64,255,94,0.3);margin-top:4px;">YodaOS Sprite · Meeting · v1.0</p>
+
+<script>
+function showState(n) {
+  document.querySelectorAll('.state-panel').forEach((p,i) => {
+    p.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.state-btn').forEach((b,i) => {
+    b.classList.toggle('active', i === n);
+  });
+}
+</script>
+</body>
+</html>
